@@ -1,0 +1,4 @@
+interface:
+  display_name: "APEX Page Range Governance"
+  short_description: "Reserve and validate APEX project page ranges."
+  default_prompt: "Set up a project page range and validate TEST and Production conflicts."

@@ -10,11 +10,9 @@ cd "<RUTA_APEX_SKILLS>"
 .\scripts\Initialize-ApexCodexProject.ps1 -ProjectPath "<RUTA_PROYECTO_APEX>" -InstallSharedDependencies
 ```
 
-El inicializador prepara dependencias, habilita conexión Oracle directa cuando corresponda, importa TEST desde `.env` si hace falta y registra `apex-mcp-test`.
-
 ## 2. Regla inicial de acceso
 
-Antes de inspeccionar, comparar, exportar o copiar, el agente valida el perfil del ambiente solicitado en modo sólo lectura. Si el perfil no existe, es inválido o no tiene permisos, informa la limitación y detiene ese flujo; no solicita ni muestra secretos.
+Antes de inspeccionar, comparar, exportar, copiar o reservar páginas, el agente valida el perfil del ambiente solicitado en modo sólo lectura. Si el perfil no existe, es inválido o no tiene permisos, informa la limitación y detiene ese flujo; no solicita ni muestra secretos.
 
 Abra una tarea **nueva** de Codex Desktop dentro del proyecto APEX.
 
@@ -25,6 +23,25 @@ Abra una tarea **nueva** de Codex Desktop dentro del proyecto APEX.
 ```text
 Usa apex-project-bootstrap-final para iniciar este proyecto APEX.
 ```
+
+### Trabajar por proyecto y rango de páginas
+
+```text
+Voy a trabajar en la aplicación <numero> en el proyecto <nombre-proyecto>,
+en el rango de páginas <desde> a <hasta>. Usa apex-page-range-governance.
+Valida TEST y Producción, comprueba cruces de rango, crea la estructura del
+proyecto dentro de la carpeta de aplicación y registra las diferencias.
+No crees ni modifiques páginas si existe conflicto sin mi decisión explícita.
+```
+
+La estructura adicional será `aplicaciones/aplicacion-<numero>/<nombre-proyecto>/` con subcarpetas `pruebas/` y `produccion/`. No reemplaza `control-proyecto/`.
+
+Toda página creada debe usar:
+
+| Propiedad APEX | Valor |
+| --- | --- |
+| Page Name | `<nombre-proyecto>-<nombre-pagina>` |
+| Page Title | `<nombre-pagina>` |
 
 ### Inspeccionar APEX u Oracle
 
@@ -44,27 +61,21 @@ Primero valida ambos perfiles. Compara aplicación <id>, página <id> u objeto
 
 ### Copiar Producción → TEST
 
-La solicitud debe identificar aplicación, páginas y autorizar explícitamente modificar TEST. El agente valida ambos perfiles, advierte el alcance, crea backup/export y diferencias cuando el riesgo o el flujo lo ameriten, y no modifica Producción.
+La solicitud debe identificar aplicación, páginas y autorizar explícitamente modificar TEST. El agente valida ambos perfiles, advierte alcance, crea backup/export y diferencias cuando el riesgo o el flujo lo ameriten, y no modifica Producción.
 
 ### Copiar TEST → Producción
 
-La copia hacia Producción exige **autorización explícita e independiente** del usuario, incluso si el cambio ya fue aprobado en TEST. Antes de ejecutar, el agente explica qué objetos/artefactos modificará, el ambiente destino, impacto y riesgo. Recomienda QA, backup, rollback, evidencia y manifiesto según el alcance; no los exige si el usuario ya validó un cambio menor fuera de las skills.
-
-```text
-El cambio <descripción> está autorizado explícitamente para Producción.
-Antes de ejecutarlo, indícame exactamente qué modificarás, impacto y riesgo.
-No realices acciones adicionales sin mi aprobación.
-```
+La copia hacia Producción exige **autorización explícita e independiente**. Antes de ejecutar, el agente explica objetos/artefactos, ambiente destino, impacto y riesgo. Recomienda controles proporcionales; no los impone para un cambio menor ya validado por el usuario fuera de las skills.
 
 ## 4. Documentación de consulta
 
 | Necesidad | Documento |
 | --- | --- |
-| Instalación, mensajes y solución de problemas | [Inicialización Codex](docs/inicializacion-automatica-codex.md) |
+| Instalación y solución de problemas | [Inicialización Codex](docs/inicializacion-automatica-codex.md) |
 | Perfiles seguros TEST/Producción | [Perfiles seguros](docs/perfiles-credenciales-seguros.md) |
 | Registro MCP en Codex Desktop | [Oracle MCP](docs/codex-desktop-mcp-oracle.md) |
-| Flujos reutilizables y comparación de ambientes | [Casos de uso](docs/casos-de-uso-apex.md) |
-| Reglas de estructuras y entregables por proyecto | [Estructura estándar](docs/estructura-estandar-proyecto.md) |
+| Casos reutilizables | [Casos de uso](docs/casos-de-uso-apex.md) |
+| Estructura y rango de páginas | [Layout y registro](skills/apex-page-range-governance/references/layout-and-register.md) |
 | Auditoría obligatoria | [Auditoría](docs/auditoria-obligatoria.md) |
 
 ## 5. Cierre obligatorio
@@ -73,5 +84,3 @@ No realices acciones adicionales sin mi aprobación.
 python .\scripts\audit_skill_ecosystem.py
 git diff --check
 ```
-
-El manual detallado de cada aplicación se genera al cierre, después de QA aprobada y evidencia validada cuando esas actividades forman parte del alcance gestionado.
