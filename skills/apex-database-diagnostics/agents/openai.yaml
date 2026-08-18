@@ -1,0 +1,4 @@
+interface:
+  display_name: Oracle APEX Database Diagnostics
+  short_description: Diagnose APEX and Oracle errors via secure MCP profiles.
+  default_prompt: Diagnose this Oracle APEX error using the configured TEST profile in read-only mode.
