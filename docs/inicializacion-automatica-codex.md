@@ -1,6 +1,6 @@
 # Inicializador de proyectos APEX para Codex Desktop
 
-Use este inicializador cuando Codex indique que no tiene conexión Oracle, servidor MCP o herramientas de base de datos. Una skill no abre una conexión por sí misma: el entorno Python, el perfil seguro y `apex-mcp-test` deben estar disponibles en el equipo.
+Use este inicializador cuando Codex indique que no tiene conexión Oracle, servidor MCP o herramientas de base de datos. Una skill no abre una conexión por sí misma: el entorno Python, el perfil seguro y `apex-mcp-test` deben estar preparados en el equipo.
 
 ## Primera instalación: copie sólo estos comandos
 
@@ -12,50 +12,45 @@ cd "D:\Users\ddelacruz\Desktop\Python\codex\apex.skills"
 .\scripts\Initialize-ApexCodexProject.ps1 -ProjectPath "D:\ruta\mi-proyecto-apex" -InstallSharedDependencies
 ```
 
-El inicializador muestra cuatro pasos breves y realiza automáticamente lo que pueda hacer sin pedirle secretos:
+El inicializador muestra cinco pasos y realiza automáticamente lo posible sin pedir secretos:
 
 1. Crea el entorno Python compartido e instala las dependencias.
-2. Importa TEST desde el `.env` ignorado sólo si el perfil seguro aún no existe; construye el DSN y descubre workspace ID, workspace name y parsing schema con consultas de lectura.
-3. Registra `apex-mcp-test` en Codex Desktop sólo si aún no está registrado.
-4. Confirma que el proyecto está listo.
+2. Aplica el patch canónico para que `apex-mcp` acepte conexión Oracle directa; wallet queda opcional.
+3. Importa TEST desde `.env` si el perfil seguro aún no existe y descubre los metadatos APEX mediante consultas de lectura.
+4. Registra `apex-mcp-test` en Codex Desktop sólo si aún no está registrado.
+5. Confirma que el proyecto está listo.
 
-No escriba usuario, contraseña, wallet, workspace ID, parsing schema ni workspace name. La conexión directa existente usa `DB_TESTING_USER`, `DB_TESTING_PASSWORD`, `DB_TESTING_HOST`, `DB_TESTING_PORT` y `DB_TESTING_SID` del `.env`; no requiere wallet.
-
-Después abra una **tarea nueva** de Codex Desktop dentro de `D:\ruta\mi-proyecto-apex`. Una tarea anterior no adquiere MCPs nuevos.
+No escriba usuario, contraseña, wallet, workspace ID, parsing schema ni workspace name. La conexión directa existente usa las variables `DB_TESTING_*` del `.env` y no requiere wallet. Abra una **tarea nueva** de Codex Desktop dentro del proyecto al terminar.
 
 ## Cada proyecto posterior
-
-No reinstale paquetes ni cree perfiles otra vez. Copie:
 
 ```powershell
 cd "D:\Users\ddelacruz\Desktop\Python\codex\apex.skills"
 .\scripts\Initialize-ApexCodexProject.ps1 -ProjectPath "D:\ruta\mi-proyecto-apex"
 ```
 
-## Resultado esperado
+El resultado correcto incluye:
 
 ```text
-APEX Codex Bootstrap
---------------------
-[2/4] Checking secure TEST profile...
+[2/5] Applying direct Oracle connection compatibility...
+      [OK] Direct connection supported; wallet is optional.
+[3/5] Checking secure TEST profile...
       [OK] TEST profile ready.
-[3/4] Checking Codex MCP registration...
+[4/5] Checking Codex MCP registration...
       [OK] apex-mcp-test available.
-[4/4] Project readiness...
-      [OK] D:\ruta\mi-proyecto-apex
 ```
 
-`Unsupported` en la columna `Auth` de `codex mcp list` no es un error: este servidor MCP local usa `stdio`, no autenticación OAuth.
+`Unsupported` en la columna `Auth` de `codex mcp list` no es un error: el servidor local usa `stdio`, no OAuth.
 
 ## Si falla
 
 | Mensaje | Acción |
 | --- | --- |
 | `Shared runtime missing` | Ejecute con `-InstallSharedDependencies`. |
-| No local `.env` file was found | Copie el `.env` seguro al repositorio de skills; no lo suba a Git. |
-| Could not import the TEST profile | Revise las variables TEST del `.env` o los permisos APEX, sin compartir secretos. |
+| `Required APEX MCP integration scripts are missing` | Actualice el repositorio de skills y vuelva a ejecutar. |
+| `Could not import the TEST profile` | Revise las variables TEST del `.env` o los permisos APEX, sin compartir secretos. |
 | MCP no aparece en la tarea | Abra una tarea nueva de Codex Desktop. |
-| Error ACL del terminal | Confirme que el inicializador termine con `[OK] apex-mcp-test available`, abra una tarea nueva y use el MCP. |
+| Error ACL del terminal | Complete el inicializador, abra una tarea nueva y use MCP. |
 
 ## Prompt posterior
 
