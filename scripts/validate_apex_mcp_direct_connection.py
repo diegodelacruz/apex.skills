@@ -1,21 +1,26 @@
 #!/usr/bin/env python3
-"""Validate the patched apex-mcp direct TEST connection without mutations."""
+"""Validate the patched apex-mcp direct connection without mutations."""
 
+import argparse
 import json
 import os
 import sys
 from pathlib import Path
 
 
-ROOT = Path(__file__).resolve().parent.parent
-sys.path.insert(0, str(ROOT / ".upstreams" / "apex-mcp"))
+parser = argparse.ArgumentParser()
+parser.add_argument("--environment", choices=("test", "production"), default="test")
+args = parser.parse_args()
+
+root = Path(__file__).resolve().parent.parent
+sys.path.insert(0, str(root / ".upstreams" / "apex-mcp"))
 
 import keyring
 
 
-raw_profile = keyring.get_password("apex-skills", "test")
+raw_profile = keyring.get_password("apex-skills", args.environment)
 if not raw_profile:
-	raise SystemExit("TEST profile is missing. Run manage_apex_credentials.py import-env first.")
+	raise SystemExit(f"{args.environment} profile is missing. Import it first.")
 profile = json.loads(raw_profile)
 mapping = {
 	"ORACLE_DB_USER": "db_user",
@@ -28,8 +33,9 @@ mapping = {
 for environment_name, profile_name in mapping.items():
 	os.environ[environment_name] = str(profile[profile_name])
 
-from apex_mcp.tools.sql_tools import apex_connect
 from apex_mcp.db import db
+from apex_mcp.tools.sql_tools import apex_connect
+
 
 result = json.loads(apex_connect())
 if result.get("status") != "ok":
@@ -39,4 +45,4 @@ db._conn.close()
 db._conn = None
 if not rows:
 	raise SystemExit("APEX_MCP_DIRECT_CONNECTION_FAIL")
-print("APEX_MCP_DIRECT_CONNECTION_PASS mode=read-only")
+print(f"APEX_MCP_DIRECT_CONNECTION_PASS environment={args.environment} mode=read-only")
