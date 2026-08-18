@@ -1,13 +1,14 @@
 # Conectar un agente a Oracle para diagnóstico APEX
 
-Decir “usa las skills y conéctate a la base” no configura un conector automáticamente. Deben cumplirse cuatro condiciones:
+Las skills no configuran un conector automáticamente. El repositorio obtiene la conexión desde su `.env`, guarda el perfil en el keyring del sistema y descubre los datos APEX mediante consultas de sólo lectura. No solicite ni copie al chat usuario, contraseña, wallet, workspace ID, parsing schema ni workspace name.
 
-1. El repositorio de skills tiene upstreams inicializados y dependencias instaladas en `.venv`.
-2. El usuario guarda su perfil TEST/Producción en el keyring seguro.
-3. El perfil valida una conexión de solo lectura.
-4. El cliente de IA tiene configurado `apex-mcp` mediante el wrapper de perfil seguro.
+Use el inicializador documentado en [inicialización automática de Codex](inicializacion-automatica-codex.md). Para un `.env` con conexión directa `HOST`/`PORT`/`SID`, el comando de perfil es:
 
-Los comandos y ejemplo MCP están en `skills/apex-database-diagnostics/references/connection-bootstrap.md`.
+```powershell
+.\.venv\Scripts\python.exe .\scripts\manage_apex_credentials.py import-env --environment test
+```
+
+El importador toma las variables `DB_TESTING_*`, construye el DSN, consulta el workspace funcional y parsing schema visibles en APEX, y guarda el perfil seguro. Wallet es opcional y no se solicita para conexiones directas.
 
 Una vez conectado, use este prompt:
 
