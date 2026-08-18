@@ -44,16 +44,16 @@ Primero valida ambos perfiles. Compara aplicación <id>, página <id> u objeto
 
 ### Copiar Producción → TEST
 
-La solicitud debe identificar aplicación, páginas y autorizar explícitamente modificar TEST. El agente valida ambos perfiles, crea backup/export de TEST, genera diferencias y rollback antes de aplicar. Producción permanece sólo lectura.
+La solicitud debe identificar aplicación, páginas y autorizar explícitamente modificar TEST. El agente valida ambos perfiles, advierte el alcance, crea backup/export y diferencias cuando el riesgo o el flujo lo ameriten, y no modifica Producción.
 
 ### Copiar TEST → Producción
 
-La copia hacia Producción exige **autorización explícita e independiente** del usuario, incluso si el cambio ya fue aprobado en TEST. Antes de aplicar, el agente valida perfiles, QA TEST, release SQL/manifiesto, backup/rollback y evidencia. Sin esa autorización no instala, importa ni modifica Producción.
+La copia hacia Producción exige **autorización explícita e independiente** del usuario, incluso si el cambio ya fue aprobado en TEST. Antes de ejecutar, el agente explica qué objetos/artefactos modificará, el ambiente destino, impacto y riesgo. Recomienda QA, backup, rollback, evidencia y manifiesto según el alcance; no los exige si el usuario ya validó un cambio menor fuera de las skills.
 
 ```text
-El cambio TEST <id> está aprobado para Producción. Autorizo explícitamente
-instalar los artefactos <lista> en Producción. Valida perfil, QA, backup,
-rollback y evidencia antes de ejecutar. Registra el resultado.
+El cambio <descripción> está autorizado explícitamente para Producción.
+Antes de ejecutarlo, indícame exactamente qué modificarás, impacto y riesgo.
+No realices acciones adicionales sin mi aprobación.
 ```
 
 ## 4. Documentación de consulta
@@ -74,4 +74,4 @@ python .\scripts\audit_skill_ecosystem.py
 git diff --check
 ```
 
-El manual detallado de cada aplicación se genera al cierre, después de QA aprobada y evidencia validada.
+El manual detallado de cada aplicación se genera al cierre, después de QA aprobada y evidencia validada cuando esas actividades forman parte del alcance gestionado.
