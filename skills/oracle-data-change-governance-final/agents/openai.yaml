@@ -1,0 +1,4 @@
+interface:
+  display_name: Final Oracle DATA Change Governance
+  short_description: Controlled DATA changes with documented decisions and rollback.
+  default_prompt: Prepare a documented Oracle DATA change using the final project policies.

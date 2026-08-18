@@ -1,0 +1,4 @@
+interface:
+  display_name: Safe Oracle APEX Export QA
+  short_description: Static Oracle APEX export QA with no database changes.
+  default_prompt: Validate these Oracle APEX split exports and return QA evidence.

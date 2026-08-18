@@ -1,0 +1,4 @@
+interface:
+  display_name: Oracle APEX User Manual
+  short_description: Capture workflows and deliver validated Word manuals.
+  default_prompt: Create a validated Word user manual from approved Oracle APEX QA evidence.

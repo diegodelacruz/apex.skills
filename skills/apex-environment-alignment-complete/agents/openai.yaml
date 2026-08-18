@@ -1,0 +1,4 @@
+interface:
+  display_name: Complete Oracle APEX Environment Alignment
+  short_description: Secure profiles, environment diffs, and release SQL.
+  default_prompt: Validate secure TEST and production profiles and compare this APEX page before editing.

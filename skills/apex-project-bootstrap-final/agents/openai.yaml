@@ -1,0 +1,4 @@
+interface:
+  display_name: Final Oracle APEX Project Bootstrap
+  short_description: Start APEX projects with final canonical policies.
+  default_prompt: Bootstrap this new Oracle APEX project using the final canonical policies.

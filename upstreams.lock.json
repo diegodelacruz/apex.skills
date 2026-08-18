@@ -1,0 +1,18 @@
+{
+  "version": 2,
+  "repositories": {
+    "apex-mcp": {
+      "url": "https://github.com/TechFernandesLTDA/apex-mcp.git",
+      "purpose": "MCP integration reference"
+    },
+    "zaimella-skill": {
+      "url": "https://github.com/jefersonKel/zaimella-skill.git",
+      "purpose": "APEX standards, QA, Playwright, and manuals"
+    },
+    "zaimella-apex-oracle": {
+      "url": "https://github.com/zaimella/zaimella-apex-oracle.git",
+      "purpose": "Versioned APEX and Oracle source reference"
+    }
+  },
+  "update_policy": "manual backup then fast-forward; use V2 scripts"
+}

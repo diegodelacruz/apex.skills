@@ -1,0 +1,27 @@
+# Secrets and local profiles
+.env
+.env.*
+!.env.example
+*.wallet
+*.sso
+*.p12
+credentials.json
+auth.json
+
+# Local environments and caches
+.venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+node_modules/
+playwright-report/
+test-results/
+
+# Managed local sources and recoverable update backups
+.upstreams/
+.upstream-backups/
+
+# Generated QA/manual artifacts that can contain sensitive screenshots or traces
+control-proyecto/**/traces/
+control-proyecto/**/screenshots/
+control-proyecto/**/auth/

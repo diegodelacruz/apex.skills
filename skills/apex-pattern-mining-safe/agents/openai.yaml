@@ -1,0 +1,4 @@
+interface:
+  display_name: Safe Oracle APEX Pattern Mining
+  short_description: Extract reusable APEX practices from exports.
+  default_prompt: Mine these APEX exports and create a safe reusable pattern catalogue.

@@ -1,0 +1,4 @@
+interface:
+  display_name: Safe Oracle APEX Engineering
+  short_description: Read-only-aware Oracle APEX 24.1.3 engineering.
+  default_prompt: Inspect this Oracle APEX export and propose a safe implementation plan.

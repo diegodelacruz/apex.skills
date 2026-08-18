@@ -1,0 +1,4 @@
+interface:
+  display_name: Safe Oracle APEX Delivery Lifecycle
+  short_description: Canonical lifecycle for APEX project delivery.
+  default_prompt: Start this Oracle APEX project using the canonical delivery lifecycle.

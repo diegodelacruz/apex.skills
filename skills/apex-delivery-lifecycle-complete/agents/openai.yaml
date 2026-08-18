@@ -1,0 +1,4 @@
+interface:
+  display_name: Complete Oracle APEX Delivery Lifecycle
+  short_description: Full APEX lifecycle with environment alignment and release gates.
+  default_prompt: Start this Oracle APEX project with secure environment alignment and the complete canonical lifecycle.

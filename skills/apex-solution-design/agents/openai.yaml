@@ -1,0 +1,4 @@
+interface:
+  display_name: Oracle APEX Solution Design
+  short_description: Design APEX applications before implementation.
+  default_prompt: Design a new Oracle APEX application from this requirement and pattern catalogue.
