@@ -4,56 +4,65 @@ Este es el punto de entrada para usar las skills de Oracle APEX con Codex Deskto
 
 ## 1. Preparar el equipo una sola vez
 
-Abra PowerShell y reemplace los marcadores por rutas absolutas:
-
 ```powershell
 cd "<RUTA_APEX_SKILLS>"
 .\scripts\Initialize-ApexSkillUpstreams-V2.ps1
 .\scripts\Initialize-ApexCodexProject.ps1 -ProjectPath "<RUTA_PROYECTO_APEX>" -InstallSharedDependencies
 ```
 
-El inicializador prepara dependencias, habilita conexión Oracle directa sin wallet cuando corresponda, importa TEST desde el `.env` local si hace falta y registra `apex-mcp-test` en Codex Desktop.
+El inicializador prepara dependencias, habilita conexión Oracle directa sin wallet cuando corresponda, importa TEST desde el `.env` local si hace falta y registra `apex-mcp-test`.
 
-Abra una tarea **nueva** de Codex Desktop dentro del proyecto APEX al terminar.
+## 2. Regla inicial de acceso
 
-## 2. Empezar cada proyecto APEX
+Antes de cualquier inspección, comparación, exportación o copia, el agente valida el perfil del ambiente solicitado en modo sólo lectura. Si el perfil no existe, es inválido o no tiene permisos, debe informar esa limitación y detener ese flujo; no pide ni muestra credenciales y no intenta usar otro ambiente como sustituto.
 
-```powershell
-cd "<RUTA_APEX_SKILLS>"
-.\scripts\Initialize-ApexCodexProject.ps1 -ProjectPath "<RUTA_PROYECTO_APEX>"
-```
+Abra una tarea **nueva** de Codex Desktop dentro del proyecto APEX al terminar la preparación.
 
-Después pida al agente:
+## 3. Formas de uso
+
+### Iniciar un proyecto
 
 ```text
 Usa apex-project-bootstrap-final para iniciar este proyecto APEX.
 ```
 
-El agente crea `control-proyecto/`, decisiones y plan antes de desarrollar.
-
-## 3. Diagnosticar un error sin hacer cambios
-
-Para TEST:
+### Inspeccionar APEX u Oracle en TEST o Producción
 
 ```text
-Usa apex-database-diagnostics y apex-mcp-test.
-Analiza este error sólo en lectura. No ejecutes cambios; entrega evidencia,
-causa, plan TEST, validación y rollback.
+Conéctate al ambiente <test|production>. Primero valida mi perfil de acceso
+en modo sólo lectura. Después revisa la aplicación <id>, página <id> u objeto
+<nombre>. No ejecutes cambios; entrega evidencia y limitaciones de acceso.
 ```
 
-Cuando el error pueda depender de versión o configuración, use ambos ambientes autorizados:
+### Diagnosticar un error
+
+```text
+Usa apex-database-diagnostics en <test|production>. Primero valida el perfil.
+Analiza este error sólo en lectura; entrega evidencia, causa, plan TEST,
+validación y rollback. No ejecutes cambios.
+```
+
+### Comparar TEST y Producción
 
 ```text
 Usa apex-database-diagnostics, apex-mcp-test y apex-mcp-production.
-Compara ambos ambientes sólo en lectura y genera la evidencia de diferencias.
-No ejecutes cambios.
+Primero valida ambos perfiles. Compara aplicación <id>, página <id> u objeto
+<nombre> sólo en lectura. Genera environment-diff.md con evidencia,
+diferencias y limitaciones. No ejecutes cambios.
 ```
 
-## 4. Modificar una página existente
+### Copiar páginas de Producción a TEST
 
-Antes de editar, el agente debe comparar TEST y Producción, registrar `environment-diff.md`, proponer sincronización si procede y esperar autorización para cualquier operación fuera de TEST.
+La solicitud debe identificar aplicación, páginas y ambiente destino. Copiar es una modificación de TEST, por lo que el agente debe validar ambos perfiles, confirmar la autorización explícita incluida en la solicitud, generar backup/export de TEST, comparar diferencias y preparar evidencia/rollback antes de aplicar la copia. Nunca sobrescribe TEST silenciosamente ni modifica Producción.
 
-## 5. Documentación de consulta
+```text
+Conéctate a Producción y TEST. Valida primero ambos perfiles. Copia las páginas
+<lista> de la aplicación <id> desde Producción hacia TEST. La autorización para
+modificar TEST está confirmada. Antes de aplicar: exporta backup de TEST,
+genera environment-diff.md, detalla el impacto y rollback. No modifiques Producción.
+```
+
+## 4. Documentación de consulta
 
 | Necesidad | Documento |
 | --- | --- |
@@ -64,7 +73,7 @@ Antes de editar, el agente debe comparar TEST y Producción, registrar `environm
 | Reglas de estructuras y entregables por proyecto | [Estructura estándar](docs/estructura-estandar-proyecto.md) |
 | Auditoría obligatoria | [Auditoría](docs/auditoria-obligatoria.md) |
 
-## 6. Cierre obligatorio
+## 5. Cierre obligatorio
 
 Antes de informar que un cambio está terminado, ejecute:
 
