@@ -4,12 +4,12 @@ Use este inicializador cuando Codex indique que no tiene conexión Oracle, servi
 
 ## Primera instalación: copie sólo estos comandos
 
-Reemplace únicamente la ruta del proyecto APEX:
+Reemplace los marcadores por rutas absolutas:
 
 ```powershell
-cd "D:\Users\ddelacruz\Desktop\Python\codex\apex.skills"
+cd "<RUTA_APEX_SKILLS>"
 .\scripts\Initialize-ApexSkillUpstreams-V2.ps1
-.\scripts\Initialize-ApexCodexProject.ps1 -ProjectPath "D:\ruta\mi-proyecto-apex" -InstallSharedDependencies
+.\scripts\Initialize-ApexCodexProject.ps1 -ProjectPath "<RUTA_PROYECTO_APEX>" -InstallSharedDependencies
 ```
 
 El inicializador muestra cinco pasos y realiza automáticamente lo posible sin pedir secretos:
@@ -20,13 +20,13 @@ El inicializador muestra cinco pasos y realiza automáticamente lo posible sin p
 4. Registra `apex-mcp-test` en Codex Desktop sólo si aún no está registrado.
 5. Confirma que el proyecto está listo.
 
-No escriba usuario, contraseña, wallet, workspace ID, parsing schema ni workspace name. La conexión directa existente usa las variables `DB_TESTING_*` del `.env` y no requiere wallet. Abra una **tarea nueva** de Codex Desktop dentro del proyecto al terminar.
+No escriba usuario, contraseña, wallet, workspace ID, parsing schema ni workspace name. La conexión directa usa las variables `DB_TESTING_*` del `.env` y no requiere wallet. Abra una **tarea nueva** de Codex Desktop dentro del proyecto al terminar.
 
 ## Cada proyecto posterior
 
 ```powershell
-cd "D:\Users\ddelacruz\Desktop\Python\codex\apex.skills"
-.\scripts\Initialize-ApexCodexProject.ps1 -ProjectPath "D:\ruta\mi-proyecto-apex"
+cd "<RUTA_APEX_SKILLS>"
+.\scripts\Initialize-ApexCodexProject.ps1 -ProjectPath "<RUTA_PROYECTO_APEX>"
 ```
 
 El resultado correcto incluye:
@@ -60,4 +60,4 @@ Analiza este error en modo sólo lectura. No ejecutes cambios; entrega evidencia
 causa probable, plan de corrección, validación TEST y rollback.
 ```
 
-Producción se importa y registra sólo para usuarios autorizados y únicamente en lectura. APEX 24.1.3 mantiene el upstream 24.2 en modo inspección/dry-run hasta aprobar compatibilidad en TEST.
+Para casos que deban comparar ambos ambientes, consulte [casos de uso](casos-de-uso-apex.md). Producción se importa y registra sólo para usuarios autorizados y únicamente en lectura. APEX 24.1.3 mantiene el upstream 24.2 en modo inspección/dry-run hasta aprobar compatibilidad en TEST.

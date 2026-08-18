@@ -1,25 +1,19 @@
 # Perfiles seguros TEST y Producción
 
-Los secretos se almacenan por usuario en el keyring seguro del sistema operativo. Nunca se guardan en Git, `.env`, skills, decisiones, planes ni artefactos de release.
+Los secretos se almacenan por usuario en el keyring seguro del sistema operativo. Nunca se guardan en Git, skills, decisiones, planes ni artefactos de release.
 
-Instale el conjunto completo:
-
-```powershell
-python -m pip install -r requirements-complete.txt
-```
-
-Registre cada perfil de manera interactiva; el comando no imprime contraseñas:
+Para una conexión directa definida en el `.env` local, importe sin introducir secretos manualmente:
 
 ```powershell
-python .\scripts\manage_apex_credentials.py set --environment test
-python .\scripts\manage_apex_credentials.py set --environment production
+.\.venv\Scripts\python.exe .\scripts\manage_apex_credentials.py import-env --environment test
+.\.venv\Scripts\python.exe .\scripts\manage_apex_credentials.py validate --environment test
 ```
 
-Compruebe disponibilidad o conexión de solo lectura:
+Producción se importa sólo para usuarios autorizados y se usa inicialmente en lectura:
 
 ```powershell
-python .\scripts\manage_apex_credentials.py status --environment test
-python .\scripts\manage_apex_credentials.py validate --environment test
+.\.venv\Scripts\python.exe .\scripts\manage_apex_credentials.py import-env --environment production
+.\.venv\Scripts\python.exe .\scripts\manage_apex_credentials.py validate --environment production
 ```
 
-Un usuario sin perfil o sin acceso a Producción puede desarrollar y validar en TEST. El proyecto registra solamente el estado del perfil, nunca sus valores.
+Un usuario sin acceso a Producción desarrolla y valida en TEST; el proyecto registra estado y limitación, nunca valores del perfil.

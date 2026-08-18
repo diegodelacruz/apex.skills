@@ -1,25 +1,19 @@
 # Oracle MCP en Codex Desktop
 
-Codex Desktop registra los servidores MCP en la configuración del usuario, por lo que la configuración está disponible desde cualquier proyecto abierto por ese usuario. Las skills orientan al agente; no crean por sí mismas una conexión a Oracle.
+Codex Desktop registra servidores MCP por usuario, disponibles desde cualquier proyecto. Las skills guían el flujo; no crean por sí solas una conexión Oracle.
 
-Complete primero el bootstrap de [conexión segura a Oracle](conectar-agente-a-oracle.md), incluida la creación y validación del perfil `test`. Después, en PowerShell, ejecute el siguiente comando reemplazando las rutas si el repositorio está en otra ubicación:
-
-```powershell
-codex mcp add apex-mcp-test -- "D:\Users\ddelacruz\Desktop\Python\codex\apex.skills\.venv\Scripts\python.exe" "D:\Users\ddelacruz\Desktop\Python\codex\apex.skills\scripts\run_apex_mcp_with_profile.py" --environment test
-```
-
-Verifique el registro sin mostrar credenciales:
+Use primero [el inicializador](inicializacion-automatica-codex.md). Si necesita registrar manualmente un servidor, reemplace `<RUTA_APEX_SKILLS>` por la ruta absoluta del repositorio:
 
 ```powershell
-codex mcp list
+codex mcp add apex-mcp-test -- "<RUTA_APEX_SKILLS>\.venv\Scripts\python.exe" "<RUTA_APEX_SKILLS>\scripts\run_apex_mcp_with_profile.py" --environment test
 ```
 
-Abra una tarea nueva en Codex Desktop después de registrar el servidor. Esa tarea debe mostrar `apex-mcp-test` entre sus herramientas. No se puede añadir retroactivamente a una tarea que ya empezó.
-
-Para diagnóstico de producción se registra un segundo servidor, únicamente con un perfil autorizado y para lectura:
+Para un diagnóstico comparativo autorizado:
 
 ```powershell
-codex mcp add apex-mcp-production -- "D:\Users\ddelacruz\Desktop\Python\codex\apex.skills\.venv\Scripts\python.exe" "D:\Users\ddelacruz\Desktop\Python\codex\apex.skills\scripts\run_apex_mcp_with_profile.py" --environment production
+codex mcp add apex-mcp-production -- "<RUTA_APEX_SKILLS>\.venv\Scripts\python.exe" "<RUTA_APEX_SKILLS>\scripts\run_apex_mcp_with_profile.py" --environment production
 ```
 
-El wrapper lee el perfil desde el keyring del sistema y nunca inyecta credenciales en `config.toml`, comandos, documentación, repositorios ni chat. Para APEX 24.1.3, el upstream APEX 24.2 se limita a inspección/dry-run hasta aprobar compatibilidad en TEST.
+Compruebe el registro con `codex mcp list` y abra una tarea nueva en Codex Desktop. `Unsupported` en `Auth` es normal para un MCP local `stdio`; no representa un error.
+
+El wrapper lee el perfil desde el keyring del sistema y no coloca secretos en `config.toml`, comandos, documentación, repositorios ni chat. APEX 24.1.3 limita el upstream 24.2 a inspección/dry-run hasta aprobar compatibilidad en TEST.

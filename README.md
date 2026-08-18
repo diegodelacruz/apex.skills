@@ -1,36 +1,29 @@
 # APEX Skills
 
-Framework canónico para agentes que desarrollan, validan, liberan y documentan Oracle APEX 24.1.3. Incluye conocimiento de Finanzas (109) y Compras (130), fuentes upstream, gobierno DATA, alineación TEST/Producción, QA y manuales Word.
+Framework canónico para agentes que desarrollan, validan, liberan y documentan Oracle APEX 24.1.3. Incluye base de patrones de exportes APEX, fuentes upstream, gobierno DATA, alineación TEST/Producción, QA y manuales Word.
 
 ## Preparación inicial
 
 ```powershell
 .\scripts\Initialize-ApexSkillUpstreams-V2.ps1
-python -m pip install -r requirements.txt
-python .\scripts\audit_skill_ecosystem.py
+.\scripts\Initialize-ApexCodexProject.ps1 -ProjectPath "<RUTA_PROYECTO_APEX>" -InstallSharedDependencies
 ```
 
 Use [la entrada canónica final](skills/CANONICAL-SKILLS-ULTIMATE.md): `apex-project-bootstrap-final`, seguido de `apex-delivery-lifecycle-complete`.
 
-## Proyectos nuevos
+## Proyectos nuevos y diagnóstico
 
-Cada proyecto contiene `control-proyecto/` para decisiones, plan maestro, cambios, scripts, QA, evidencia, releases y manuales. Consulte [estructura estándar](docs/estructura-estandar-proyecto.md).
+Cada proyecto contiene `control-proyecto/` para decisiones, plan maestro, cambios, scripts, QA, evidencia, releases y manuales. Consulte [estructura estándar](docs/estructura-estandar-proyecto.md) y [casos de uso](docs/casos-de-uso-apex.md).
 
-El runtime Python compartido es `<ruta-a-apex.skills>/.venv`. Cree `.venv` dentro de un proyecto solo para dependencias propias, CI aislado o petición explícita. Si falta una dependencia, el agente instala con aprobación automática o pregunta una vez antes de hacerlo.
+El runtime Python compartido es `<RUTA_APEX_SKILLS>/.venv`. Cree `.venv` dentro de un proyecto sólo para dependencias propias, CI aislado o petición explícita.
 
 ## Credenciales y ambientes
 
-Las credenciales TEST/Producción se guardan por usuario en el keyring seguro del sistema operativo, nunca en Git, `.env`, Markdown, SQL ni scripts.
-
-```powershell
-python .\scripts\manage_apex_credentials.py set --environment test
-python .\scripts\manage_apex_credentials.py set --environment production
-python .\scripts\manage_apex_credentials.py validate --environment test
-```
+Las credenciales TEST/Producción se guardan por usuario en el keyring seguro del sistema operativo, nunca en Git, `.env`, Markdown, SQL ni scripts. El inicializador importa el perfil desde el `.env` local sólo si aún no existe y verifica el MCP de TEST.
 
 Antes de editar una página existente, aplique `apex-environment-alignment-complete`: compara TEST con Producción, registra el diff y recomienda sincronizar Producción a TEST si existen diferencias. La sincronización exige autorización explícita. Al concluir, el SQL validado de TEST y el manifiesto de instalación se guardan en `control-proyecto/cambios/<id>/release/`.
 
-Lea [perfiles seguros](docs/perfiles-credenciales-seguros.md) y [alineación de ambientes](docs/credenciales-y-alineacion-ambientes.md).
+Lea [perfiles seguros](docs/perfiles-credenciales-seguros.md), [alineación de ambientes](docs/credenciales-y-alineacion-ambientes.md) y [configuración Codex Desktop](docs/codex-desktop-mcp-oracle.md).
 
 ## Políticas DATA
 
@@ -54,12 +47,13 @@ El inicializador y actualizador V2 administran `apex-mcp`, `zaimella-skill` y `z
 
 `apex-mcp` está orientado a 24.2; frente a APEX 24.1.3 se permite solo inspección/dry-run hasta una prueba de compatibilidad aprobada en TEST.
 
-## Validación
+## Auditoría obligatoria
 
-Después de cambios en skills o documentación:
+Después de cambios en skills, scripts o documentación:
 
 ```powershell
 python .\scripts\audit_skill_ecosystem.py
+git diff --check
 ```
 
-El manual Word final requiere evidencia QA aprobada, auditoría de imágenes y renderizado a PNG para revisión visual antes de entregar.
+Consulte [auditoría obligatoria](docs/auditoria-obligatoria.md). El manual Word final requiere evidencia QA aprobada, auditoría de imágenes y renderizado a PNG para revisión visual antes de entregar.
