@@ -12,7 +12,7 @@ cd "<RUTA_APEX_SKILLS>"
 
 ## 2. Uso recomendado
 
-Empiece sus solicitudes con `Usa apex.`:
+Empiece con `Usa apex.`:
 
 ```text
 Usa apex. Quiero revisar la página <id> de la aplicación <id> en TEST.
@@ -23,13 +23,27 @@ Usa apex. Voy a trabajar en la aplicación <numero>, proyecto <nombre>,
 rango de páginas <desde>-<hasta>.
 ```
 
-```text
-Usa apex. Compara esta aplicación/página entre TEST y Producción sólo en lectura.
-```
-
 El agente valida el perfil del ambiente solicitado antes de inspeccionar. Si el perfil no existe, es inválido o no tiene permisos, informa la limitación y no intenta sustituir el ambiente.
 
-## 3. Flujos comunes
+## 3. Reiniciar el MCP local
+
+`apex-mcp-test` y `apex-mcp-production` usan `stdio`: se inician por cada tarea de Codex Desktop, no quedan ejecutándose como un servicio permanente.
+
+1. Cierre la tarea actual de Codex Desktop que usa el MCP.
+2. Desde PowerShell, ejecute:
+
+```powershell
+cd "<RUTA_APEX_SKILLS>"
+.\scripts\Initialize-ApexCodexProject.ps1 -ProjectPath "<RUTA_PROYECTO_APEX>"
+codex mcp list
+```
+
+3. Confirme que `apex-mcp-test` aparece como `enabled`. Si requiere Producción autorizada, confirme también `apex-mcp-production`.
+4. Abra una **tarea nueva** con `<RUTA_PROYECTO_APEX>` como workspace y vuelva a solicitar el trabajo con `Usa apex.`
+
+El inicializador reaplica la compatibilidad de conexión directa, verifica el perfil TEST y confirma el registro MCP. No solicite wallet para una conexión directa ya configurada. `Unsupported` en la columna `Auth` es normal para un MCP local `stdio`.
+
+## 4. Flujos comunes
 
 | Solicitud | Qué coordina `apex` |
 | --- | --- |
@@ -42,11 +56,11 @@ El agente valida el perfil del ambiente solicitado antes de inspeccionar. Si el 
 | Copia TEST → Producción | Explicación de impacto/riesgo y aprobación explícita separada para Producción. |
 | Manual final | QA/evidencia y flujo de Word validado. |
 
-## 4. Nombres de skills
+## 5. Nombres de skills
 
 Las skills especializadas no se eliminan: ayudan al coordinador a aplicar reglas concretas. Puede invocarlas si conoce el caso exacto, pero para el uso normal basta `apex`.
 
-## 5. Documentación de consulta
+## 6. Documentación de consulta
 
 | Necesidad | Documento |
 | --- | --- |
@@ -57,7 +71,7 @@ Las skills especializadas no se eliminan: ayudan al coordinador a aplicar reglas
 | Dependencias/upstreams | [Dependencias](docs/dependencias.md) |
 | Auditoría | [Auditoría obligatoria](docs/auditoria-obligatoria.md) |
 
-## 6. Cierre obligatorio
+## 7. Cierre obligatorio
 
 ```powershell
 python .\scripts\audit_skill_ecosystem.py
