@@ -41,6 +41,12 @@ Describa la necesidad normalmente; no escriba `usa apex`:
 Revisa la página 120 de la aplicación 109 en TEST y determina por qué está lenta.
 ```
 
+La forma abreviada `109.201`, cuando acompaña una referencia a página, significa la página 201 de la aplicación 109:
+
+```text
+Revisa la página 109.201 en producción, en solo lectura.
+```
+
 ```text
 Analiza el paquete data.pk_ejemplo en producción, en solo lectura, y propone optimizaciones.
 ```

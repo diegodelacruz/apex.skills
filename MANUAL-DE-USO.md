@@ -21,6 +21,12 @@ Escriba la solicitud directamente:
 Quiero revisar la página <id> de la aplicación <id> en TEST porque está lenta.
 ```
 
+También puede identificar una página como `<aplicación>.<página>`; por ejemplo, `109.201` significa la página 201 dentro de la aplicación 109, no un número decimal:
+
+```text
+Quiero revisar la página 109.201 porque presenta un error.
+```
+
 ```text
 Revisa el paquete <esquema>.<paquete> y propone cómo optimizar su ejecución.
 ```
