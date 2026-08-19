@@ -28,7 +28,7 @@ powershell -ExecutionPolicy Bypass -File "<RUTA_APEX_SKILLS>\scripts\Install-Ape
 
 ## Usar Codex CLI en un proyecto
 
-Primero prepare el entorno compartido y el MCP una vez, según [Inicialización Codex](inicializacion-automatica-codex.md). Luego abra una terminal en la raíz del proyecto y ejecute:
+Primero prepare el entorno compartido y el MCP una vez, según [Inicialización Codex](inicializacion-automatica-codex.md). El inicializador valida tanto el registro como el handshake MCP real. Luego abra una terminal en la raíz del proyecto y ejecute:
 
 ```powershell
 cd "<RUTA_PROYECTO_APEX>"
@@ -52,6 +52,10 @@ Analiza el paquete data.pk_ejemplo en producción, en solo lectura, y propone op
 ```
 
 El coordinador reconoce el contexto Oracle/APEX y selecciona las skills necesarias. Si el pedido menciona TEST o Producción, valida primero el perfil solicitado en modo lectura. Los cambios siguen requiriendo las aprobaciones establecidas.
+
+## Si Codex CLI informa un fallo de initialize
+
+No solicite credenciales ni wallet. Desde `apex.skills`, ejecute `git pull`, repita el inicializador y abra una sesión nueva de Codex CLI. El inicializador actual valida el handshake antes de reportar éxito; consulte los mensajes de [Inicialización Codex](inicializacion-automatica-codex.md) si no pasa.
 
 ## Comandos operativos, no skills
 

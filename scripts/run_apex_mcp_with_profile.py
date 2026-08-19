@@ -4,6 +4,7 @@
 import argparse
 import json
 import os
+import subprocess
 import sys
 
 
@@ -55,7 +56,15 @@ def main() -> None:
 	for environment_name, profile_name in {**REQUIRED_MAPPING, **OPTIONAL_MAPPING}.items():
 		if profile.get(profile_name):
 			environment[environment_name] = str(profile[profile_name])
-	os.execvpe(sys.executable, [sys.executable, "-m", "apex_mcp", *args.mcp_args], environment)
+
+	# On Windows, os.execvpe can terminate the stdio process before Codex CLI
+	# receives the initialize response. subprocess.run preserves MCP stdio handles.
+	result = subprocess.run(
+		[sys.executable, "-m", "apex_mcp", *args.mcp_args],
+		env=environment,
+		check=False,
+	)
+	raise SystemExit(result.returncode)
 
 
 if __name__ == "__main__":
