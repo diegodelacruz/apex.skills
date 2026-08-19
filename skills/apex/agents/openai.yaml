@@ -1,0 +1,4 @@
+interface:
+  display_name: "APEX Coordinator"
+  short_description: "Route Oracle APEX work to the appropriate workflow."
+  default_prompt: "Coordinate this Oracle APEX request using the required specialist skills."

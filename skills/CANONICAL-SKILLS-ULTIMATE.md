@@ -1,5 +1,7 @@
-# Ultimate canonical APEX entry
+# Entrada canónica APEX
 
-Start a project with `apex-project-bootstrap-final`, then use `apex-delivery-lifecycle-complete` and `apex-environment-alignment-complete` before every existing-page edit.
+Para usuarios, invoque simplemente `apex` o describa la solicitud en lenguaje natural. La skill coordinadora clasifica el trabajo y usa las skills especializadas necesarias.
 
-Install `requirements-complete.txt` in the shared skills environment. Store TEST and production credentials using `scripts/manage_apex_credentials.py`, never in the repository.
+Las skills especializadas permanecen como módulos internos: inicio de proyecto, rangos de páginas, diagnóstico, alineación de ambientes, diseño, ingeniería, gobierno DATA, QA, release y manual final.
+
+Instale `requirements.txt` en el entorno compartido mediante el inicializador. Los perfiles TEST y Producción se guardan con `scripts/manage_apex_credentials.py`, nunca en el repositorio.
