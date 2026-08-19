@@ -8,7 +8,10 @@ Punto de entrada para usuarios y agentes Oracle APEX. Describa el objetivo en le
 cd "<RUTA_APEX_SKILLS>"
 .\scripts\Initialize-ApexSkillUpstreams-V2.ps1
 .\scripts\Initialize-ApexCodexProject.ps1 -ProjectPath "<RUTA_PROYECTO_APEX>" -InstallSharedDependencies
+.\scripts\Install-ApexSkillsForCodex.ps1
 ```
+
+El tercer comando instala las skills en el directorio de usuario de Codex CLI mediante enlaces locales; no instala Python ni modifica la base de datos. Consulte [Uso desde terminal](docs/uso-skills-codex-cli.md) para PowerShell, CMD, actualizaciones y otros agentes.
 
 ## 2. Uso recomendado
 
@@ -30,11 +33,22 @@ El coordinador reconoce APEX, Oracle, Application Express/App Express, objetos d
 
 El agente valida el perfil del ambiente solicitado antes de inspeccionar. Si el perfil no existe, es inválido o no tiene permisos, informa la limitación y no intenta sustituir el ambiente.
 
-## 3. Reiniciar el MCP local
+## 3. Usar Codex desde terminal
 
-`apex-mcp-test` y `apex-mcp-production` usan `stdio`: se inician por cada tarea de Codex Desktop, no quedan ejecutándose como un servicio permanente.
+Abra PowerShell o CMD en la carpeta del proyecto y ejecute `codex`. Codex CLI, no la terminal por sí sola, descubre y utiliza las skills instaladas:
 
-1. Cierre la tarea actual de Codex Desktop que usa el MCP.
+```powershell
+cd "<RUTA_PROYECTO_APEX>"
+codex
+```
+
+Después describa el trabajo normalmente. Para detalles de instalación, actualización, MCP y validadores consulte [Uso desde terminal](docs/uso-skills-codex-cli.md).
+
+## 4. Reiniciar el MCP local
+
+`apex-mcp-test` y `apex-mcp-production` usan `stdio`: se inician por cada tarea de Codex Desktop o sesión de Codex CLI, no quedan ejecutándose como un servicio permanente.
+
+1. Cierre la tarea o sesión actual de Codex que usa el MCP.
 2. Desde PowerShell, ejecute:
 
 ```powershell
@@ -44,11 +58,11 @@ codex mcp list
 ```
 
 3. Confirme que `apex-mcp-test` aparece como `enabled`. Si requiere Producción autorizada, confirme también `apex-mcp-production`.
-4. Abra una **tarea nueva** con `<RUTA_PROYECTO_APEX>` como workspace y describa directamente el trabajo.
+4. Abra una **tarea nueva** o una sesión nueva de Codex CLI con `<RUTA_PROYECTO_APEX>` como workspace y describa directamente el trabajo.
 
 El inicializador reaplica la compatibilidad de conexión directa, verifica el perfil TEST y confirma el registro MCP. No solicite wallet para una conexión directa ya configurada. `Unsupported` en la columna `Auth` es normal para un MCP local `stdio`.
 
-## 4. Flujos comunes
+## 5. Flujos comunes
 
 | Solicitud | Qué coordina automáticamente |
 | --- | --- |
@@ -62,14 +76,15 @@ El inicializador reaplica la compatibilidad de conexión directa, verifica el pe
 | Copia TEST → Producción | Explicación de impacto/riesgo y aprobación explícita separada para Producción. |
 | Manual final | QA/evidencia y flujo de Word validado. |
 
-## 5. Nombres de skills
+## 6. Nombres de skills
 
 Las skills especializadas no se eliminan: ayudan al coordinador a aplicar reglas concretas. Puede invocarlas si conoce el caso exacto, pero para el uso normal basta describir la necesidad.
 
-## 6. Documentación de consulta
+## 7. Documentación de consulta
 
 | Necesidad | Documento |
 | --- | --- |
+| Uso desde PowerShell/CMD | [Uso desde terminal](docs/uso-skills-codex-cli.md) |
 | Instalación y problemas | [Inicialización Codex](docs/inicializacion-automatica-codex.md) |
 | Perfiles TEST/Producción | [Perfiles seguros](docs/perfiles-credenciales-seguros.md) |
 | MCP Codex Desktop | [Oracle MCP](docs/codex-desktop-mcp-oracle.md) |
@@ -77,7 +92,7 @@ Las skills especializadas no se eliminan: ayudan al coordinador a aplicar reglas
 | Dependencias/upstreams | [Dependencias](docs/dependencias.md) |
 | Auditoría | [Auditoría obligatoria](docs/auditoria-obligatoria.md) |
 
-## 7. Cierre obligatorio
+## 8. Cierre obligatorio
 
 ```powershell
 python .\scripts\audit_skill_ecosystem.py
