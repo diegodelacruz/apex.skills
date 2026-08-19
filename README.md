@@ -1,8 +1,8 @@
 # APEX Skills
 
-Framework canónico para agentes que desarrollan, validan, liberan y documentan Oracle APEX 24.1.3.
+Framework canónico para agentes que desarrollan, validan, liberan y documentan Oracle APEX 24.1.3 y objetos Oracle relacionados.
 
-Empiece por [MANUAL-DE-USO.md](MANUAL-DE-USO.md). Para uso normal, invoque la skill corta `apex` o describa la solicitud en lenguaje natural; el coordinador elige las skills especializadas necesarias.
+Empiece por [MANUAL-DE-USO.md](MANUAL-DE-USO.md). Describa el objetivo en lenguaje natural: el coordinador detecta el contexto Oracle/APEX y elige las skills especializadas necesarias; no debe escribir `usa apex`.
 
 ## Preparación inicial
 
@@ -17,6 +17,6 @@ Empiece por [MANUAL-DE-USO.md](MANUAL-DE-USO.md). Para uso normal, invoque la sk
 - Validación de acceso en lectura antes de operar un ambiente.
 - Alineación TEST/Producción para páginas existentes y control de rangos por proyecto.
 - Cambios a Producción sólo con aprobación explícita separada.
-- Gobierno DATA, decisiones, planes y auditoría antes del cierre.
+- Gobierno DATA, decisiones, planes, validación SQL y auditoría antes del cierre.
 
 Consulte [dependencias](docs/dependencias.md), [casos de uso](docs/casos-de-uso-apex.md) y [auditoría obligatoria](docs/auditoria-obligatoria.md).

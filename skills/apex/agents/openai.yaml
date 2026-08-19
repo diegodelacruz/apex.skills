@@ -1,4 +1,4 @@
 interface:
-  display_name: "APEX Coordinator"
-  short_description: "Route Oracle APEX work to the appropriate workflow."
-  default_prompt: "Coordinate this Oracle APEX request using the required specialist skills."
+  display_name: "Oracle and APEX Coordinator"
+  short_description: "Route Oracle or APEX requests with required validation gates."
+  default_prompt: "Describe your Oracle or APEX objective; the coordinator will select the required workflows and validation gates."

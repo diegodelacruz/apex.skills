@@ -19,6 +19,14 @@ python -m py_compile .\scripts\nombre_del_script.py
 
 Para PowerShell se valida el parser, y para cambios APEX/Oracle se ejecutan las pruebas de sólo lectura, QA y evidencias definidas por el plan de implementación.
 
+Todo `.sql` creado o modificado debe pasar además el validador de gobierno Oracle antes de entregarse:
+
+```powershell
+python .\skills\oracle-data-change-governance-final\scripts\validate_sql_style.py <archivo-o-carpeta-sql>
+```
+
+El resultado `STYLE_FAIL` bloquea la entrega. El control exige nombres de archivo e identificadores SQL no citados en minúsculas y tabuladores físicos para toda sangría; conserva el formato de cadenas, comentarios, mensajes y valores de diccionario que requieran otra capitalización.
+
 ## Criterio de cierre
 
 Sólo se puede comunicar “listo”, generar el manual final o publicar una versión cuando:

@@ -1,6 +1,6 @@
 ---
 name: oracle-data-change-governance-final
-description: Govern documented Oracle DATA object changes for TEST and production using the final project rules for backup, rebuild, audit fields, identifier triggers, decisions, plans, and rollback. Use for any table, view, sequence, trigger, index, constraint, package, or deployment script change.
+description: Govern documented Oracle DATA object changes for TEST and production using the final project rules for backup, rebuild, audit fields, identifier triggers, decisions, plans, rollback, and SQL style validation. Use for any table, view, sequence, trigger, index, constraint, package, or deployment script change.
 ---
 
 # Final DATA Change Governance
@@ -12,7 +12,7 @@ Create `control-proyecto/cambios/<id>/decisions.md` and `implementation-plan.md`
 ## Object and script rules
 
 - Official objects live in `data`; backups are created in the current user's schema.
-- SQL filenames/content are lower-case and use physical four-column tabs, not spaces. Document every created object with purpose, owner, dependencies, rules, validation, rollback, and deployment order.
+- SQL filenames and non-literal identifiers are lower-case. Use physical four-column tabs, not spaces. Preserve the required casing of string literals, comments, prompts, and quoted identifiers. Document every created object with purpose, owner, dependencies, rules, validation, rollback, and deployment order.
 - Never use `alter` to correct a table or view. Reconstruct a table only after explicit user request. For views use `drop`, `commit`, `create`, `commit`; capture prior DDL/backup before drop and inspect dependents.
 - Retain every backup until the user explicitly decides to purge it. Never purge automatically.
 - On non-migration table recreation, reset identifier sequencing. On a user-declared migration, preserve sequential continuity and disable/re-enable the documented triggers.
@@ -23,4 +23,6 @@ Create `control-proyecto/cambios/<id>/decisions.md` and `implementation-plan.md`
 
 ## Completion gate
 
-Keep implementation-plan checkboxes updated. Mark a step complete only with evidence path, environment, timestamp, and result. Deliver scripts, decision record, plan status, validation, rollback procedure, and backup retention state.
+Run `python <skill-root>/scripts/validate_sql_style.py <sql-file-or-directory>` on every generated or changed SQL delivery before handoff. A `STYLE_FAIL` blocks delivery; correct every finding rather than waiving it. Keep its output as validation evidence in the implementation plan.
+
+Keep implementation-plan checkboxes updated. Mark a step complete only with evidence path, environment, timestamp, and result. Deliver scripts, decision record, plan status, validation, rollback procedure, backup retention state, and SQL style result.
