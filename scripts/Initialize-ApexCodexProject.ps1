@@ -76,22 +76,29 @@ Write-Host '[4/7] Validating TEST MCP handshake...'
 Invoke-QuietPython @($handshake, '--environment', 'test')
 Write-Host '      [OK] TEST MCP initialize response received.' -ForegroundColor Green
 
-Write-Host '[5/7] Installing skills for Codex CLI...'
+Write-Host '[5/7] Installing agent skills...'
 & $skillInstaller
-if ($LASTEXITCODE -ne 0) { throw 'Could not install APEX skills for Codex CLI.' }
+if ($LASTEXITCODE -ne 0) { throw 'Could not install APEX skills.' }
 Write-Host '      [OK] APEX coordinator and specialist skills are available.' -ForegroundColor Green
 
-Write-Host '[6/7] Checking Codex MCP registration...'
-$mcpList = & codex mcp list 2>&1 | Out-String
-if ($mcpList -notmatch '(?m)^apex-mcp-test\s') {
-	if ($PSCmdlet.ShouldProcess('Codex user configuration', 'register apex-mcp-test')) {
-		& codex mcp add apex-mcp-test -- $python $wrapper --environment test | Out-Null
-		if ($LASTEXITCODE -ne 0) { throw 'Could not register apex-mcp-test in Codex.' }
+Write-Host '[6/7] Checking agent MCP registration...'
+if (Get-Command codex -ErrorAction SilentlyContinue) {
+	$mcpList = & codex mcp list 2>&1 | Out-String
+	if ($mcpList -notmatch '(?m)^apex-mcp-test\s') {
+		if ($PSCmdlet.ShouldProcess('Codex user configuration', 'register apex-mcp-test')) {
+			& codex mcp add apex-mcp-test -- $python $wrapper --environment test | Out-Null
+			if ($LASTEXITCODE -ne 0) { throw 'Could not register apex-mcp-test in Codex.' }
+		}
 	}
+	Write-Host '      [OK] apex-mcp-test registered in Codex CLI.' -ForegroundColor Green
+} else {
+	Write-Host '      [OK] MCP ready. Use Claude Code or Codex CLI to connect.' -ForegroundColor Green
 }
-Write-Host '      [OK] apex-mcp-test available.' -ForegroundColor Green
 
 Write-Host '[7/7] Project readiness...'
 Write-Host "      [OK] $project" -ForegroundColor Green
 Write-Host ''
-Write-Host 'Next: open a NEW Codex Desktop task or Codex CLI session in this project and describe the read-only diagnosis.' -ForegroundColor Yellow
+Write-Host '      Next steps:' -ForegroundColor Yellow
+Write-Host '      • Codex CLI: open a new task in this project' -ForegroundColor Yellow
+Write-Host '      • Claude Code: open this project in Claude Code' -ForegroundColor Yellow
+Write-Host '      Then describe the read-only diagnosis to get started.' -ForegroundColor Yellow

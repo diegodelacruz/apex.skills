@@ -59,5 +59,3 @@ foreach ($source in $skillFolders) {
 }
 
 Write-Host ''
-Write-Host "      [OK] APEX coordinator and specialist skills are available." -ForegroundColor Green
-Write-Host "      Skills location: $targetRoot" -ForegroundColor Yellow
