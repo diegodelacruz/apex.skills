@@ -99,6 +99,9 @@ Write-Host '[7/7] Project readiness...'
 Write-Host "      [OK] $project" -ForegroundColor Green
 Write-Host ''
 Write-Host '      Next steps:' -ForegroundColor Yellow
-Write-Host '      • Codex CLI: open a new task in this project' -ForegroundColor Yellow
-Write-Host '      • Claude Code: open this project in Claude Code' -ForegroundColor Yellow
+Write-Host '      - Codex CLI: open a new task in this project' -ForegroundColor Yellow
+Write-Host '      - Claude Code: open this project in Claude Code' -ForegroundColor Yellow
 Write-Host '      Then describe the read-only diagnosis to get started.' -ForegroundColor Yellow
+Write-Host ''
+Write-Host '      Initialized and verified by Diego de la Cruz' -ForegroundColor Cyan
+Write-Host '      (Supervised by Claude Code)' -ForegroundColor Gray
