@@ -72,12 +72,22 @@ def main():
 
 	try:
 		db_content = db_file.read_text(encoding="utf-8")
+
+		# Check if already patched
+		if "connect_kwargs = {" in db_content and 'oracledb.connect(**connect_kwargs)' in db_content:
+			print("APEX_MCP_DIRECT_CONNECTION_PATCH_PRESENT")
+			return 0
+
 		if "self._conn = oracledb.connect" not in db_content:
-			logging.warning("WARNING: apex-mcp version may differ from expected")
-			logging.warning("         db.py does not contain the expected oracledb.connect() pattern")
-			logging.warning("         Attempting to continue with other patches...")
-	except Exception:
-		pass
+			logging.error("ERROR: apex-mcp version is not compatible")
+			logging.error("       db.py does not contain expected oracledb.connect() pattern")
+			raise RuntimeError("Unsupported apex-mcp version")
+
+	except Exception as err:
+		if isinstance(err, RuntimeError):
+			raise
+		logging.exception("Failed to check db.py status")
+		raise SystemExit(1) from err
 
 	try:
 		changes = []
