@@ -80,7 +80,6 @@ Write-Host '[5/7] Installing agent skills...'
 & $skillInstaller
 if ($LASTEXITCODE -ne 0) { throw 'Could not install APEX skills.' }
 Write-Host '      [OK] APEX coordinator and specialist skills are available.' -ForegroundColor Green
-
 Write-Host '[6/7] Checking agent MCP registration...'
 if (Get-Command codex -ErrorAction SilentlyContinue) {
 	$mcpList = & codex mcp list 2>&1 | Out-String
@@ -94,14 +93,12 @@ if (Get-Command codex -ErrorAction SilentlyContinue) {
 } else {
 	Write-Host '      [OK] MCP ready. Use Claude Code or Codex CLI to connect.' -ForegroundColor Green
 }
-
 Write-Host '[7/7] Project readiness...'
 Write-Host "      [OK] $project" -ForegroundColor Green
 Write-Host ''
-Write-Host '      Next steps:' -ForegroundColor Yellow
-Write-Host '      - Codex CLI: open a new task in this project' -ForegroundColor Yellow
-Write-Host '      - Claude Code: open this project in Claude Code' -ForegroundColor Yellow
-Write-Host '      Then describe the read-only diagnosis to get started.' -ForegroundColor Yellow
+Write-Host 'Next steps:' -ForegroundColor Yellow
+Write-Host '- Codex CLI: open a new task in this project' -ForegroundColor Yellow
+Write-Host '- Claude Code: open this project in Claude Code' -ForegroundColor Yellow
+Write-Host 'Then describe the read-only diagnosis to get started.' -ForegroundColor Yellow
 Write-Host ''
-Write-Host '      Initialized and verified by Diego de la Cruz' -ForegroundColor Cyan
-Write-Host '      (Supervised by Claude Code)' -ForegroundColor Gray
+Write-Host 'Initialized and verified by Diego de la Cruz Sandoval' -ForegroundColor Cyan
