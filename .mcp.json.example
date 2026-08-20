@@ -1,0 +1,49 @@
+{
+  "mcpServers": {
+    "oracle-apex-skills": {
+      "command": "python3",
+      "args": ["-m", "scripts.manage_apex_credentials"],
+      "env": {
+        "APEX_SKILLS_ENV": "production",
+        "PYTHONPATH": "."
+      },
+      "description": "Oracle APEX Skills Framework - Credencial Management & Validation"
+    },
+    "apex-project-utilities": {
+      "command": "python3",
+      "args": ["scripts/audit_skill_ecosystem.py"],
+      "env": {
+        "PYTHONPATH": "."
+      },
+      "description": "APEX Skills Ecosystem Auditor - Validates resources and links"
+    },
+    "apex-export-processing": {
+      "command": "python3",
+      "args": ["-c", "from scripts.apex_export_utilities import *"],
+      "env": {
+        "PYTHONPATH": "."
+      },
+      "description": "APEX Export Utilities - ZIP extraction and YAML parsing"
+    }
+  },
+  "mcpResourceServers": {
+    "apex-skills-docs": {
+      "url": "file://./docs",
+      "type": "markdown"
+    },
+    "apex-skills-examples": {
+      "url": "file://./apps",
+      "type": "export-zip"
+    }
+  },
+  "settings": {
+    "pythonPath": ".venv/bin/python3",
+    "pythonVersion": "3.8+",
+    "requirementsFile": "requirements.txt",
+    "testRunner": "pytest",
+    "testCoverageTarget": 80,
+    "credentialStorage": "system-keyring",
+    "defaultEnvironment": "production",
+    "logLevel": "INFO"
+  }
+}

@@ -1,18 +1,37 @@
 #!/usr/bin/env python3
 """Store, import, and validate secure APEX environment profiles."""
+
 import argparse
 import getpass
+import importlib
 import json
 import sys
 from pathlib import Path
 
 SERVICE = "apex-skills"
 REQUIRED_FIELDS = ("db_user", "db_pass", "dsn", "workspace_id", "schema", "workspace_name")
+ALLOWED_MODULES = {"keyring", "oracledb"}
 
 
-def module(name):
+def import_module_safe(name):
+	"""Safely import a module from the allowed list.
+
+	Args:
+			name: Module name to import (must be in ALLOWED_MODULES)
+
+	Returns:
+			The imported module object
+
+	Raises:
+			SystemExit: If module not in whitelist or import fails
+	"""
+	if name not in ALLOWED_MODULES:
+		raise SystemExit(
+			f"Module '{name}' is not in the allowed list: {', '.join(ALLOWED_MODULES)}"
+		)
+
 	try:
-		return __import__(name)
+		return importlib.import_module(name)
 	except ImportError as error:
 		raise SystemExit(f"Missing dependency: {name}. Install requirements.txt first.") from error
 
@@ -50,13 +69,18 @@ def connection_kwargs(profile):
 
 
 def discover_apex_metadata(profile):
-	with module("oracledb").connect(**connection_kwargs(profile)) as connection:
+	with import_module_safe("oracledb").connect(**connection_kwargs(profile)) as connection:
 		with connection.cursor() as cursor:
-			cursor.execute("select workspace_id from apex_workspace_schemas where schema = sys_context('userenv', 'current_schema') order by workspace_id")
+			cursor.execute(
+				"select workspace_id from apex_workspace_schemas where schema = sys_context('userenv', 'current_schema') order by workspace_id"
+			)
 			workspace_ids = [str(row[0]) for row in cursor.fetchall()]
 			workspace = None
 			if len(workspace_ids) == 1:
-				cursor.execute("select workspace from apex_workspaces where workspace_id = :workspace_id", [workspace_ids[0]])
+				cursor.execute(
+					"select workspace from apex_workspaces where workspace_id = :workspace_id",
+					[workspace_ids[0]],
+				)
 				workspace = cursor.fetchone()
 				if workspace:
 					profile["workspace_id"] = workspace_ids[0]
@@ -81,7 +105,11 @@ def discover_apex_metadata(profile):
 
 
 def set_profile(keyring, environment):
-	profile = {"db_user": input("Oracle user: ").strip(), "db_pass": getpass.getpass("Oracle password: "), "dsn": input("Oracle DSN: ").strip()}
+	profile = {
+		"db_user": input("Oracle user: ").strip(),
+		"db_pass": getpass.getpass("Oracle password: "),
+		"dsn": input("Oracle DSN: ").strip(),
+	}
 	save_profile(keyring, environment, discover_apex_metadata(profile))
 
 
@@ -92,9 +120,17 @@ def import_env_profile(keyring, environment, env_file):
 	missing = [name for name in needed if not values.get(name)]
 	if missing:
 		raise SystemExit("Missing .env values: " + ", ".join(missing))
-	profile = {"db_user": values[f"{prefix}_USER"], "db_pass": values[f"{prefix}_PASSWORD"], "dsn": "{}:{}/{}".format(values[f"{prefix}_HOST"], values[f"{prefix}_PORT"], values[f"{prefix}_SID"])}
+	profile = {
+		"db_user": values[f"{prefix}_USER"],
+		"db_pass": values[f"{prefix}_PASSWORD"],
+		"dsn": "{}:{}/{}".format(
+			values[f"{prefix}_HOST"], values[f"{prefix}_PORT"], values[f"{prefix}_SID"]
+		),
+	}
 	save_profile(keyring, environment, discover_apex_metadata(profile))
-	print(f"PROFILE_IMPORTED environment={environment} source={env_file.name} mode=direct-connection")
+	print(
+		f"PROFILE_IMPORTED environment={environment} source={env_file.name} mode=direct-connection"
+	)
 
 
 def status(keyring, environment):
@@ -103,7 +139,10 @@ def status(keyring, environment):
 		print(f"PROFILE_MISSING environment={environment}")
 		return 1
 	missing = [field for field in REQUIRED_FIELDS if not profile.get(field)]
-	print(f"PROFILE_{'READY' if not missing else 'INCOMPLETE'} environment={environment}" + (f" missing={','.join(missing)}" if missing else ""))
+	print(
+		f"PROFILE_{'READY' if not missing else 'INCOMPLETE'} environment={environment}"
+		+ (f" missing={','.join(missing)}" if missing else "")
+	)
 	return int(bool(missing))
 
 
@@ -112,12 +151,15 @@ def validate(keyring, environment):
 	if not profile or any(not profile.get(field) for field in REQUIRED_FIELDS):
 		raise SystemExit("Profile is missing or incomplete.")
 	try:
-		with module("oracledb").connect(**connection_kwargs(profile)) as connection:
+		with import_module_safe("oracledb").connect(**connection_kwargs(profile)) as connection:
 			with connection.cursor() as cursor:
 				cursor.execute("select sys_context('userenv', 'current_schema') from dual")
 				cursor.fetchone()
 	except Exception as error:
-		print(f"PROFILE_VALIDATION_FAIL environment={environment} error={type(error).__name__}", file=sys.stderr)
+		print(
+			f"PROFILE_VALIDATION_FAIL environment={environment} error={type(error).__name__}",
+			file=sys.stderr,
+		)
 		return 1
 	print(f"PROFILE_VALIDATION_PASS environment={environment} mode=read-only")
 	return 0
@@ -127,9 +169,11 @@ def main():
 	parser = argparse.ArgumentParser()
 	parser.add_argument("action", choices=("set", "import-env", "status", "validate"))
 	parser.add_argument("--environment", required=True, choices=("test", "production"))
-	parser.add_argument("--env-file", type=Path, default=Path(__file__).resolve().parent.parent / ".env")
+	parser.add_argument(
+		"--env-file", type=Path, default=Path(__file__).resolve().parent.parent / ".env"
+	)
 	args = parser.parse_args()
-	keyring = module("keyring")
+	keyring = import_module_safe("keyring")
 	if args.action == "set":
 		set_profile(keyring, args.environment)
 	elif args.action == "import-env":

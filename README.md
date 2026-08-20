@@ -4,7 +4,9 @@ Framework canónico para agentes que desarrollan, validan, liberan y documentan 
 
 Empiece por [MANUAL-DE-USO.md](MANUAL-DE-USO.md). Describa el objetivo en lenguaje natural: el coordinador detecta el contexto Oracle/APEX y elige las skills especializadas necesarias; no debe escribir `usa apex`.
 
-Para Codex CLI consulte [uso de skills desde terminal](docs/uso-skills-codex-cli.md): las skills se instalan una vez en el directorio de usuario de Codex y luego se usa `codex` desde la carpeta del proyecto.
+**Configuración por agente:**
+- **Para Claude Code**: Consulte [Configuración de Claude Code](docs/setup-claude-code.md) — MCP automático, multi-entorno, interfaz gráfica
+- **Para Codex CLI**: Consulte [uso de skills desde terminal](docs/uso-skills-codex-cli.md) — invocación manual desde terminal, almacenamiento en usuario Codex
 
 ## Preparación inicial
 
