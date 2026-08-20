@@ -31,7 +31,7 @@ foreach ($source in $skillFolders) {
 	if (Test-Path -LiteralPath $target) {
 		$current = Get-Item -LiteralPath $target -Force
 		if ($current.LinkType -and $current.Target -and ((Resolve-Path -LiteralPath $current.Target).Path -eq $source.FullName)) {
-			Write-Host "[OK] $($source.Name) is already linked." -ForegroundColor Green
+			Write-Host "      [OK] $($source.Name) is already linked." -ForegroundColor Green
 			continue
 		}
 		if (-not $Force) {
@@ -46,17 +46,18 @@ foreach ($source in $skillFolders) {
 	if ($Mode -eq 'Junction') {
 		if ($PSCmdlet.ShouldProcess($target, "link to $($source.FullName)")) {
 			New-Item -ItemType Junction -Path $target -Target $source.FullName | Out-Null
-			Write-Host "[OK] Installed $($source.Name) using Junction." -ForegroundColor Green
+			Write-Host "      [OK] Installed $($source.Name) using Junction." -ForegroundColor Green
 		} else {
-			Write-Host "[WHATIF] Would install $($source.Name) using Junction." -ForegroundColor Yellow
+			Write-Host "      [WHATIF] Would install $($source.Name) using Junction." -ForegroundColor Yellow
 		}
 	} elseif ($PSCmdlet.ShouldProcess($target, "copy $($source.FullName)")) {
 		Copy-Item -LiteralPath $source.FullName -Destination $target -Recurse
-		Write-Host "[OK] Installed $($source.Name) using Copy." -ForegroundColor Green
+		Write-Host "      [OK] Installed $($source.Name) using Copy." -ForegroundColor Green
 	} else {
-		Write-Host "[WHATIF] Would install $($source.Name) using Copy." -ForegroundColor Yellow
+		Write-Host "      [WHATIF] Would install $($source.Name) using Copy." -ForegroundColor Yellow
 	}
 }
 
 Write-Host ''
-Write-Host "Restart Codex CLI after installation. Skills location: $targetRoot" -ForegroundColor Yellow
+Write-Host "      [OK] APEX coordinator and specialist skills are available." -ForegroundColor Green
+Write-Host "      Skills location: $targetRoot" -ForegroundColor Yellow
