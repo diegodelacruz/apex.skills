@@ -11,13 +11,14 @@ ROOT = Path(__file__).resolve().parent.parent
 PACKAGE = ROOT / ".upstreams" / "apex-mcp" / "apex_mcp"
 
 
-def replace_once(path, old, new):
+def replace_once(path, old, new, normalized=False):
 	"""Replace code pattern once, with error handling and logging.
 
 	Args:
 			path: Path to file to patch
 			old: Pattern to find
 			new: Replacement pattern
+			normalized: If True, normalize whitespace before matching
 
 	Returns:
 			True if replacement was made, False if new pattern already present
@@ -35,12 +36,22 @@ def replace_once(path, old, new):
 		return False
 
 	if old not in content:
-		err_msg = f"Unsupported upstream revision: expected code not found in {path}"
-		logging.error(err_msg)
-		raise RuntimeError(err_msg)
+		if normalized:
+			old_norm = " ".join(old.split())
+			content_norm = " ".join(content.split())
+			if old_norm not in content_norm:
+				err_msg = f"Unsupported upstream revision: expected code not found in {path}"
+				logging.error(err_msg)
+				raise RuntimeError(err_msg)
+			content = content_norm
+		else:
+			err_msg = f"Unsupported upstream revision: expected code not found in {path}"
+			logging.error(err_msg)
+			raise RuntimeError(err_msg)
 
 	try:
-		path.write_text(content.replace(old, new, 1), encoding="utf-8")
+		result = content.replace(old, new, 1)
+		path.write_text(result, encoding="utf-8")
 	except (OSError, UnicodeEncodeError) as err:
 		logging.error(f"Failed to write {path}: {err}")
 		raise SystemExit(1) from err
@@ -58,6 +69,15 @@ def main():
 		)
 		logging.error(err_msg)
 		raise SystemExit(err_msg)
+
+	try:
+		db_content = db_file.read_text(encoding="utf-8")
+		if "self._conn = oracledb.connect" not in db_content:
+			logging.warning("WARNING: apex-mcp version may differ from expected")
+			logging.warning("         db.py does not contain the expected oracledb.connect() pattern")
+			logging.warning("         Attempting to continue with other patches...")
+	except Exception:
+		pass
 
 	try:
 		changes = []
