@@ -4,6 +4,24 @@ Punto de entrada para usuarios y agentes Oracle APEX. Describa el objetivo en le
 
 ## 1. Preparar el equipo una sola vez
 
+Siga la guía para su agente de preferencia:
+
+### Para Claude Code (web, CLI, desktop, o IDE):
+
+Consulte [Configuración de Claude Code](docs/setup-claude-code.md) para instrucciones completas:
+
+```bash
+git clone https://github.com/diegodelacruz/apex.skills.git
+cd apex.skills
+python3 -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt
+python3 scripts/manage_apex_credentials.py set --environment production
+# (ejecutar solo una vez) pwsh scripts/Initialize-ApexSkillUpstreams-V2.ps1
+```
+
+### Para Codex CLI:
+
 ```powershell
 cd "<RUTA_APEX_SKILLS>"
 .\scripts\Initialize-ApexSkillUpstreams-V2.ps1
@@ -39,7 +57,34 @@ El coordinador reconoce APEX, Oracle, Application Express/App Express, objetos d
 
 El agente valida el perfil del ambiente solicitado antes de inspeccionar. Si el perfil no existe, es inválido o no tiene permisos, informa la limitación y no intenta sustituir el ambiente.
 
-## 3. Usar Codex desde terminal
+## 3. Usar Claude Code
+
+Simplemente abra la carpeta apex.skills en Claude Code (web, CLI, desktop o extensión IDE) y describa el trabajo normalmente. Claude Code descubre automáticamente los skills y credenciales:
+
+```bash
+# En web o CLI:
+cd /ruta/a/apex.skills
+# (web) Abre claude.ai/code e importa la carpeta
+# (CLI) claude-code-open .
+
+# En VS Code o JetBrains:
+# File > Open Folder > /ruta/a/apex.skills
+# Claude Code Panel > Auto-detect skills
+```
+
+MCP se configura automáticamente usando el almacén de credenciales del sistema (Keyring/Credential Manager). No es necesario configurar conexiones manualmente.
+
+### Validar Claude Code Setup
+
+```bash
+python3 scripts/audit_skill_ecosystem.py
+```
+
+Deberías ver: `AUDIT_PASS: required resources and local Markdown links are valid`
+
+Para detalles avanzados, consulte [Configuración de Claude Code](docs/setup-claude-code.md).
+
+## 4. Usar Codex desde terminal
 
 Abra PowerShell o CMD en la carpeta del proyecto y ejecute `codex`. Codex CLI, no la terminal por sí sola, descubre y utiliza las skills instaladas:
 
@@ -50,7 +95,7 @@ codex
 
 Después describa el trabajo normalmente. Para detalles de instalación, actualización, MCP y validadores consulte [Uso desde terminal](docs/uso-skills-codex-cli.md).
 
-## 4. Reiniciar el MCP local
+## 5. Reiniciar el MCP local (Codex CLI)
 
 `apex-mcp-test` y `apex-mcp-production` usan `stdio`: se inician por cada tarea de Codex Desktop o sesión de Codex CLI, no quedan ejecutándose como un servicio permanente.
 
@@ -68,7 +113,7 @@ codex mcp list
 
 El inicializador reaplica la compatibilidad de conexión directa, verifica el perfil TEST y confirma el registro MCP. No solicite wallet para una conexión directa ya configurada. `Unsupported` en la columna `Auth` es normal para un MCP local `stdio`.
 
-## 5. Flujos comunes
+## 6. Flujos comunes
 
 | Solicitud | Qué coordina automáticamente |
 | --- | --- |
@@ -82,23 +127,27 @@ El inicializador reaplica la compatibilidad de conexión directa, verifica el pe
 | Copia TEST → Producción | Explicación de impacto/riesgo y aprobación explícita separada para Producción. |
 | Manual final | QA/evidencia y flujo de Word validado. |
 
-## 6. Nombres de skills
+## 7. Nombres de skills
 
 Las skills especializadas no se eliminan: ayudan al coordinador a aplicar reglas concretas. Puede invocarlas si conoce el caso exacto, pero para el uso normal basta describir la necesidad.
 
-## 7. Documentación de consulta
+## 8. Documentación de consulta
 
 | Necesidad | Documento |
 | --- | --- |
+| Configuración Claude Code | [Setup Claude Code](docs/setup-claude-code.md) |
 | Uso desde PowerShell/CMD | [Uso desde terminal](docs/uso-skills-codex-cli.md) |
 | Instalación y problemas | [Inicialización Codex](docs/inicializacion-automatica-codex.md) |
-| Perfiles TEST/Producción | [Perfiles seguros](docs/perfiles-credenciales-seguros.md) |
+| Perfiles TEST/Producción | [Credenciales y alineación de ambientes](docs/credenciales-y-alineacion-ambientes.md) |
+| Configuración de Python | [Entornos Python en proyectos](docs/entornos-python-proyectos.md) |
+| Iniciar proyecto APEX | [Iniciar proyecto APEX](docs/iniciar-proyecto-apex.md) |
 | MCP Codex Desktop | [Oracle MCP](docs/codex-desktop-mcp-oracle.md) |
 | Casos de uso | [Casos de uso](docs/casos-de-uso-apex.md) |
 | Dependencias/upstreams | [Dependencias](docs/dependencias.md) |
 | Auditoría | [Auditoría obligatoria](docs/auditoria-obligatoria.md) |
+| Decisiones canónicas | [Decisiones canónicas finales](docs/decisiones-canonicas-finales.md) |
 
-## 8. Cierre obligatorio
+## 9. Cierre obligatorio
 
 ```powershell
 python .\scripts\audit_skill_ecosystem.py

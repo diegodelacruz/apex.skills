@@ -2,7 +2,7 @@
 
 ## Entrada para proyectos nuevos
 
-1. `apex-project-bootstrap-safe`
+1. `apex-project-bootstrap-final`
 2. `apex-delivery-lifecycle-safe`
 
 ## Upstreams administrados
