@@ -45,6 +45,18 @@ if ($InstallSharedDependencies) {
 	throw 'Shared runtime missing. Run again with -InstallSharedDependencies.'
 }
 
+$apexMcpPath = Join-Path $skillsRoot '.upstreams\apex-mcp\apex_mcp'
+if (-not (Test-Path -LiteralPath $apexMcpPath)) {
+	throw @"
+Managed upstream 'apex-mcp' is missing.
+
+You must first download upstreams by running:
+  .\scripts\Initialize-ApexSkillUpstreams-V2.ps1
+
+Then run this script again.
+"@
+}
+
 Write-Host '[2/7] Applying direct Oracle connection compatibility...'
 Invoke-QuietPython @($patcher)
 Write-Host '      [OK] Direct connection supported; wallet is optional.' -ForegroundColor Green
