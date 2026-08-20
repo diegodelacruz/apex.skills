@@ -27,10 +27,16 @@ def inspect(path):
 			sql_pages = list_export_pages(z, root, 'sql')
 			names = z.namelist()
 
-			page_content = '\n'.join(
-				z.read(n).decode('utf-8', 'strict')
-				for n in readable_pages
-			)
+			page_content_parts = []
+			for n in readable_pages:
+				try:
+					page_content_parts.append(z.read(n).decode('utf-8', 'strict'))
+				except UnicodeDecodeError as err:
+					raise ValueError(
+						f'{path}: page {n} contains invalid UTF-8: {err}'
+					) from err
+
+			page_content = '\n'.join(page_content_parts)
 
 		return {
 			'archive': path.name,

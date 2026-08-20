@@ -35,12 +35,20 @@ def extract_apex_export_metadata(zip_path):
 		if meta_path not in names:
 			raise ValueError(f'{zip_path}: missing readable application YAML at {meta_path}')
 
-		metadata = z.read(meta_path).decode('utf-8', 'strict')
+		try:
+			metadata = z.read(meta_path).decode('utf-8', 'strict')
+		except UnicodeDecodeError as err:
+			raise ValueError(
+				f'{zip_path}: metadata YAML contains invalid UTF-8 at {meta_path}: {err}'
+			) from err
+
 		return root, metadata
 
 
 def get_yaml_field(yaml_text, field_name):
 	"""Extract a field value from YAML text using regex.
+
+	Replaces previous lookup() and field() functions with unified implementation.
 
 	Args:
 		yaml_text: Raw YAML text content
@@ -48,13 +56,27 @@ def get_yaml_field(yaml_text, field_name):
 
 	Returns:
 		The field value with quotes stripped, or None if field not found.
+
+	Examples:
+		>>> get_yaml_field("name: 'My App'", "name")
+		'My App'
+		>>> get_yaml_field("id: 12345", "id")
+		'12345'
+		>>> get_yaml_field("unknown", "missing")
+		None
 	"""
-	match = re.search(
-		rf'^\s*{re.escape(field_name)}:\s*(.+?)\s*$',
-		yaml_text,
-		re.MULTILINE
-	)
-	return match.group(1).strip(" '\"") if match else None
+	if not yaml_text or not field_name:
+		return None
+
+	try:
+		match = re.search(
+			rf'^\s*{re.escape(field_name)}:\s*(.+?)\s*$',
+			yaml_text,
+			re.MULTILINE
+		)
+		return match.group(1).strip(" '\"") if match else None
+	except (TypeError, AttributeError):
+		return None
 
 
 def list_export_pages(zip_path, root_dir, page_type='readable'):

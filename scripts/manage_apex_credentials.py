@@ -2,17 +2,33 @@
 """Store, import, and validate secure APEX environment profiles."""
 import argparse
 import getpass
+import importlib
 import json
 import sys
 from pathlib import Path
 
 SERVICE = "apex-skills"
 REQUIRED_FIELDS = ("db_user", "db_pass", "dsn", "workspace_id", "schema", "workspace_name")
+ALLOWED_MODULES = {"keyring", "oracledb"}
 
 
-def module(name):
+def import_module_safe(name):
+	"""Safely import a module from the allowed list.
+
+	Args:
+		name: Module name to import (must be in ALLOWED_MODULES)
+
+	Returns:
+		The imported module object
+
+	Raises:
+		SystemExit: If module not in whitelist or import fails
+	"""
+	if name not in ALLOWED_MODULES:
+		raise SystemExit(f"Module '{name}' is not in the allowed list: {', '.join(ALLOWED_MODULES)}")
+
 	try:
-		return __import__(name)
+		return importlib.import_module(name)
 	except ImportError as error:
 		raise SystemExit(f"Missing dependency: {name}. Install requirements.txt first.") from error
 
@@ -50,7 +66,7 @@ def connection_kwargs(profile):
 
 
 def discover_apex_metadata(profile):
-	with module("oracledb").connect(**connection_kwargs(profile)) as connection:
+	with import_module_safe("oracledb").connect(**connection_kwargs(profile)) as connection:
 		with connection.cursor() as cursor:
 			cursor.execute("select workspace_id from apex_workspace_schemas where schema = sys_context('userenv', 'current_schema') order by workspace_id")
 			workspace_ids = [str(row[0]) for row in cursor.fetchall()]
@@ -112,7 +128,7 @@ def validate(keyring, environment):
 	if not profile or any(not profile.get(field) for field in REQUIRED_FIELDS):
 		raise SystemExit("Profile is missing or incomplete.")
 	try:
-		with module("oracledb").connect(**connection_kwargs(profile)) as connection:
+		with import_module_safe("oracledb").connect(**connection_kwargs(profile)) as connection:
 			with connection.cursor() as cursor:
 				cursor.execute("select sys_context('userenv', 'current_schema') from dual")
 				cursor.fetchone()
@@ -129,7 +145,7 @@ def main():
 	parser.add_argument("--environment", required=True, choices=("test", "production"))
 	parser.add_argument("--env-file", type=Path, default=Path(__file__).resolve().parent.parent / ".env")
 	args = parser.parse_args()
-	keyring = module("keyring")
+	keyring = import_module_safe("keyring")
 	if args.action == "set":
 		set_profile(keyring, args.environment)
 	elif args.action == "import-env":
