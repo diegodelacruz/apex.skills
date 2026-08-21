@@ -20,7 +20,16 @@ class CLIParser:
 		self.add_common_args = add_common_args
 
 	def add_argument(self, *args, **kwargs) -> None:
-		"""Add an argument to the parser."""
+		"""Add an argument to the parser.
+
+		Args:
+			*args: Positional arguments passed to argparse.add_argument
+			**kwargs: Keyword arguments passed to argparse.add_argument
+
+		Example:
+			>>> parser = CLIParser("My script")
+			>>> parser.add_argument('--output', default='output.json')
+		"""
 		self.parser.add_argument(*args, **kwargs)
 
 	def add_environment_arg(self, choices: Tuple[str, ...] = ("test", "production"), default: str = "test") -> None:
