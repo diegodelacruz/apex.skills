@@ -1,5 +1,15 @@
 #!/usr/bin/env python3
-"""Shared path setup utilities for APEX Skills."""
+"""Shared path setup utilities for APEX Skills.
+
+This module provides centralized path setup functions to avoid duplicating
+sys.path.insert() across multiple scripts. All functions return Path objects
+for the directory they set up.
+
+Example:
+	>>> from path_setup import get_repo_root
+	>>> repo = get_repo_root()
+	>>> exports_dir = repo / "tests/fixtures/apex-exports"
+"""
 
 import sys
 from pathlib import Path
@@ -56,7 +66,7 @@ def setup_skills_path(script_file: str = __file__):
 	return root_scripts_dir
 
 
-def setup_test_path(test_file: str = __file__):
+def setup_test_path(test_file: str = __file__) -> Path:
 	"""Add the scripts directory to sys.path for test files.
 
 	Args:
@@ -78,3 +88,48 @@ def setup_test_path(test_file: str = __file__):
 		sys.path.insert(0, str(scripts_dir))
 
 	return scripts_dir
+
+
+def get_repo_root(start_path: str = __file__) -> Path:
+	"""Get the root directory of the apex.skills repository.
+
+	Searches upward from start_path for the .git directory to find repo root.
+
+	Args:
+		start_path: Starting path for search (__file__ by default)
+
+	Returns:
+		Path object pointing to repository root
+
+	Raises:
+		RuntimeError: If .git directory not found (not in a git repository)
+
+	Example:
+		>>> root = get_repo_root()
+		>>> assert (root / 'CLAUDE.md').exists()
+		>>> skills_dir = root / 'skills'
+	"""
+	current = Path(start_path).resolve()
+	if current.is_file():
+		current = current.parent
+
+	# Search upward for .git directory
+	for path in [current] + list(current.parents):
+		if (path / '.git').exists():
+			return path
+
+	raise RuntimeError(f"Could not find repository root starting from {start_path}")
+
+
+def get_script_dir() -> Path:
+	"""Get the scripts/ directory of apex.skills.
+
+	Returns:
+		Path object for the scripts directory
+
+	Example:
+		>>> scripts_dir = get_script_dir()
+		>>> cli_utils = scripts_dir / 'cli_utils.py'
+	"""
+	repo_root = get_repo_root(__file__)
+	return repo_root / 'scripts'
