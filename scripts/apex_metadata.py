@@ -28,7 +28,7 @@ class ApexMetadata:
 		self.metadata_yaml = metadata_yaml
 
 	@staticmethod
-	def get_field(yaml_text: str, field_name: str) -> Optional[str]:
+	def get_field(yaml_text: Optional[str], field_name: Optional[str]) -> Optional[str]:
 		"""Extract a field value from YAML text using regex.
 
 		This is the canonical APEX field extraction function, consolidating
