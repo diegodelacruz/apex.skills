@@ -25,3 +25,6 @@ test-results/
 control-proyecto/**/traces/
 control-proyecto/**/screenshots/
 control-proyecto/**/auth/
+
+# Audit trail (auto-generated, not committed to git)
+control-proyecto/.bitacora.json

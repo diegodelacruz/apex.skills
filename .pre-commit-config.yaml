@@ -69,3 +69,11 @@ repos:
         language: system
         types: [python]
         stages: [commit]
+
+      - id: audit-trail-capture
+        name: Capture audit trail
+        entry: bash .hooks/pre-commit.sh
+        language: system
+        stages: [commit]
+        pass_filenames: false
+        always_run: true

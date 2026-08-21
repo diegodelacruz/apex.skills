@@ -9,7 +9,7 @@
   "hooks": {
     "pre_commit": {
       "enabled": true,
-      "script": ".bitacora.hook.sh",
+      "script": ".hooks/pre-commit.sh",
       "description": "Captures audit trail on each commit"
     }
   },
