@@ -3,6 +3,7 @@ name: apex-engineering-safe
 category: "Apex Engineering & Design"
 order: 4
 tags: ['inspection', 'design', 'export', 'read-only']
+description: "Safely inspect, design, and document APEX applications from exports. Read-only analysis of applications and design patterns."
 ---
 
 # Safe Oracle APEX Engineering

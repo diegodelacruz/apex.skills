@@ -3,6 +3,7 @@ name: apex-export-qa-safe
 category: "Apex Export & QA"
 order: 6
 tags: ['qa', 'validation', 'export', 'read-only']
+description: "Static QA validation for APEX export ZIP files. Check structure, integrity, and readiness before changes."
 ---
 
 # Safe Oracle APEX Export QA

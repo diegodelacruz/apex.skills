@@ -3,6 +3,7 @@ name: apex-database-diagnostics
 category: "Apex Database & Diagnostics"
 order: 1
 tags: ['diagnostics', 'inspection', 'oracle', 'read-only']
+description: "Diagnose APEX and Oracle database errors in TEST and production environments. Use MCP profiles for database inspection and read-only queries."
 ---
 
 # APEX Database Diagnostics

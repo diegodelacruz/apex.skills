@@ -3,6 +3,7 @@ name: apex-delivery-lifecycle-safe
 category: "Apex Delivery & Lifecycle"
 order: 3
 tags: ['lifecycle', 'workflow', 'safe', 'governance']
+description: "Safe end-to-end APEX workflow from design through development, QA, and documentation. Ensures governance and validation at each step."
 ---
 
 # Canonical APEX Delivery Lifecycle

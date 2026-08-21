@@ -3,6 +3,7 @@ name: apex-environment-alignment-complete
 category: "Apex Environment & Alignment"
 order: 5
 tags: ['environment', 'sync', 'validation', 'governance']
+description: "Validate and synchronize TEST and production APEX environments. Ensure alignment and consistency across deployment targets."
 ---
 
 # Complete APEX Environment Alignment

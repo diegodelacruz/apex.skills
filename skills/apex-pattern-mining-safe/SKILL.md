@@ -3,6 +3,7 @@ name: apex-pattern-mining-safe
 category: "Apex Pattern Mining"
 order: 8
 tags: ['patterns', 'analysis', 'export', 'read-only']
+description: "Extract reusable design patterns and best practices from APEX exports. Analyze existing applications for patterns and optimization opportunities."
 ---
 
 # Safe APEX Pattern Mining

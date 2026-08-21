@@ -3,6 +3,7 @@ name: apex-project-bootstrap-final
 category: "Apex Project Management"
 order: 9
 tags: ['setup', 'initialization', 'bootstrap']
+description: "Initialize a new APEX project with workspace structure and governance policies. Set up control-proyecto and project foundations."
 ---
 
 # Final APEX Project Bootstrap

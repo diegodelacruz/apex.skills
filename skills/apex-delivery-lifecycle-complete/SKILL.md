@@ -3,6 +3,7 @@ name: apex-delivery-lifecycle-complete
 category: "Apex Delivery & Lifecycle"
 order: 2
 tags: ['lifecycle', 'workflow', 'complete', 'governance']
+description: "Complete APEX project lifecycle with environment validation and DATA governance. Covers design, development, QA, and production release with audit trail."
 ---
 
 # Complete APEX Delivery Lifecycle
