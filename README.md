@@ -2,7 +2,9 @@
 
 Framework canónico para agentes que desarrollan, validan, liberan y documentan Oracle APEX 24.1.3 y objetos Oracle relacionados.
 
-Empiece por [MANUAL-DE-USO.md](MANUAL-DE-USO.md). Describa el objetivo en lenguaje natural: el coordinador detecta el contexto Oracle/APEX y elige las skills especializadas necesarias; no debe escribir `usa apex`.
+**Para developers:** Consulte [CLAUDE.md](CLAUDE.md) — estructura del repositorio, configuración, y desarrollo.
+
+**Para usuarios:** Empiece por [docs/MANUAL-DE-USO.md](docs/MANUAL-DE-USO.md). Describa el objetivo en lenguaje natural: el coordinador detecta el contexto Oracle/APEX y elige las skills especializadas necesarias; no debe escribir `usa apex`.
 
 **Configuración por agente:**
 - **Para Claude Code**: Consulte [Configuración de Claude Code](docs/setup-claude-code.md) — MCP automático, multi-entorno, interfaz gráfica

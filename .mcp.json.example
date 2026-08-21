@@ -2,12 +2,12 @@
   "mcpServers": {
     "oracle-apex-skills": {
       "command": "python3",
-      "args": ["-m", "scripts.manage_apex_credentials"],
+      "args": ["scripts/manage_apex_credentials.py", "validate"],
       "env": {
         "APEX_SKILLS_ENV": "production",
         "PYTHONPATH": "."
       },
-      "description": "Oracle APEX Skills Framework - Credencial Management & Validation"
+      "description": "Oracle APEX Skills Framework - Credential Management & Validation"
     },
     "apex-project-utilities": {
       "command": "python3",
@@ -32,7 +32,7 @@
       "type": "markdown"
     },
     "apex-skills-examples": {
-      "url": "file://./apps",
+      "url": "file://./tests/fixtures/apex-exports",
       "type": "export-zip"
     }
   },
