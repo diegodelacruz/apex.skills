@@ -3,6 +3,7 @@ name: apex-page-range-governance
 category: "Apex Page Range Governance"
 order: 7
 tags: ['governance', 'pages', 'validation']
+description: "Reserve and validate APEX page ranges by project. Prevent page conflicts and ensure organized page allocation."
 ---
 
 # APEX Page Range Governance

@@ -3,6 +3,7 @@ name: apex-project-workspace
 category: "Apex Project Management"
 order: 10
 tags: ['workspace', 'organization', 'management']
+description: "Create and maintain the control-proyecto project workspace. Organize project structure and manage project-level documentation."
 ---
 
 # APEX Project Workspace

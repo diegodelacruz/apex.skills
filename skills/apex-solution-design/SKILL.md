@@ -3,6 +3,7 @@ name: apex-solution-design
 category: "Apex Engineering & Design"
 order: 11
 tags: ['design', 'architecture', 'planning']
+description: "Design new APEX applications or pages from business requirements. Create architecture and design specifications for new features."
 ---
 
 # APEX Solution Design
