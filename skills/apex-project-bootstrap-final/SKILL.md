@@ -1,6 +1,8 @@
 ---
 name: apex-project-bootstrap-final
-description: Start every Oracle APEX project with the final canonical workspace, dependency, source-cloning, decision-precedence, compatibility policies, Codex Desktop MCP readiness, and mandatory final audit. Use before design, implementation, QA, or documentation work in any new APEX project.
+category: "Apex Project Management"
+order: 9
+tags: ['setup', 'initialization', 'bootstrap']
 ---
 
 # Final APEX Project Bootstrap

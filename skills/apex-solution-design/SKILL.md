@@ -1,6 +1,8 @@
 ---
 name: apex-solution-design
-description: Design new Oracle APEX 24.1.3 applications or pages from a business request, schema inspection, and an APEX pattern catalogue. Use before creating an application or changing pages when a safe architecture, page map, navigation, authorization model, component choices, validation plan, and rollout plan are required. Complements APEX pattern mining, engineering, QA, and MCP tooling without executing database or APEX changes.
+category: "Apex Engineering & Design"
+order: 11
+tags: ['design', 'architecture', 'planning']
 ---
 
 # APEX Solution Design

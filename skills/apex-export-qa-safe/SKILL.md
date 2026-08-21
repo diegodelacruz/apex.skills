@@ -1,6 +1,8 @@
 ---
 name: apex-export-qa-safe
-description: Perform static, read-only QA for Oracle APEX 24.1.3 split-export ZIP files before an MCP-driven change. Validates basic source structure and declared security settings without deployment, database writes, or application imports.
+category: "Apex Export & QA"
+order: 6
+tags: ['qa', 'validation', 'export', 'read-only']
 ---
 
 # Safe Oracle APEX Export QA

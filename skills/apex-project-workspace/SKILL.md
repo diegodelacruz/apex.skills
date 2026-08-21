@@ -1,6 +1,8 @@
 ---
 name: apex-project-workspace
-description: Initialize and maintain the visible control-proyecto workspace for Oracle APEX projects. Use at project start, when organizing agent-generated decisions, implementation plans, numbered DATA change scripts, QA evidence, screenshots, traces, or final manuals. Creates a traceable, versionable project control structure without changing Oracle or APEX.
+category: "Apex Project Management"
+order: 10
+tags: ['workspace', 'organization', 'management']
 ---
 
 # APEX Project Workspace

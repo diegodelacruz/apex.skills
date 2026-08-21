@@ -1,0 +1,27 @@
+{
+  "audit": {
+    "enabled": true,
+    "auto_capture": true,
+    "smart_analysis": true,
+    "storage_location": "control-proyecto/.bitacora.json",
+    "description": "Automatic decision and audit trail capture"
+  },
+  "hooks": {
+    "pre_commit": {
+      "enabled": true,
+      "script": ".bitacora.hook.sh",
+      "description": "Captures audit trail on each commit"
+    }
+  },
+  "skills_organization": {
+    "format": "apex_prefix",
+    "use_emojis": false,
+    "alphabetical": true,
+    "description": "Skills organized with 'Apex' prefix, no emojis, alphabetical order"
+  },
+  "documentation": {
+    "skills_readme": "skills/README.md",
+    "skills_quick_reference": "skills/SKILLS-QUICK-REFERENCE.md",
+    "audit_template": "control-proyecto/.bitacora.template.md"
+  }
+}
