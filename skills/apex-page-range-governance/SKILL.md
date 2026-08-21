@@ -1,6 +1,8 @@
 ---
 name: apex-page-range-governance
-description: Reserve, document, and validate Oracle APEX page ranges for a named project within an application. Use when a user says they will work on an application, project, and page range; asks to create pages within a project range; or needs to detect TEST/production range conflicts. Validates authorized TEST and production access in read-only mode before reserving or changing pages.
+category: "Apex Page Range Governance"
+order: 7
+tags: ['governance', 'pages', 'validation']
 ---
 
 # APEX Page Range Governance

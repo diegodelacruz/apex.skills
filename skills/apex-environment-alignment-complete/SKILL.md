@@ -1,6 +1,8 @@
 ---
 name: apex-environment-alignment-complete
-description: Manage secure local TEST and production Oracle APEX credential profiles, validate authorized read-only access, compare TEST and production before existing-page edits, recommend authorized synchronization, and package validated TEST SQL for controlled production release.
+category: "Apex Environment & Alignment"
+order: 5
+tags: ['environment', 'sync', 'validation', 'governance']
 ---
 
 # Complete APEX Environment Alignment

@@ -1,6 +1,8 @@
 ---
 name: apex-delivery-lifecycle-safe
-description: Run the canonical end-to-end lifecycle for an Oracle APEX project including workspace initialization, pattern mining, solution design, DATA change governance, safe APEX engineering, export QA, evidence capture, and a rendered Word user manual.
+category: "Apex Delivery & Lifecycle"
+order: 3
+tags: ['lifecycle', 'workflow', 'safe', 'governance']
 ---
 
 # Canonical APEX Delivery Lifecycle

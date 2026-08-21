@@ -1,6 +1,8 @@
 ---
 name: apex-engineering-safe
-description: Safely inspect, design, or document Oracle APEX 24.1.3 applications using ZIP, SQL, or YAML exports. Use for APEX pages, regions, items, processes, LOVs, navigation, authorization, PL/SQL integration, and portable MCP activation. Limits production access to read-only operations.
+category: "Apex Engineering & Design"
+order: 4
+tags: ['inspection', 'design', 'export', 'read-only']
 ---
 
 # Safe Oracle APEX Engineering

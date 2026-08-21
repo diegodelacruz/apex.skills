@@ -1,6 +1,8 @@
 ---
 name: apex-delivery-lifecycle-complete
-description: Run the complete canonical lifecycle for Oracle APEX projects including secure TEST/production credential-profile validation, mandatory environment alignment before existing-page edits, controlled TEST-to-production release artifacts, DATA governance, QA, and validated Word manuals.
+category: "Apex Delivery & Lifecycle"
+order: 2
+tags: ['lifecycle', 'workflow', 'complete', 'governance']
 ---
 
 # Complete APEX Delivery Lifecycle

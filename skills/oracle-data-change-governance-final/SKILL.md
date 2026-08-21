@@ -1,6 +1,8 @@
 ---
 name: oracle-data-change-governance-final
-description: Govern documented Oracle DATA object changes for TEST and production using the final project rules for backup, rebuild, audit fields, identifier triggers, decisions, plans, rollback, and SQL style validation. Use for any table, view, sequence, trigger, index, constraint, package, or deployment script change.
+category: "Oracle Data Governance"
+order: 13
+tags: ['database', 'governance', 'audit']
 ---
 
 # Final DATA Change Governance

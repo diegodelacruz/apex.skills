@@ -1,6 +1,8 @@
 ---
 name: apex-database-diagnostics
-description: Diagnose Oracle APEX and Oracle database errors using the configured secure TEST or production MCP profile. Use when a user asks to inspect an APEX application, page, database object, error, metadata, performance, or environment differences. Validates the requested profile in read-only mode before inspection; uses read-only queries and inspection/dry-run only for APEX 24.1.3.
+category: "Apex Database & Diagnostics"
+order: 1
+tags: ['diagnostics', 'inspection', 'oracle', 'read-only']
 ---
 
 # APEX Database Diagnostics

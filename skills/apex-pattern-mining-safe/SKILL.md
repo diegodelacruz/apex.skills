@@ -1,6 +1,8 @@
 ---
 name: apex-pattern-mining-safe
-description: Mine reusable Oracle APEX design, security, navigation, component, template, plugin, LOV, JavaScript, CSS, and page-flow patterns from split-export ZIP files. Use when learning from existing APEX exports, comparing exports, or preparing a knowledge base for future development without modifying an application.
+category: "Apex Pattern Mining"
+order: 8
+tags: ['patterns', 'analysis', 'export', 'read-only']
 ---
 
 # Safe APEX Pattern Mining

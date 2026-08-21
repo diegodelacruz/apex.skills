@@ -1,6 +1,8 @@
 ---
 name: apex-user-manual
-description: Generate a validated Word user manual for a completed Oracle APEX project or change. Use after approved QA evidence exists to capture the real APEX workflow with Playwright or Browser, build a DOCX from reviewed content, audit embedded images, render the document to PNG for visual QA, and deliver the final manual under control-proyecto/manuales.
+category: "Apex Documentation"
+order: 12
+tags: ['documentation', 'automation', 'export']
 ---
 
 # APEX User Manual
