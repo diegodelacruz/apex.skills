@@ -17,6 +17,11 @@ node_modules/
 playwright-report/
 test-results/
 
+# Coverage reports
+.coverage
+.coverage.*
+htmlcov/
+
 # Managed local sources and recoverable update backups
 .upstreams/
 .upstream-backups/
