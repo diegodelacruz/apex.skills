@@ -34,44 +34,43 @@ CREATE TABLE user_accounts (
 );
 
 -- Column Documentation: user_id
-ALTER TABLE user_accounts ADD COMMENT ON COLUMN user_accounts.user_id 
+COMMENT ON COLUMN user_accounts.user_id 
 	IS 'Unique identifier for user account. Primary key. Auto-generated sequence.';
 
 -- Column Documentation: username
-ALTER TABLE user_accounts ADD COMMENT ON COLUMN user_accounts.username 
+COMMENT ON COLUMN user_accounts.username 
 	IS 'Unique login username. 3-100 characters. Used for authentication. Case-sensitive.';
 
 -- Column Documentation: email
-ALTER TABLE user_accounts ADD COMMENT ON COLUMN user_accounts.email 
+COMMENT ON COLUMN user_accounts.email 
 	IS 'User email address. Must be unique. Used for password reset and notifications.';
 
 -- Column Documentation: password_hash
-ALTER TABLE user_accounts ADD COMMENT ON COLUMN user_accounts.password_hash 
-	IS 'SHA-256 hash of password. Never store plain text. Hash includes salt.';
+COMMENT ON COLUMN user_accounts.password_hash 
+	IS 'Argon2id hash of password with salt. Never use plain text or fast algorithms like SHA-256.';
 
 -- Column Documentation: first_name
-ALTER TABLE user_accounts ADD COMMENT ON COLUMN user_accounts.first_name 
+COMMENT ON COLUMN user_accounts.first_name 
 	IS 'User first name. Optional. Maximum 100 characters. For display purposes.';
 
 -- Column Documentation: last_name
-ALTER TABLE user_accounts ADD COMMENT ON COLUMN user_accounts.last_name 
+COMMENT ON COLUMN user_accounts.last_name 
 	IS 'User last name. Optional. Maximum 100 characters. For display purposes.';
 
 -- Column Documentation: created_date
-ALTER TABLE user_accounts ADD COMMENT ON COLUMN user_accounts.created_date 
+COMMENT ON COLUMN user_accounts.created_date 
 	IS 'Timestamp when account created. Automatically set to SYSDATE. Used for audit.';
 
 -- Column Documentation: last_login_date
-ALTER TABLE user_accounts ADD COMMENT ON COLUMN user_accounts.last_login_date 
+COMMENT ON COLUMN user_accounts.last_login_date 
 	IS 'Timestamp of last successful login. NULL if never logged in. Updated by login procedure.';
 
 -- Column Documentation: account_status
-ALTER TABLE user_accounts ADD COMMENT ON COLUMN user_accounts.account_status 
+COMMENT ON COLUMN user_accounts.account_status 
 	IS 'Account status: ACTIVE, SUSPENDED, LOCKED, DELETED. Controls login eligibility.';
 
 -- Table Comment
-ALTER TABLE user_accounts 
-	ADD COMMENT ON TABLE user_accounts 
+COMMENT ON TABLE user_accounts 
 	IS 'User account master table. Stores credentials and profile. Referenced by sessions and permissions.';
 ```
 
@@ -184,12 +183,17 @@ BEGIN
 		RAISE PASSWORD_TOO_WEAK;
 	END IF;
 
-	-- Step 6-7: Hash password and insert record
+	-- Step 6-7: Hash password using secure algorithm (Argon2id recommended)
+	-- NOTE: For production, delegate authentication to APEX built-in authentication scheme
+	-- or OAuth provider. If custom storage required, use Argon2id or PBKDF2 with high work factor.
+	-- DBMS_CRYPTO.HASH with SHA-256 is NOT secure for password storage.
+	-- This is a SIMPLIFIED EXAMPLE for documentation purposes only.
 	v_salt := DBMS_RANDOM.STRING('A', 16);
+	-- In production: use PL/SQL wrapper to Argon2id or bcrypt
 	v_hash := DBMS_CRYPTO.HASH(
 		src => UTL_I18N.STRING_TO_RAW(p_password || v_salt),
 		typ => DBMS_CRYPTO.HASH_SH256
-	);
+	) || ':' || v_salt;  -- Store salt alongside hash for verification
 
 	INSERT INTO user_accounts (
 		username, email, password_hash, first_name, last_name

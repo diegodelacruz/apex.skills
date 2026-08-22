@@ -21,7 +21,7 @@
 
 #### 1. TABLAS
 
-**Requisito:** SQL comments inline + ALTER TABLE ADD COMMENT para cada columna
+**Requisito:** SQL comments inline + COMMENT ON COLUMN para cada columna (sintaxis Oracle correcta)
 
 ```sql
 -- ============================================================================
@@ -602,7 +602,7 @@ See examples above (TABLES, PROCEDURES, FUNCTIONS sections).
 
 Before pushing code:
 
-- [ ] Every table has ALTER TABLE ADD COMMENT for each column
+- [ ] Every table has COMMENT ON COLUMN for each column (Oracle syntax)
 - [ ] Every procedure has PURPOSE, PARAMETERS, EXCEPTIONS documented
 - [ ] Every function has PURPOSE, PARAMETERS, RETURNS, LOGIC FLOW documented
 - [ ] Complex SQL has step-by-step comments
