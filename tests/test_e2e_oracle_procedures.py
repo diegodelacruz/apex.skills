@@ -220,7 +220,7 @@ class PackageExecutionTest(OracleProcedureTestCase):
 
     def test_package_procedure_initialization(self) -> None:
         """Test package initialization."""
-        package_state = {
+        package_state: Dict[str, Any] = {
             "initialized": False,
             "config": None,
         }

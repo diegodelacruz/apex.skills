@@ -331,7 +331,7 @@ class SkillOutputValidationTest(SkillIntegrationTestCase):
 
     def test_skill_output_completeness(self) -> None:
         """Test that required output fields are present."""
-        output = {
+        output: Dict[str, Any] = {
             "status": "success",
             "data": None,
             "errors": [],
