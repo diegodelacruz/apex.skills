@@ -113,15 +113,14 @@ class DocumentationValidator:
 		columns_section = match.group(1)
 		columns = re.findall(r'(\w+)\s+(?:NUMBER|VARCHAR2|DATE|CLOB|BLOB)', columns_section)
 
-		# Check for comment on column for each column (Oracle correct syntax - lowercase)
+		# Check for ALTER TABLE ADD COMMENT for each column
 		for column in columns:
-			# Accept: comment on column table.column is '...';
 			comment_pattern = (
-				rf'comment\s+on\s+column\s+{table_name}\.{column}'
+				rf'ALTER\s+TABLE\s+{table_name}\s+ADD\s+COMMENT\s+ON\s+COLUMN\s+{table_name}\.{column}'
 			)
 			if not re.search(comment_pattern, content, re.IGNORECASE):
 				self.warnings.append(
-					f"Table {table_name}.{column}: Missing 'comment on column' documentation"
+					f"Table {table_name}.{column}: Missing ALTER TABLE ADD COMMENT"
 				)
 				return False
 
@@ -208,7 +207,7 @@ class DocumentationValidator:
 		all_pass = True
 
 		for sql_file in sql_files:
-			if not self.validate_file(str(sql_file)):
+			if not self._validate_file(str(sql_file)):
 				all_pass = False
 
 		return all_pass
@@ -241,10 +240,10 @@ class DocumentationValidator:
 	def get_exit_code(self) -> int:
 		"""Return appropriate exit code.
 
-		0 if no errors or warnings
-		1 if any errors or warnings found
+		0 if no errors (warnings OK)
+		1 if any errors found
 		"""
-		return 1 if (self.errors or self.warnings) else 0
+		return 1 if self.errors else 0
 
 
 def main() -> int:

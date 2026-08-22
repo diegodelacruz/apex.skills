@@ -21,7 +21,7 @@
 
 #### 1. TABLAS
 
-**Requisito:** SQL comments inline + COMMENT ON COLUMN para cada columna (sintaxis Oracle correcta)
+**Requisito:** SQL comments inline + ALTER TABLE ADD COMMENT para cada columna
 
 ```sql
 -- ============================================================================
@@ -53,22 +53,22 @@ CREATE TABLE customers (
 );
 
 -- Document each column
-comment on column customers.customer_id 
+ALTER TABLE customers ADD COMMENT ON COLUMN customers.customer_id 
 	IS 'Primary key: Unique customer identifier, auto-generated via seq_customer_id';
 
-comment on column customers.name 
+ALTER TABLE customers ADD COMMENT ON COLUMN customers.name 
 	IS 'Customer full name (first + last). Required field. Max 100 chars.';
 
-comment on column customers.email 
+ALTER TABLE customers ADD COMMENT ON COLUMN customers.email 
 	IS 'Email address. Unique constraint enforced. Used for login and communication.';
 
-comment on column customers.phone 
+ALTER TABLE customers ADD COMMENT ON COLUMN customers.phone 
 	IS 'Contact phone number. Optional. Format: may vary by region.';
 
-comment on column customers.created_date 
+ALTER TABLE customers ADD COMMENT ON COLUMN customers.created_date 
 	IS 'Audit column: Timestamp when record was created. Set by database.';
 
-comment on column customers.updated_date 
+ALTER TABLE customers ADD COMMENT ON COLUMN customers.updated_date 
 	IS 'Audit column: Timestamp when record was last modified. Updated by trigger.';
 ```
 
@@ -120,10 +120,10 @@ CREATE OR REPLACE VIEW v_active_customers AS
 		s.subscription_status = 'ACTIVE'
 		AND s.end_date >= TRUNC(SYSDATE);
 
-comment on column v_active_customers.subscription_id 
+ALTER TABLE v_active_customers ADD COMMENT ON COLUMN v_active_customers.subscription_id 
 	IS 'Active subscription ID. Joins to subscriptions table.';
 
-comment on column v_active_customers.subscription_type 
+ALTER TABLE v_active_customers ADD COMMENT ON COLUMN v_active_customers.subscription_type 
 	IS 'Type of subscription: BASIC (free), PRO (paid monthly), ENTERPRISE (custom)';
 ```
 
@@ -602,7 +602,7 @@ See examples above (TABLES, PROCEDURES, FUNCTIONS sections).
 
 Before pushing code:
 
-- [ ] Every table has COMMENT ON COLUMN for each column (Oracle syntax)
+- [ ] Every table has ALTER TABLE ADD COMMENT for each column
 - [ ] Every procedure has PURPOSE, PARAMETERS, EXCEPTIONS documented
 - [ ] Every function has PURPOSE, PARAMETERS, RETURNS, LOGIC FLOW documented
 - [ ] Complex SQL has step-by-step comments
