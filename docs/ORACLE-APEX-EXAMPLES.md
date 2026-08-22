@@ -34,39 +34,39 @@ CREATE TABLE user_accounts (
 );
 
 -- Column Documentation: user_id
-ALTER TABLE user_accounts ADD COMMENT ON COLUMN user_accounts.user_id 
+comment on column user_accounts.user_id 
 	IS 'Unique identifier for user account. Primary key. Auto-generated sequence.';
 
 -- Column Documentation: username
-ALTER TABLE user_accounts ADD COMMENT ON COLUMN user_accounts.username 
+comment on column user_accounts.username 
 	IS 'Unique login username. 3-100 characters. Used for authentication. Case-sensitive.';
 
 -- Column Documentation: email
-ALTER TABLE user_accounts ADD COMMENT ON COLUMN user_accounts.email 
+comment on column user_accounts.email 
 	IS 'User email address. Must be unique. Used for password reset and notifications.';
 
 -- Column Documentation: password_hash
-ALTER TABLE user_accounts ADD COMMENT ON COLUMN user_accounts.password_hash 
+comment on column user_accounts.password_hash 
 	IS 'SHA-256 hash of password. Never store plain text. Hash includes salt.';
 
 -- Column Documentation: first_name
-ALTER TABLE user_accounts ADD COMMENT ON COLUMN user_accounts.first_name 
+comment on column user_accounts.first_name 
 	IS 'User first name. Optional. Maximum 100 characters. For display purposes.';
 
 -- Column Documentation: last_name
-ALTER TABLE user_accounts ADD COMMENT ON COLUMN user_accounts.last_name 
+comment on column user_accounts.last_name 
 	IS 'User last name. Optional. Maximum 100 characters. For display purposes.';
 
 -- Column Documentation: created_date
-ALTER TABLE user_accounts ADD COMMENT ON COLUMN user_accounts.created_date 
+comment on column user_accounts.created_date 
 	IS 'Timestamp when account created. Automatically set to SYSDATE. Used for audit.';
 
 -- Column Documentation: last_login_date
-ALTER TABLE user_accounts ADD COMMENT ON COLUMN user_accounts.last_login_date 
+comment on column user_accounts.last_login_date 
 	IS 'Timestamp of last successful login. NULL if never logged in. Updated by login procedure.';
 
 -- Column Documentation: account_status
-ALTER TABLE user_accounts ADD COMMENT ON COLUMN user_accounts.account_status 
+comment on column user_accounts.account_status 
 	IS 'Account status: ACTIVE, SUSPENDED, LOCKED, DELETED. Controls login eligibility.';
 
 -- Table Comment
