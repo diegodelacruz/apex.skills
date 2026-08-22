@@ -113,17 +113,15 @@ class DocumentationValidator:
 		columns_section = match.group(1)
 		columns = re.findall(r'(\w+)\s+(?:NUMBER|VARCHAR2|DATE|CLOB|BLOB)', columns_section)
 
-		# Check for COMMENT ON COLUMN for each column (Oracle correct syntax)
+		# Check for comment on column for each column (Oracle correct syntax - lowercase)
 		for column in columns:
-			# Accept both syntaxes: COMMENT ON COLUMN ... and ALTER TABLE ADD COMMENT ON COLUMN ...
-			# Prefer: COMMENT ON COLUMN table.column IS '...';
+			# Accept: comment on column table.column is '...';
 			comment_pattern = (
-				rf'COMMENT\s+ON\s+COLUMN\s+{table_name}\.{column}|'
-				rf'ALTER\s+TABLE\s+{table_name}\s+ADD\s+COMMENT\s+ON\s+COLUMN\s+{table_name}\.{column}'
+				rf'comment\s+on\s+column\s+{table_name}\.{column}'
 			)
 			if not re.search(comment_pattern, content, re.IGNORECASE):
 				self.warnings.append(
-					f"Table {table_name}.{column}: Missing COMMENT ON COLUMN documentation"
+					f"Table {table_name}.{column}: Missing 'comment on column' documentation"
 				)
 				return False
 

@@ -19,26 +19,26 @@ CREATE TABLE users_example (
 	status VARCHAR2(20) DEFAULT 'ACTIVE'
 );
 
-COMMENT ON COLUMN users_example.user_id
-	IS 'Unique user identifier. Primary key. Auto-generated via sequence.';
+comment on column users_example.user_id
+	is 'Unique user identifier. Primary key. Auto-generated via sequence.';
 
-COMMENT ON COLUMN users_example.username
-	IS 'Login username. 3-100 chars, alphanumeric + underscore. Must be unique.';
+comment on column users_example.username
+	is 'Login username. 3-100 chars, alphanumeric + underscore. Must be unique.';
 
-COMMENT ON COLUMN users_example.email
-	IS 'User email address. Must be unique. Used for notifications and password reset.';
+comment on column users_example.email
+	is 'User email address. Must be unique. Used for notifications and password reset.';
 
-COMMENT ON COLUMN users_example.first_name
-	IS 'User first name. Optional. Maximum 100 characters. Display purposes.';
+comment on column users_example.first_name
+	is 'User first name. Optional. Maximum 100 characters. Display purposes.';
 
-COMMENT ON COLUMN users_example.last_name
-	IS 'User last name. Optional. Maximum 100 characters. Display purposes.';
+comment on column users_example.last_name
+	is 'User last name. Optional. Maximum 100 characters. Display purposes.';
 
-COMMENT ON COLUMN users_example.created_date
-	IS 'Account creation timestamp. Automatically set to SYSDATE. Audit purposes.';
+comment on column users_example.created_date
+	is 'Account creation timestamp. Automatically set to SYSDATE. Audit purposes.';
 
-COMMENT ON COLUMN users_example.status
-	IS 'Account status: ACTIVE, INACTIVE, SUSPENDED. Controls login eligibility.';
+comment on column users_example.status
+	is 'Account status: ACTIVE, INACTIVE, SUSPENDED. Controls login eligibility.';
 
 -- ============================================================================
 -- PROCEDURE: create_example_user

@@ -53,22 +53,22 @@ CREATE TABLE customers (
 );
 
 -- Document each column
-ALTER TABLE customers ADD COMMENT ON COLUMN customers.customer_id 
+comment on column customers.customer_id 
 	IS 'Primary key: Unique customer identifier, auto-generated via seq_customer_id';
 
-ALTER TABLE customers ADD COMMENT ON COLUMN customers.name 
+comment on column customers.name 
 	IS 'Customer full name (first + last). Required field. Max 100 chars.';
 
-ALTER TABLE customers ADD COMMENT ON COLUMN customers.email 
+comment on column customers.email 
 	IS 'Email address. Unique constraint enforced. Used for login and communication.';
 
-ALTER TABLE customers ADD COMMENT ON COLUMN customers.phone 
+comment on column customers.phone 
 	IS 'Contact phone number. Optional. Format: may vary by region.';
 
-ALTER TABLE customers ADD COMMENT ON COLUMN customers.created_date 
+comment on column customers.created_date 
 	IS 'Audit column: Timestamp when record was created. Set by database.';
 
-ALTER TABLE customers ADD COMMENT ON COLUMN customers.updated_date 
+comment on column customers.updated_date 
 	IS 'Audit column: Timestamp when record was last modified. Updated by trigger.';
 ```
 
@@ -120,10 +120,10 @@ CREATE OR REPLACE VIEW v_active_customers AS
 		s.subscription_status = 'ACTIVE'
 		AND s.end_date >= TRUNC(SYSDATE);
 
-ALTER TABLE v_active_customers ADD COMMENT ON COLUMN v_active_customers.subscription_id 
+comment on column v_active_customers.subscription_id 
 	IS 'Active subscription ID. Joins to subscriptions table.';
 
-ALTER TABLE v_active_customers ADD COMMENT ON COLUMN v_active_customers.subscription_type 
+comment on column v_active_customers.subscription_type 
 	IS 'Type of subscription: BASIC (free), PRO (paid monthly), ENTERPRISE (custom)';
 ```
 

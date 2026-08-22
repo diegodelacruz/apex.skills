@@ -34,44 +34,44 @@ CREATE TABLE user_accounts (
 );
 
 -- Column Documentation: user_id
-COMMENT ON COLUMN user_accounts.user_id 
-	IS 'Unique identifier for user account. Primary key. Auto-generated sequence.';
+comment on column user_accounts.user_id 
+	is 'Unique identifier for user account. Primary key. Auto-generated sequence.';
 
 -- Column Documentation: username
-COMMENT ON COLUMN user_accounts.username 
-	IS 'Unique login username. 3-100 characters. Used for authentication. Case-sensitive.';
+comment on column user_accounts.username 
+	is 'Unique login username. 3-100 characters. Used for authentication. Case-sensitive.';
 
 -- Column Documentation: email
-COMMENT ON COLUMN user_accounts.email 
-	IS 'User email address. Must be unique. Used for password reset and notifications.';
+comment on column user_accounts.email 
+	is 'User email address. Must be unique. Used for password reset and notifications.';
 
 -- Column Documentation: password_hash
-COMMENT ON COLUMN user_accounts.password_hash 
-	IS 'Argon2id hash of password with salt. Never use plain text or fast algorithms like SHA-256.';
+comment on column user_accounts.password_hash 
+	is 'Argon2id hash of password with salt. Never use plain text or fast algorithms like SHA-256.';
 
 -- Column Documentation: first_name
-COMMENT ON COLUMN user_accounts.first_name 
-	IS 'User first name. Optional. Maximum 100 characters. For display purposes.';
+comment on column user_accounts.first_name 
+	is 'User first name. Optional. Maximum 100 characters. For display purposes.';
 
 -- Column Documentation: last_name
-COMMENT ON COLUMN user_accounts.last_name 
-	IS 'User last name. Optional. Maximum 100 characters. For display purposes.';
+comment on column user_accounts.last_name 
+	is 'User last name. Optional. Maximum 100 characters. For display purposes.';
 
 -- Column Documentation: created_date
-COMMENT ON COLUMN user_accounts.created_date 
-	IS 'Timestamp when account created. Automatically set to SYSDATE. Used for audit.';
+comment on column user_accounts.created_date 
+	is 'Timestamp when account created. Automatically set to SYSDATE. Used for audit.';
 
 -- Column Documentation: last_login_date
-COMMENT ON COLUMN user_accounts.last_login_date 
-	IS 'Timestamp of last successful login. NULL if never logged in. Updated by login procedure.';
+comment on column user_accounts.last_login_date 
+	is 'Timestamp of last successful login. NULL if never logged in. Updated by login procedure.';
 
 -- Column Documentation: account_status
-COMMENT ON COLUMN user_accounts.account_status 
-	IS 'Account status: ACTIVE, SUSPENDED, LOCKED, DELETED. Controls login eligibility.';
+comment on column user_accounts.account_status 
+	is 'Account status: ACTIVE, SUSPENDED, LOCKED, DELETED. Controls login eligibility.';
 
 -- Table Comment
-COMMENT ON TABLE user_accounts 
-	IS 'User account master table. Stores credentials and profile. Referenced by sessions and permissions.';
+comment on table user_accounts 
+	is 'User account master table. Stores credentials and profile. Referenced by sessions and permissions.';
 ```
 
 ---
@@ -137,7 +137,7 @@ COMMENT ON TABLE user_accounts
 --   /
 -- ============================================================================
 
-CREATE OR REPLACE PROCEDURE create_user_account (
+create or replace procedure create_user_account (
 	p_username    IN  VARCHAR2,
 	p_email       IN  VARCHAR2,
 	p_first_name  IN  VARCHAR2 DEFAULT NULL,
