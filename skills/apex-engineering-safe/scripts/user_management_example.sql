@@ -19,25 +19,25 @@ CREATE TABLE users_example (
 	status VARCHAR2(20) DEFAULT 'ACTIVE'
 );
 
-ALTER TABLE users_example ADD COMMENT ON COLUMN users_example.user_id
+comment on column users_example.user_id
 	IS 'Unique user identifier. Primary key. Auto-generated via sequence.';
 
-ALTER TABLE users_example ADD COMMENT ON COLUMN users_example.username
+comment on column users_example.username
 	IS 'Login username. 3-100 chars, alphanumeric + underscore. Must be unique.';
 
-ALTER TABLE users_example ADD COMMENT ON COLUMN users_example.email
+comment on column users_example.email
 	IS 'User email address. Must be unique. Used for notifications and password reset.';
 
-ALTER TABLE users_example ADD COMMENT ON COLUMN users_example.first_name
+comment on column users_example.first_name
 	IS 'User first name. Optional. Maximum 100 characters. Display purposes.';
 
-ALTER TABLE users_example ADD COMMENT ON COLUMN users_example.last_name
+comment on column users_example.last_name
 	IS 'User last name. Optional. Maximum 100 characters. Display purposes.';
 
-ALTER TABLE users_example ADD COMMENT ON COLUMN users_example.created_date
+comment on column users_example.created_date
 	IS 'Account creation timestamp. Automatically set to SYSDATE. Audit purposes.';
 
-ALTER TABLE users_example ADD COMMENT ON COLUMN users_example.status
+comment on column users_example.status
 	IS 'Account status: ACTIVE, INACTIVE, SUSPENDED. Controls login eligibility.';
 
 -- ============================================================================
