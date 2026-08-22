@@ -1,10 +1,11 @@
 """Unit tests for apex_export_utilities module."""
 
-import pytest
 import sys
+import zipfile
 from pathlib import Path
 from tempfile import NamedTemporaryFile
-import zipfile
+
+import pytest
 
 # Add scripts directory to path using centralized setup
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "scripts"))

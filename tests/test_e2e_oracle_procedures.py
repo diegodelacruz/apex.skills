@@ -11,7 +11,7 @@ Tests complete Oracle workflows including:
 
 import unittest
 from typing import Any, Dict, List, Optional, Tuple
-from unittest.mock import MagicMock, patch, call
+from unittest.mock import MagicMock, call, patch
 
 
 class OracleProcedureTestCase(unittest.TestCase):

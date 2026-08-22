@@ -2,7 +2,7 @@
 """Shared metadata extraction utilities for Oracle APEX exports."""
 
 import re
-from typing import Optional, Dict
+from typing import Dict, Optional
 
 
 class ApexMetadata:

@@ -3,7 +3,7 @@
 
 import argparse
 import sys
-from typing import Optional, Dict, List, Tuple
+from typing import Dict, List, Optional, Tuple
 
 
 class CLIParser:

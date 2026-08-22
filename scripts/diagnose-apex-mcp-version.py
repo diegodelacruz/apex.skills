@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """Diagnose apex-mcp version and show what patterns are present."""
 
-from pathlib import Path
 import re
+from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 PACKAGE = ROOT / ".upstreams" / "apex-mcp" / "apex_mcp"

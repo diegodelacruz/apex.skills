@@ -6,7 +6,7 @@ import importlib
 import json
 import sys
 from pathlib import Path
-from typing import Optional, Dict, Any
+from typing import Any, Dict, Optional
 
 from cli_utils import CLIParser, exit_with_error
 
