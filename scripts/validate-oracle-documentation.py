@@ -207,7 +207,7 @@ class DocumentationValidator:
 		all_pass = True
 
 		for sql_file in sql_files:
-			if not self._validate_file(str(sql_file)):
+			if not self.validate_file(str(sql_file)):
 				all_pass = False
 
 		return all_pass

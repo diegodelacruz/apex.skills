@@ -1,5 +1,6 @@
 # MCP integration from the managed local upstream
--e ./.upstreams/apex-mcp
+# NOTE: This requires bootstrap - see CLAUDE.md for setup instructions
+# -e ./.upstreams/apex-mcp
 
 # Secure per-user TEST/production credential profiles
 keyring>=25.0.0

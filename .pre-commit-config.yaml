@@ -1,21 +1,17 @@
 repos:
-  # DISABLED: Secret detection
-  # Note: .secrets.baseline does not exist and hook excludes all Python/docs
-  # Re-enable when baseline is created and exclusions are fixed
-  # - repo: https://github.com/Yelp/detect-secrets
-  #   rev: v1.4.0
-  #   hooks:
-  #     - id: detect-secrets
-  #       args:
-  #         - --baseline
-  #         - .secrets.baseline
-  #       exclude: |
-  #         (?x)^(
-  #           requirements\.txt|
-  #           \.env\.example|
-  #           scripts/.*\.py|
-  #           docs/.*\.md
-  #         )$
+  # Secret detection - Scans for exposed credentials
+  - repo: https://github.com/Yelp/detect-secrets
+    rev: v1.4.0
+    hooks:
+      - id: detect-secrets
+        args:
+          - --baseline
+          - .secrets.baseline
+        exclude: |
+          (?x)^(
+            \.mcp\.json\.example|
+            tests/fixtures/
+          )$
 
   # General file checks
   - repo: https://github.com/pre-commit/pre-commit-hooks

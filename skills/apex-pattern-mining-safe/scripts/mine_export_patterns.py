@@ -8,6 +8,9 @@ import sys
 import zipfile
 from pathlib import Path
 
+# Add scripts directory to path for imports
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent.parent.parent / "scripts"))
+
 from path_setup import setup_skills_path
 setup_skills_path(__file__)
 
