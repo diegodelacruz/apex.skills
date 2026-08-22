@@ -8,7 +8,7 @@ Siga la guía para su agente de preferencia:
 
 ### Para Claude Code (web, CLI, desktop, o IDE):
 
-Consulte [Configuración de Claude Code](docs/setup-claude-code.md) para instrucciones completas:
+Consulte [Configuración de Claude Code](setup-claude-code.md) para instrucciones completas:
 
 ```bash
 git clone https://github.com/diegodelacruz/apex.skills.git
@@ -29,7 +29,7 @@ cd "<RUTA_APEX_SKILLS>"
 .\scripts\Install-ApexSkillsForCodex.ps1
 ```
 
-El tercer comando instala las skills en el directorio de usuario de Codex CLI mediante enlaces locales; no instala Python ni modifica la base de datos. Consulte [Uso desde terminal](docs/uso-skills-codex-cli.md) para PowerShell, CMD, actualizaciones y otros agentes.
+El tercer comando instala las skills en el directorio de usuario de Codex CLI mediante enlaces locales; no instala Python ni modifica la base de datos. Consulte [Uso desde terminal](uso-skills-codex-cli.md) para PowerShell, CMD, actualizaciones y otros agentes.
 
 ## 2. Uso recomendado
 
@@ -135,17 +135,17 @@ Las skills especializadas no se eliminan: ayudan al coordinador a aplicar reglas
 
 | Necesidad | Documento |
 | --- | --- |
-| Configuración Claude Code | [Setup Claude Code](docs/setup-claude-code.md) |
-| Uso desde PowerShell/CMD | [Uso desde terminal](docs/uso-skills-codex-cli.md) |
-| Instalación y problemas | [Inicialización Codex](docs/inicializacion-automatica-codex.md) |
-| Perfiles TEST/Producción | [Credenciales y alineación de ambientes](docs/credenciales-y-alineacion-ambientes.md) |
-| Configuración de Python | [Entornos Python en proyectos](docs/entornos-python-proyectos.md) |
-| Iniciar proyecto APEX | [Iniciar proyecto APEX](docs/iniciar-proyecto-apex.md) |
-| MCP Codex Desktop | [Oracle MCP](docs/codex-desktop-mcp-oracle.md) |
-| Casos de uso | [Casos de uso](docs/casos-de-uso-apex.md) |
-| Dependencias/upstreams | [Dependencias](docs/dependencias.md) |
-| Auditoría | [Auditoría obligatoria](docs/auditoria-obligatoria.md) |
-| Decisiones canónicas | [Decisiones canónicas finales](docs/decisiones-canonicas-finales.md) |
+| Configuración Claude Code | [Setup Claude Code](setup-claude-code.md) |
+| Uso desde PowerShell/CMD | [Uso desde terminal](uso-skills-codex-cli.md) |
+| Instalación y problemas | [Inicialización Codex](inicializacion-automatica-codex.md) |
+| Perfiles TEST/Producción | [Credenciales y alineación de ambientes](credenciales-y-alineacion-ambientes.md) |
+| Configuración de Python | [Entornos Python en proyectos](entornos-python-proyectos.md) |
+| Iniciar proyecto APEX | [Iniciar proyecto APEX](iniciar-proyecto-apex.md) |
+| MCP Codex Desktop | [Oracle MCP](codex-desktop-mcp-oracle.md) |
+| Casos de uso | [Casos de uso](casos-de-uso-apex.md) |
+| Dependencias/upstreams | [Dependencias](dependencias.md) |
+| Auditoría | [Auditoría obligatoria](auditoria-obligatoria.md) |
+| Decisiones canónicas | [Decisiones canónicas finales](decisiones-canonicas-finales.md) |
 
 ## 9. Cierre obligatorio
 

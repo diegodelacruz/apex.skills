@@ -3,7 +3,7 @@
 
 import argparse
 import sys
-from typing import Dict, List, Optional, Tuple
+from typing import Any, Dict, List, NoReturn, Optional, Tuple
 
 
 class CLIParser:
@@ -72,7 +72,7 @@ class CLIParser:
         return self.parser.parse_args(args)
 
 
-def exit_with_error(message: str, error_code: str = "ERROR", exit_code: int = 1) -> None:
+def exit_with_error(message: str, error_code: str = "ERROR", exit_code: int = 1) -> NoReturn:
     """Print error message and exit.
 
     Args:
@@ -87,7 +87,7 @@ def exit_with_error(message: str, error_code: str = "ERROR", exit_code: int = 1)
     raise SystemExit(exit_code)
 
 
-def exit_with_success(message: str, success_code: str = "SUCCESS") -> None:
+def exit_with_success(message: str, success_code: str = "SUCCESS") -> NoReturn:
     """Print success message and exit.
 
     Args:
@@ -101,7 +101,7 @@ def exit_with_success(message: str, success_code: str = "SUCCESS") -> None:
     raise SystemExit(0)
 
 
-def format_key_value(data: Dict[str, any]) -> str:
+def format_key_value(data: Dict[str, Any]) -> str:
     """Format dictionary as key=value output.
 
     Args:

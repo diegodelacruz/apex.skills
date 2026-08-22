@@ -16,7 +16,7 @@ import os
 import re
 import sys
 from pathlib import Path
-from typing import List, Tuple
+from typing import List
 
 
 class DocumentationValidator:
@@ -82,7 +82,7 @@ class DocumentationValidator:
 
         Requirements:
         - Header comment with PURPOSE
-        - ALTER TABLE ADD COMMENT for each column
+        - COMMENT ON COLUMN for each column
         """
         # Check for table header comment
         pattern = r"--\s+TABLE:\s+" + table_name + r".*?PURPOSE:"
@@ -99,11 +99,11 @@ class DocumentationValidator:
         columns_section = match.group(1)
         columns = re.findall(r"(\w+)\s+(?:NUMBER|VARCHAR2|DATE|CLOB|BLOB)", columns_section)
 
-        # Check for ALTER TABLE ADD COMMENT for each column
+        # Check for COMMENT ON COLUMN for each column
         for column in columns:
-            comment_pattern = rf"ALTER\s+TABLE\s+{table_name}\s+ADD\s+COMMENT\s+ON\s+COLUMN\s+{table_name}\.{column}"
+            comment_pattern = rf"COMMENT\s+ON\s+COLUMN\s+{table_name}\.{column}"
             if not re.search(comment_pattern, content, re.IGNORECASE):
-                self.warnings.append(f"Table {table_name}.{column}: Missing ALTER TABLE ADD COMMENT")
+                self.warnings.append(f"Table {table_name}.{column}: Missing COMMENT ON COLUMN")
                 return False
 
         return True
@@ -123,7 +123,7 @@ class DocumentationValidator:
             return False
 
         # Check for PARAMETERS section
-        if not re.search(r"PARAMETERS:", content[content.find(proc_name) :], re.IGNORECASE):
+        if not re.search(r"PARAMETERS:", content[content.find(proc_name):], re.IGNORECASE):
             self.warnings.append(f"Procedure {proc_name}: Missing PARAMETERS section")
             return False
 

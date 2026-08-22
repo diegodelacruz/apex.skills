@@ -10,8 +10,8 @@ Tests complete Oracle workflows including:
 """
 
 import unittest
-from typing import Any, Dict, List, Optional, Tuple
-from unittest.mock import MagicMock, call, patch
+from typing import Any, Dict, Optional
+from unittest.mock import MagicMock
 
 
 class OracleProcedureTestCase(unittest.TestCase):
@@ -45,11 +45,6 @@ class ProcedureParameterTest(OracleProcedureTestCase):
                 "p_email": "test@example.com",
                 "p_role": "ADMIN",
             },
-        )
-
-        expected_call = (
-            self.proc_name,
-            ("test_user", "test@example.com", "ADMIN"),
         )
 
         self.assertEqual(self.proc_name, "CREATE_USER_PROC")
@@ -225,7 +220,7 @@ class PackageExecutionTest(OracleProcedureTestCase):
 
     def test_package_procedure_initialization(self) -> None:
         """Test package initialization."""
-        package_state = {
+        package_state: Dict[str, Any] = {
             "initialized": False,
             "config": None,
         }

@@ -15,7 +15,7 @@ def diagnose():
         return
 
     content = db_file.read_text(encoding="utf-8")
-    print(f"=== APEX-MCP DIAGNOSIS ===")
+    print("=== APEX-MCP DIAGNOSIS ===")
     print(f"File: {db_file}")
     print(f"Size: {len(content)} bytes")
     print()
@@ -44,7 +44,7 @@ def diagnose():
     print("=== CONNECT METHOD SIGNATURE ===")
     match = re.search(r"def.*connect.*\(.*?\):", content, re.MULTILINE | re.DOTALL)
     if match:
-        print(f"Found method signature:")
+        print("Found method signature:")
         lines = match.group(0).split("\n")
         for line in lines[:5]:
             print(f"  {line}")
