@@ -16,7 +16,7 @@ import os
 import re
 import sys
 from pathlib import Path
-from typing import List, Tuple
+from typing import List
 
 
 class DocumentationValidator:
@@ -123,7 +123,7 @@ class DocumentationValidator:
             return False
 
         # Check for PARAMETERS section
-        if not re.search(r"PARAMETERS:", content[content.find(proc_name) :], re.IGNORECASE):
+        if not re.search(r"PARAMETERS:", content[content.find(proc_name):], re.IGNORECASE):
             self.warnings.append(f"Procedure {proc_name}: Missing PARAMETERS section")
             return False
 

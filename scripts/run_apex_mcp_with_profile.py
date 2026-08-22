@@ -31,7 +31,7 @@ def main() -> None:
 
     try:
         import keyring
-    except ImportError as error:
+    except ImportError:
         exit_with_error("Missing dependency: keyring. Install requirements.txt in the shared skills environment.")
 
     raw_profile = keyring.get_password(SERVICE, args.environment)
@@ -39,7 +39,7 @@ def main() -> None:
         exit_with_error(f"Missing secure profile: {args.environment}. Import or set it first.")
     try:
         profile = json.loads(raw_profile)
-    except json.JSONDecodeError as error:
+    except json.JSONDecodeError:
         exit_with_error(f"Invalid secure profile: {args.environment}. Import or set it again.")
 
     missing = [

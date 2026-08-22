@@ -1,9 +1,7 @@
 #!/usr/bin/env python3
 """Shared utilities for Oracle APEX export processing."""
 
-import re
 import zipfile
-from pathlib import Path
 
 from apex_metadata import ApexMetadata
 

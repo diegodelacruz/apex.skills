@@ -12,7 +12,6 @@ import importlib.util
 import tempfile
 import unittest
 from pathlib import Path
-from typing import List
 
 # Load module with dashes in filename
 script_path = Path(__file__).parent.parent / "scripts" / "validate-oracle-documentation.py"
@@ -356,7 +355,7 @@ class ValidationEdgeCasesTest(DocumentationValidatorTestCase):
     def test_empty_sql_file(self) -> None:
         """Test validation of empty SQL file."""
         sql_file = self._create_sql_file("")
-        result = self.validator.validate_file(str(sql_file))
+        self.validator.validate_file(str(sql_file))
 
         self.assertEqual(self.validator.objects_found, 0)
 
@@ -369,7 +368,7 @@ class ValidationEdgeCasesTest(DocumentationValidatorTestCase):
 		"""
 
         sql_file = self._create_sql_file(content)
-        result = self.validator.validate_file(str(sql_file))
+        self.validator.validate_file(str(sql_file))
 
         self.assertEqual(self.validator.objects_found, 0)
 
@@ -382,7 +381,7 @@ class ValidationEdgeCasesTest(DocumentationValidatorTestCase):
 		"""
 
         sql_file = self._create_sql_file(content)
-        result = self.validator.validate_file(str(sql_file))
+        self.validator.validate_file(str(sql_file))
 
         # Should handle case-insensitive matching
         self.assertGreaterEqual(self.validator.objects_found, 1)

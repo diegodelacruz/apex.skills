@@ -9,12 +9,10 @@ Tests complete skill workflows including:
 """
 
 import json
-import os
 import tempfile
 import unittest
 from pathlib import Path
 from typing import Any, Dict
-from unittest.mock import MagicMock, patch
 
 
 class SkillIntegrationTestCase(unittest.TestCase):
@@ -143,7 +141,6 @@ class SkillInteractionTest(SkillIntegrationTestCase):
     def test_skill_output_as_input_to_another(self) -> None:
         """Test passing output from one skill to another."""
         # Skill 1: Generate documentation
-        context1 = self._create_skill_context("apex_documentation_generator")
         output1 = {"documentation": "Generated docs", "status": "success"}
 
         # Skill 2: Validate documentation
@@ -233,8 +230,6 @@ class SkillErrorHandlingTest(SkillIntegrationTestCase):
 
     def test_skill_graceful_degradation(self) -> None:
         """Test skill continues operation despite non-critical errors."""
-        context = self._create_skill_context("apex_resilient_skill")
-
         results = []
         items = [{"id": 1, "valid": True}, {"id": 2, "valid": False}, {"id": 3, "valid": True}]
 

@@ -3,18 +3,20 @@
 
 import argparse
 import json
+import keyring
 import os
 import sys
 from pathlib import Path
 
-parser = argparse.ArgumentParser()
-parser.add_argument("--environment", choices=("test", "production"), default="test")
-args = parser.parse_args()
-
 root = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(root / ".upstreams" / "apex-mcp"))
 
-import keyring
+from apex_mcp.db import db  # noqa: E402
+from apex_mcp.tools.sql_tools import apex_connect  # noqa: E402
+
+parser = argparse.ArgumentParser()
+parser.add_argument("--environment", choices=("test", "production"), default="test")
+args = parser.parse_args()
 
 raw_profile = keyring.get_password("apex-skills", args.environment)
 if not raw_profile:
@@ -30,9 +32,6 @@ mapping = {
 }
 for environment_name, profile_name in mapping.items():
     os.environ[environment_name] = str(profile[profile_name])
-
-from apex_mcp.db import db
-from apex_mcp.tools.sql_tools import apex_connect
 
 result = json.loads(apex_connect())
 if result.get("status") != "ok":

@@ -1,14 +1,13 @@
 """Unit tests for cli_utils module."""
 
 import sys
-from io import StringIO
 from pathlib import Path
 
 import pytest
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "scripts"))
 
-from cli_utils import CLIParser, format_key_value
+from cli_utils import CLIParser, format_key_value  # noqa: E402
 
 
 class TestCLIParser:

@@ -7,7 +7,7 @@ import pytest
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "scripts"))
 
-from path_setup import setup_scripts_path, setup_skills_path, setup_test_path
+from path_setup import setup_scripts_path, setup_test_path  # noqa: E402
 
 
 class TestPathSetup:

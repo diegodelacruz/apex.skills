@@ -17,10 +17,9 @@ Returns:
 
 import ast
 import os
-import re
 import sys
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Tuple, Union
+from typing import Any, Dict, List
 
 
 class TypeHintAnalyzer(ast.NodeVisitor):
@@ -144,7 +143,7 @@ class TypeHintGenerator:
         print(f"Type hint issues:    {self.hints_added}")
 
         if self.errors:
-            print(f"\nErrors encountered:")
+            print("\nErrors encountered:")
             for error in self.errors:
                 print(f"  • {error}")
 
