@@ -18,55 +18,55 @@ from pathlib import Path
 
 
 def validate_json_file(filepath: str) -> bool:
-	"""Validate JSON file syntax.
+    """Validate JSON file syntax.
 
-	Args:
-		filepath: Path to JSON file
+    Args:
+            filepath: Path to JSON file
 
-	Returns:
-		True if valid, False otherwise
-	"""
-	try:
-		with open(filepath) as f:
-			json.load(f)
-		print(f"✅ {filepath} is valid JSON")
-		return True
-	except json.JSONDecodeError as e:
-		print(f"❌ {filepath} has JSON error: {e}")
-		return False
-	except FileNotFoundError:
-		print(f"⚠️  {filepath} not found (optional)")
-		return True
+    Returns:
+            True if valid, False otherwise
+    """
+    try:
+        with open(filepath) as f:
+            json.load(f)
+        print(f"✅ {filepath} is valid JSON")
+        return True
+    except json.JSONDecodeError as e:
+        print(f"❌ {filepath} has JSON error: {e}")
+        return False
+    except FileNotFoundError:
+        print(f"⚠️  {filepath} not found (optional)")
+        return True
 
 
 def validate_all() -> int:
-	"""Validate all configuration files.
+    """Validate all configuration files.
 
-	Returns:
-		0 if all valid, 1 if any invalid
-	"""
-	repo_root = Path(__file__).parent.parent
-	all_valid = True
+    Returns:
+            0 if all valid, 1 if any invalid
+    """
+    repo_root = Path(__file__).parent.parent
+    all_valid = True
 
-	# JSON files
-	json_files = [
-		'.claude/settings.json',
-		'.mcp.json.example',
-	]
+    # JSON files
+    json_files = [
+        ".claude/settings.json",
+        ".mcp.json.example",
+    ]
 
-	for file in json_files:
-		filepath = repo_root / file
-		if not validate_json_file(str(filepath)):
-			all_valid = False
+    for file in json_files:
+        filepath = repo_root / file
+        if not validate_json_file(str(filepath)):
+            all_valid = False
 
-	print()
-	if all_valid:
-		print("✅ All configuration files are valid!")
-		return 0
-	else:
-		print("❌ Some configuration files have errors")
-		return 1
+    print()
+    if all_valid:
+        print("✅ All configuration files are valid!")
+        return 0
+    else:
+        print("❌ Some configuration files have errors")
+        return 1
 
 
-if __name__ == '__main__':
-	sys.exit(validate_all())
+if __name__ == "__main__":
+    sys.exit(validate_all())

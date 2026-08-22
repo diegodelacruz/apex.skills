@@ -24,31 +24,31 @@ DocumentationValidator = validate_module.DocumentationValidator
 
 
 class DocumentationValidatorTestCase(unittest.TestCase):
-	"""Base class for documentation validator tests."""
+    """Base class for documentation validator tests."""
 
-	def setUp(self) -> None:
-		"""Set up test fixtures."""
-		self.temp_dir = tempfile.TemporaryDirectory()
-		self.test_dir = Path(self.temp_dir.name)
-		self.validator = DocumentationValidator()
+    def setUp(self) -> None:
+        """Set up test fixtures."""
+        self.temp_dir = tempfile.TemporaryDirectory()
+        self.test_dir = Path(self.temp_dir.name)
+        self.validator = DocumentationValidator()
 
-	def tearDown(self) -> None:
-		"""Clean up test fixtures."""
-		self.temp_dir.cleanup()
+    def tearDown(self) -> None:
+        """Clean up test fixtures."""
+        self.temp_dir.cleanup()
 
-	def _create_sql_file(self, content: str) -> Path:
-		"""Create a temporary SQL file with content."""
-		sql_file = self.test_dir / "test.sql"
-		sql_file.write_text(content)
-		return sql_file
+    def _create_sql_file(self, content: str) -> Path:
+        """Create a temporary SQL file with content."""
+        sql_file = self.test_dir / "test.sql"
+        sql_file.write_text(content)
+        return sql_file
 
 
 class TableDocumentationTest(DocumentationValidatorTestCase):
-	"""Test table documentation validation."""
+    """Test table documentation validation."""
 
-	def test_table_with_proper_documentation(self) -> None:
-		"""Test table with complete documentation."""
-		content = """
+    def test_table_with_proper_documentation(self) -> None:
+        """Test table with complete documentation."""
+        content = """
 		-- TABLE: users
 		-- PURPOSE: Store user account information
 		-- CREATED: 2026-08-22
@@ -64,35 +64,35 @@ class TableDocumentationTest(DocumentationValidatorTestCase):
 		ALTER TABLE users ADD COMMENT ON COLUMN users.email IS 'User email address';
 		"""
 
-		sql_file = self._create_sql_file(content)
-		result = self.validator.validate_file(str(sql_file))
+        sql_file = self._create_sql_file(content)
+        result = self.validator.validate_file(str(sql_file))
 
-		# Should pass or warn depending on implementation
-		self.assertIsNotNone(result)
+        # Should pass or warn depending on implementation
+        self.assertIsNotNone(result)
 
-	def test_table_missing_header_comment(self) -> None:
-		"""Test table without header comment."""
-		content = """
+    def test_table_missing_header_comment(self) -> None:
+        """Test table without header comment."""
+        content = """
 		CREATE TABLE products (
 			id NUMBER PRIMARY KEY,
 			name VARCHAR2(255)
 		);
 		"""
 
-		sql_file = self._create_sql_file(content)
-		result = self.validator.validate_file(str(sql_file))
+        sql_file = self._create_sql_file(content)
+        result = self.validator.validate_file(str(sql_file))
 
-		# Should detect the table
-		self.assertIsNotNone(result)
-		self.assertGreater(self.validator.objects_found, 0)
+        # Should detect the table
+        self.assertIsNotNone(result)
+        self.assertGreater(self.validator.objects_found, 0)
 
 
 class ProcedureDocumentationTest(DocumentationValidatorTestCase):
-	"""Test procedure documentation validation."""
+    """Test procedure documentation validation."""
 
-	def test_procedure_with_complete_documentation(self) -> None:
-		"""Test procedure with all required documentation."""
-		content = """
+    def test_procedure_with_complete_documentation(self) -> None:
+        """Test procedure with all required documentation."""
+        content = """
 		-- PROCEDURE: create_user_proc
 		-- PURPOSE: Creates a new user account
 		-- PARAMETERS:
@@ -115,14 +115,14 @@ class ProcedureDocumentationTest(DocumentationValidatorTestCase):
 		/
 		"""
 
-		sql_file = self._create_sql_file(content)
-		result = self.validator.validate_file(str(sql_file))
+        sql_file = self._create_sql_file(content)
+        result = self.validator.validate_file(str(sql_file))
 
-		self.assertIsNotNone(result)
+        self.assertIsNotNone(result)
 
-	def test_procedure_missing_parameters_section(self) -> None:
-		"""Test procedure without PARAMETERS section."""
-		content = """
+    def test_procedure_missing_parameters_section(self) -> None:
+        """Test procedure without PARAMETERS section."""
+        content = """
 		-- PROCEDURE: simple_proc
 		-- PURPOSE: Simple test procedure
 
@@ -133,18 +133,18 @@ class ProcedureDocumentationTest(DocumentationValidatorTestCase):
 		/
 		"""
 
-		sql_file = self._create_sql_file(content)
-		result = self.validator.validate_file(str(sql_file))
+        sql_file = self._create_sql_file(content)
+        result = self.validator.validate_file(str(sql_file))
 
-		self.assertIsNotNone(result)
+        self.assertIsNotNone(result)
 
 
 class FunctionDocumentationTest(DocumentationValidatorTestCase):
-	"""Test function documentation validation."""
+    """Test function documentation validation."""
 
-	def test_function_with_complete_documentation(self) -> None:
-		"""Test function with complete documentation."""
-		content = """
+    def test_function_with_complete_documentation(self) -> None:
+        """Test function with complete documentation."""
+        content = """
 		-- FUNCTION: calculate_tax
 		-- PURPOSE: Calculate tax amount for given amount
 		-- PARAMETERS:
@@ -163,14 +163,14 @@ class FunctionDocumentationTest(DocumentationValidatorTestCase):
 		/
 		"""
 
-		sql_file = self._create_sql_file(content)
-		result = self.validator.validate_file(str(sql_file))
+        sql_file = self._create_sql_file(content)
+        result = self.validator.validate_file(str(sql_file))
 
-		self.assertIsNotNone(result)
+        self.assertIsNotNone(result)
 
-	def test_function_missing_returns_section(self) -> None:
-		"""Test function without RETURNS section."""
-		content = """
+    def test_function_missing_returns_section(self) -> None:
+        """Test function without RETURNS section."""
+        content = """
 		-- FUNCTION: get_value
 		-- PURPOSE: Retrieve a value
 
@@ -181,18 +181,18 @@ class FunctionDocumentationTest(DocumentationValidatorTestCase):
 		/
 		"""
 
-		sql_file = self._create_sql_file(content)
-		result = self.validator.validate_file(str(sql_file))
+        sql_file = self._create_sql_file(content)
+        result = self.validator.validate_file(str(sql_file))
 
-		self.assertIsNotNone(result)
+        self.assertIsNotNone(result)
 
 
 class ViewDocumentationTest(DocumentationValidatorTestCase):
-	"""Test view documentation validation."""
+    """Test view documentation validation."""
 
-	def test_view_with_documentation(self) -> None:
-		"""Test view with proper documentation."""
-		content = """
+    def test_view_with_documentation(self) -> None:
+        """Test view with proper documentation."""
+        content = """
 		-- VIEW: active_users_v
 		-- PURPOSE: Show all active users
 		-- BASE QUERY: Selects from users table with status = 'ACTIVE'
@@ -205,94 +205,94 @@ class ViewDocumentationTest(DocumentationValidatorTestCase):
 			SELECT id, username, email FROM users WHERE status = 'ACTIVE';
 		"""
 
-		sql_file = self._create_sql_file(content)
-		result = self.validator.validate_file(str(sql_file))
+        sql_file = self._create_sql_file(content)
+        result = self.validator.validate_file(str(sql_file))
 
-		self.assertIsNotNone(result)
+        self.assertIsNotNone(result)
 
 
 class ValidatorReportingTest(DocumentationValidatorTestCase):
-	"""Test validator error reporting."""
+    """Test validator error reporting."""
 
-	def test_validator_collects_errors(self) -> None:
-		"""Test that validator collects errors."""
-		self.assertEqual(len(self.validator.errors), 0)
-		self.assertEqual(len(self.validator.warnings), 0)
+    def test_validator_collects_errors(self) -> None:
+        """Test that validator collects errors."""
+        self.assertEqual(len(self.validator.errors), 0)
+        self.assertEqual(len(self.validator.warnings), 0)
 
-	def test_validator_counts_objects(self) -> None:
-		"""Test that validator counts objects found."""
-		content = """
+    def test_validator_counts_objects(self) -> None:
+        """Test that validator counts objects found."""
+        content = """
 		CREATE TABLE table1 (id NUMBER);
 		CREATE TABLE table2 (id NUMBER);
 		CREATE PROCEDURE proc1 AS BEGIN NULL; END;
 		"""
 
-		sql_file = self._create_sql_file(content)
-		self.validator.validate_file(str(sql_file))
+        sql_file = self._create_sql_file(content)
+        self.validator.validate_file(str(sql_file))
 
-		self.assertGreater(self.validator.objects_found, 0)
+        self.assertGreater(self.validator.objects_found, 0)
 
-	def test_validator_exit_code_on_errors(self) -> None:
-		"""Test exit code when errors exist."""
-		# Add a mock error
-		self.validator.errors.append("Test error")
-		exit_code = self.validator.get_exit_code()
+    def test_validator_exit_code_on_errors(self) -> None:
+        """Test exit code when errors exist."""
+        # Add a mock error
+        self.validator.errors.append("Test error")
+        exit_code = self.validator.get_exit_code()
 
-		self.assertEqual(exit_code, 1)
+        self.assertEqual(exit_code, 1)
 
-	def test_validator_exit_code_on_success(self) -> None:
-		"""Test exit code when no errors."""
-		self.validator.errors = []
-		exit_code = self.validator.get_exit_code()
+    def test_validator_exit_code_on_success(self) -> None:
+        """Test exit code when no errors."""
+        self.validator.errors = []
+        exit_code = self.validator.get_exit_code()
 
-		self.assertEqual(exit_code, 0)
+        self.assertEqual(exit_code, 0)
 
-	def test_validator_files_checked_count(self) -> None:
-		"""Test validator counts files checked."""
-		content = "SELECT 1 FROM DUAL;"
-		sql_file = self._create_sql_file(content)
-		self.validator.validate_file(str(sql_file))
+    def test_validator_files_checked_count(self) -> None:
+        """Test validator counts files checked."""
+        content = "SELECT 1 FROM DUAL;"
+        sql_file = self._create_sql_file(content)
+        self.validator.validate_file(str(sql_file))
 
-		self.assertEqual(self.validator.files_checked, 1)
+        self.assertEqual(self.validator.files_checked, 1)
 
 
 class MultipleObjectsTest(DocumentationValidatorTestCase):
-	"""Test validation of files with multiple objects."""
+    """Test validation of files with multiple objects."""
 
-	def test_file_with_multiple_tables(self) -> None:
-		"""Test file containing multiple tables."""
-		content = """
+    def test_file_with_multiple_tables(self) -> None:
+        """Test file containing multiple tables."""
+        content = """
 		CREATE TABLE users (id NUMBER);
 		CREATE TABLE products (id NUMBER);
 		CREATE TABLE orders (id NUMBER);
 		"""
 
-		sql_file = self._create_sql_file(content)
-		self.validator.validate_file(str(sql_file))
+        sql_file = self._create_sql_file(content)
+        self.validator.validate_file(str(sql_file))
 
-		self.assertGreaterEqual(self.validator.objects_found, 3)
+        self.assertGreaterEqual(self.validator.objects_found, 3)
 
-	def test_file_with_mixed_objects(self) -> None:
-		"""Test file with tables, procedures, and functions."""
-		content = """
+    def test_file_with_mixed_objects(self) -> None:
+        """Test file with tables, procedures, and functions."""
+        content = """
 		CREATE TABLE users (id NUMBER);
 		CREATE PROCEDURE create_user AS BEGIN NULL; END;
 		CREATE FUNCTION get_user_count RETURN NUMBER AS BEGIN RETURN 0; END;
 		CREATE VIEW user_view AS SELECT * FROM users;
 		"""
 
-		sql_file = self._create_sql_file(content)
-		self.validator.validate_file(str(sql_file))
+        sql_file = self._create_sql_file(content)
+        self.validator.validate_file(str(sql_file))
 
-		self.assertGreaterEqual(self.validator.objects_found, 4)
+        self.assertGreaterEqual(self.validator.objects_found, 4)
 
 
 class DocumentationComplexSQLTest(DocumentationValidatorTestCase):
-	"""Test documentation validation with complex SQL."""
+    """Test documentation validation with complex SQL."""
 
-	def test_procedure_with_complex_logic(self) -> None:
-		"""Test procedure with complex business logic."""
-		content = """
+    def test_procedure_with_complex_logic(self) -> None:
+        """Test procedure with complex business logic."""
+        content = """
 		-- PROCEDURE: process_orders
 		-- PURPOSE: Process pending orders and update inventory
 		-- PARAMETERS:
@@ -320,14 +320,14 @@ class DocumentationComplexSQLTest(DocumentationValidatorTestCase):
 		/
 		"""
 
-		sql_file = self._create_sql_file(content)
-		result = self.validator.validate_file(str(sql_file))
+        sql_file = self._create_sql_file(content)
+        result = self.validator.validate_file(str(sql_file))
 
-		self.assertIsNotNone(result)
+        self.assertIsNotNone(result)
 
-	def test_package_with_multiple_procedures(self) -> None:
-		"""Test package containing multiple procedures."""
-		content = """
+    def test_package_with_multiple_procedures(self) -> None:
+        """Test package containing multiple procedures."""
+        content = """
 		-- PACKAGE: user_management_pkg
 		-- PURPOSE: User account management package
 		-- PROCEDURES:
@@ -343,50 +343,50 @@ class DocumentationComplexSQLTest(DocumentationValidatorTestCase):
 		/
 		"""
 
-		sql_file = self._create_sql_file(content)
-		self.validator.validate_file(str(sql_file))
+        sql_file = self._create_sql_file(content)
+        self.validator.validate_file(str(sql_file))
 
-		# Should handle package definitions
-		self.assertIsNotNone(self.validator)
+        # Should handle package definitions
+        self.assertIsNotNone(self.validator)
 
 
 class ValidationEdgeCasesTest(DocumentationValidatorTestCase):
-	"""Test edge cases in validation."""
+    """Test edge cases in validation."""
 
-	def test_empty_sql_file(self) -> None:
-		"""Test validation of empty SQL file."""
-		sql_file = self._create_sql_file("")
-		result = self.validator.validate_file(str(sql_file))
+    def test_empty_sql_file(self) -> None:
+        """Test validation of empty SQL file."""
+        sql_file = self._create_sql_file("")
+        result = self.validator.validate_file(str(sql_file))
 
-		self.assertEqual(self.validator.objects_found, 0)
+        self.assertEqual(self.validator.objects_found, 0)
 
-	def test_sql_file_with_comments_only(self) -> None:
-		"""Test SQL file with only comments."""
-		content = """
+    def test_sql_file_with_comments_only(self) -> None:
+        """Test SQL file with only comments."""
+        content = """
 		-- This is a comment
 		-- Another comment
 		-- More comments
 		"""
 
-		sql_file = self._create_sql_file(content)
-		result = self.validator.validate_file(str(sql_file))
+        sql_file = self._create_sql_file(content)
+        result = self.validator.validate_file(str(sql_file))
 
-		self.assertEqual(self.validator.objects_found, 0)
+        self.assertEqual(self.validator.objects_found, 0)
 
-	def test_sql_with_mixed_case_keywords(self) -> None:
-		"""Test SQL with mixed case keywords."""
-		content = """
+    def test_sql_with_mixed_case_keywords(self) -> None:
+        """Test SQL with mixed case keywords."""
+        content = """
 		create table MixedCase (id number);
 		CREATE PROCEDURE test_proc as begin null; end;
 		Create Function test_func Return Number As Begin Return 1; End;
 		"""
 
-		sql_file = self._create_sql_file(content)
-		result = self.validator.validate_file(str(sql_file))
+        sql_file = self._create_sql_file(content)
+        result = self.validator.validate_file(str(sql_file))
 
-		# Should handle case-insensitive matching
-		self.assertGreaterEqual(self.validator.objects_found, 1)
+        # Should handle case-insensitive matching
+        self.assertGreaterEqual(self.validator.objects_found, 1)
 
 
 if __name__ == "__main__":
-	unittest.main()
+    unittest.main()
