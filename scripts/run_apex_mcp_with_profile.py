@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
 """Start apex-mcp with a TEST or production profile held in the OS keyring."""
 
-import argparse
 import json
 import os
 import subprocess
 import sys
 
+from cli_utils import CLIParser, exit_with_error
 
 SERVICE = "apex-skills"
 REQUIRED_MAPPING = {
@@ -24,25 +24,25 @@ OPTIONAL_MAPPING = {
 
 
 def main() -> None:
-	parser = argparse.ArgumentParser()
-	parser.add_argument("--environment", required=True, choices=("test", "production"))
-	parser.add_argument("mcp_args", nargs=argparse.REMAINDER)
+	parser = CLIParser("Start apex-mcp with a secure profile from OS keyring")
+	parser.add_environment_arg()
+	parser.add_argument("mcp_args", nargs="*", help="Additional arguments to pass to apex-mcp")
 	args = parser.parse_args()
 
 	try:
 		import keyring
 	except ImportError as error:
-		raise SystemExit(
+		exit_with_error(
 			"Missing dependency: keyring. Install requirements.txt in the shared skills environment."
-		) from error
+		)
 
 	raw_profile = keyring.get_password(SERVICE, args.environment)
 	if not raw_profile:
-		raise SystemExit(f"Missing secure profile: {args.environment}. Import or set it first.")
+		exit_with_error(f"Missing secure profile: {args.environment}. Import or set it first.")
 	try:
 		profile = json.loads(raw_profile)
 	except json.JSONDecodeError as error:
-		raise SystemExit(f"Invalid secure profile: {args.environment}. Import or set it again.") from error
+		exit_with_error(f"Invalid secure profile: {args.environment}. Import or set it again.")
 
 	missing = [
 		environment_name
@@ -50,7 +50,7 @@ def main() -> None:
 		if not profile.get(profile_name)
 	]
 	if missing:
-		raise SystemExit("Incomplete secure profile; missing mapped values: " + ", ".join(missing))
+		exit_with_error("Incomplete secure profile; missing mapped values: " + ", ".join(missing))
 
 	environment = os.environ.copy()
 	for environment_name, profile_name in {**REQUIRED_MAPPING, **OPTIONAL_MAPPING}.items():

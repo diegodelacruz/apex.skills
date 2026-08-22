@@ -5,6 +5,8 @@ import re
 import zipfile
 from pathlib import Path
 
+from apex_metadata import ApexMetadata
+
 
 def extract_apex_export_metadata(zip_path):
 	"""Extract root directory and metadata YAML from an APEX export ZIP.
@@ -48,6 +50,7 @@ def extract_apex_export_metadata(zip_path):
 def get_yaml_field(yaml_text, field_name):
 	"""Extract a field value from YAML text using regex.
 
+	Backward-compatible wrapper around ApexMetadata.get_field().
 	Replaces previous lookup() and field() functions with unified implementation.
 
 	Args:
@@ -65,14 +68,7 @@ def get_yaml_field(yaml_text, field_name):
 			>>> get_yaml_field("unknown", "missing")
 			None
 	"""
-	if not yaml_text or not field_name:
-		return None
-
-	try:
-		match = re.search(rf"^\s*{re.escape(field_name)}:\s*(.+?)\s*$", yaml_text, re.MULTILINE)
-		return match.group(1).strip(" '\"") if match else None
-	except (TypeError, AttributeError):
-		return None
+	return ApexMetadata.get_field(yaml_text, field_name)
 
 
 def list_export_pages(zip_path, root_dir, page_type="readable"):

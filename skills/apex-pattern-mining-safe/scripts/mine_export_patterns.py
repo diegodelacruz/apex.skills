@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 """Read-only evidence inventory for split Oracle APEX ZIP exports."""
 
-import argparse
 import collections
 import json
 import re
@@ -9,13 +8,17 @@ import sys
 import zipfile
 from pathlib import Path
 
+from path_setup import setup_skills_path
+setup_skills_path(__file__)
+
+from apex_export_utilities import extract_apex_export_metadata, list_export_pages
+from apex_metadata import ApexMetadata
+from cli_utils import CLIParser, exit_with_error
+
 try:
 	sys.stdout.reconfigure(encoding="utf-8")
 except AttributeError:
 	pass
-
-sys.path.insert(0, str(Path(__file__).resolve().parent.parent.parent.parent / "scripts"))
-from apex_export_utilities import extract_apex_export_metadata, get_yaml_field, list_export_pages
 
 
 def inspect(path):
@@ -37,23 +40,20 @@ def inspect(path):
 
 			page_content = "\n".join(page_content_parts)
 
+		apex_meta = ApexMetadata(metadata)
+		app_info = apex_meta.get_application_info()
+		security = apex_meta.get_security_settings()
+
 		return {
 			"archive": path.name,
 			"application": {
-				"id": get_yaml_field(metadata, "id"),
-				"name": get_yaml_field(metadata, "name"),
-				"alias": get_yaml_field(metadata, "alias"),
-				"schema": get_yaml_field(metadata, "parsing-schema"),
+				"id": app_info.get("id"),
+				"name": app_info.get("name"),
+				"alias": app_info.get("alias"),
+				"schema": app_info.get("schema"),
 			},
 			"pages": len(readable_pages),
-			"security": {
-				"session_state_protection": bool(
-					re.search(r"session-state-protection:\s*\n\s+enabled:\s*true", metadata)
-				),
-				"extended_html_escaping": "html-escaping-mode: Extended" in metadata,
-				"deep_links_disabled": "deep-linking: Disabled" in metadata,
-				"frames_denied": "embed-in-frames: Deny" in metadata,
-			},
+			"security": security,
 			"component_types": collections.Counter(
 				re.findall(r"^\s*type:\s*(.+?)\s*$", page_content, re.M)
 			).most_common(20),
@@ -72,18 +72,17 @@ def inspect(path):
 
 
 def main():
-	p = argparse.ArgumentParser()
-	p.add_argument("export_zip", nargs="+", type=Path)
-	p.add_argument("--json", action="store_true")
-	a = p.parse_args()
+	parser = CLIParser("Mine patterns from Oracle APEX export ZIPs")
+	parser.add_argument("export_zip", nargs="+", type=Path, help="Path(s) to APEX export ZIP files")
+	parser.add_json_output_arg()
+	args = parser.parse_args()
 
 	try:
-		report = [inspect(x) for x in a.export_zip]
+		report = [inspect(x) for x in args.export_zip]
 	except ValueError as err:
-		print(f"MINING_FAIL: {err}")
-		raise SystemExit(1)
+		exit_with_error(str(err), "MINING_FAIL")
 
-	if a.json:
+	if args.json:
 		print(json.dumps(report, ensure_ascii=False, indent=2))
 	else:
 		for item in report:

@@ -6,8 +6,10 @@ from pathlib import Path
 from tempfile import NamedTemporaryFile
 import zipfile
 
-# Add scripts directory to path
+# Add scripts directory to path using centralized setup
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "scripts"))
+from path_setup import setup_test_path
+setup_test_path(__file__)
 
 from apex_export_utilities import (
 	extract_apex_export_metadata,
