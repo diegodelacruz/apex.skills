@@ -1,34 +1,29 @@
-#!/bin/bash
-# Bootstrap upstream dependencies for apex.skills
-# This script clones or updates required upstream repositories
+#!/usr/bin/env bash
+# Bootstrap all managed upstream repositories required by apex.skills.
+set -euo pipefail
 
-set -e
+ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+UPSTREAMS_DIR="$ROOT/.upstreams"
 
-UPSTREAMS_DIR=".upstreams"
-APEX_MCP_REPO="https://github.com/diegodelacruz/apex-mcp.git"
+declare -A REPOS=(
+  [apex-mcp]="https://github.com/TechFernandesLTDA/apex-mcp.git"
+  [zaimella-skill]="https://github.com/jefersonKel/zaimella-skill.git"
+  [zaimella-apex-oracle]="https://github.com/zaimella/zaimella-apex-oracle.git"
+)
 
-echo "🔧 Bootstrapping apex.skills upstreams..."
+mkdir -p "$UPSTREAMS_DIR"
 
-# Create upstreams directory if it doesn't exist
-if [ ! -d "$UPSTREAMS_DIR" ]; then
-	mkdir -p "$UPSTREAMS_DIR"
-	echo "✅ Created $UPSTREAMS_DIR/"
-fi
+for name in "${!REPOS[@]}"; do
+  target="$UPSTREAMS_DIR/$name"
+  if [[ -d "$target/.git" ]]; then
+    echo "[OK] $name already present"
+  elif [[ -e "$target" ]]; then
+    echo "ERROR: target exists but is not a Git checkout: $target" >&2
+    exit 1
+  else
+    echo "[CLONE] $name"
+    git clone --depth 1 "${REPOS[$name]}" "$target"
+  fi
+done
 
-# Clone or update apex-mcp
-if [ ! -d "$UPSTREAMS_DIR/apex-mcp" ]; then
-	echo "📥 Cloning apex-mcp..."
-	git clone "$APEX_MCP_REPO" "$UPSTREAMS_DIR/apex-mcp"
-	echo "✅ apex-mcp cloned"
-else
-	echo "♻️  Updating apex-mcp..."
-	cd "$UPSTREAMS_DIR/apex-mcp"
-	git pull origin main
-	cd ../..
-	echo "✅ apex-mcp updated"
-fi
-
-echo ""
-echo "✅ Bootstrap complete. You can now run:"
-echo "   pip install -r requirements.txt"
-echo ""
+echo "[OK] Managed upstreams ready under $UPSTREAMS_DIR"

@@ -1,8 +1,8 @@
 # GitHub Configuration & Release Management
 
-**Setup Date:** 2026-08-21  
-**Branch Protection:** Required  
-**Release Strategy:** Semantic Versioning  
+**Setup Date:** 2026-08-21
+**Branch Protection:** Pending activation in GitHub repository settings
+**Release Strategy:** Semantic Versioning
 
 ---
 
@@ -137,7 +137,7 @@ gh release create v1.1.0 \
 
 ---
 
-## 3. COMMIT SIGNING (Future)
+## 3. COMMIT SIGNING (Optional policy decision)
 
 ### Setup GPG Key
 
@@ -159,7 +159,7 @@ All commits will be signed with GPG (future requirement).
 
 ---
 
-## 4. CI/CD PIPELINE (Planned)
+## 4. CI/CD PIPELINE (Versioned and active)
 
 ### GitHub Actions Workflow
 
@@ -247,6 +247,22 @@ echo "✅ Stale reviews dismissed"
 ```
 
 ---
+
+## CURRENT GOVERNANCE STATUS
+
+Versioned in this repository:
+- CODEOWNERS defines repository ownership and review routing.
+- Dependabot monitors Python and GitHub Actions dependencies.
+- GitHub Actions CI bootstraps managed upstreams, runs tests, audit, formatting, type, security, secret, and whitespace checks.
+- Pull requests use the repository template.
+
+Still requires a repository administrator in GitHub:
+- Protect main and require one CODEOWNER approval.
+- Require the CI status checks before merge.
+- Dismiss stale approvals and require branches to be up to date.
+- Decide whether administrators are subject to the same rules.
+- Decide and configure signed-commit enforcement.
+- Create the first release tag and GitHub release.
 
 ## IMPLEMENTATION CHECKLIST
 

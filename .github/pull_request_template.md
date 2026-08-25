@@ -18,7 +18,7 @@ Closes #(issue number)
 
 - [ ] Added tests for new functionality
 - [ ] All tests pass (`pytest tests/ -v`)
-- [ ] Coverage maintained (>80%)
+- [ ] Coverage maintained (coverage threshold configured by pytest.ini)
 
 ## Documentation
 
