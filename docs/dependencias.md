@@ -2,7 +2,11 @@
 
 ## Python
 
-Instale dependencias desde la raíz después de inicializar los upstreams:
+Para una clonación nueva, ejecute primero:
+
+.\scripts\Setup-ApexSkills.ps1
+
+El script descarga los upstreams, crea .venv e instala requirements.txt. También puede ejecutar después python -m pip install -r requirements.txt si necesita repetir la instalación.
 
 ```powershell
 python -m pip install -r requirements.txt

@@ -16,6 +16,9 @@ One-line descriptions for rapid lookup.
 | **apex-project-bootstrap-final** | Initialize new APEX project with workspace and policies |
 | **apex-project-workspace** | Create and maintain control-proyecto project workspace |
 | **apex-solution-design** | Design new APEX applications or pages from requirements |
+| **apex-blueprint-design-safe** | Produce a reviewable blueprint before APEX implementation |
+| **apex-rest-source-catalogs-safe** | Assess Fusion REST source catalogs for safe APEX integration |
+| **apex-ui-craft-safe** | Improve APEX UX, accessibility, responsive behavior, and motion safely |
 | **apex-user-manual** | Generate Word user manual with embedded screenshots |
 | **apex** (Coordinator) | Main entry point: understands requests and routes to skills |
 | **oracle-data-change-governance-final** | Govern DATA changes with complete audit trail |
@@ -30,7 +33,10 @@ One-line descriptions for rapid lookup.
 |------|-------|
 | Inspect an existing APEX app | apex-engineering-safe |
 | Design a new APEX app | apex-solution-design |
+| Create a reviewable blueprint first | apex-blueprint-design-safe |
 | Learn patterns from existing exports | apex-pattern-mining-safe |
+| Assess a Fusion REST source catalog | apex-rest-source-catalogs-safe |
+| Review UX or responsive/accessibility behavior | apex-ui-craft-safe |
 | Check if export is ready | apex-export-qa-safe |
 | Compare TEST vs Production | apex-environment-alignment-complete |
 | Reserve pages for my project | apex-page-range-governance |
@@ -49,7 +55,7 @@ One-line descriptions for rapid lookup.
 
 | Cost | Skills |
 |------|--------|
-| **Free (Read-only)** | apex-engineering-safe, apex-export-qa-safe, apex-pattern-mining-safe, apex-database-diagnostics |
+| **Free (Read-only)** | apex-engineering-safe, apex-export-qa-safe, apex-pattern-mining-safe, apex-rest-source-catalogs-safe, apex-ui-craft-safe, apex-database-diagnostics |
 | **Free (On-demand)** | apex-audit-decisions-log (automatic capture, tokens only on view) |
 | **Low (Typical)** | apex-solution-design, apex-page-range-governance, apex-environment-alignment-complete |
 | **Medium (Complex)** | apex-project-bootstrap-final, apex-project-workspace, apex-user-manual |

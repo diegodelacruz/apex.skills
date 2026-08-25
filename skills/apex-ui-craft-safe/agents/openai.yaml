@@ -1,0 +1,5 @@
+interface:
+  display_name: Safe APEX UI Craft
+  short_description: Improve APEX UX, responsive behavior, accessibility, and visual polish safely.
+  default_prompt: Review this Oracle APEX page for UX, responsive design, accessibility, and justified motion improvements.
+

@@ -15,3 +15,6 @@ description: "Extract reusable design patterns and best practices from APEX expo
 5. Use upstream references for standards and QA; use apex-mcp only as an MCP integration reference. Do not execute upstream deployment tools while mining.
 
 The local baseline demonstrates authenticated Universal Theme 42 applications using `DATA`, Spanish (Ecuador), session-state protection, extended HTML escaping, disabled deep links, denied framing, disabled browser cache, Hero pages, action bars, and region-refresh workspaces.
+
+6. Hand off blueprint, REST catalog, or UX patterns to apex-blueprint-design-safe, apex-rest-source-catalogs-safe, or apex-ui-craft-safe.
+7. Preserve Universal Theme, accessibility, responsive behavior, security boundaries, and explicit approval gates; evidence never authorizes implementation.

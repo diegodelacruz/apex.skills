@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ---
 
+## [Unreleased] - 2026-08-25
+
+### Added
+
+- Added safe APEX blueprint, Fusion REST Source Catalog, and Universal Theme UX craft workflows.
+- Registered upstream provenance, licenses, and pinned commits.
+
+### Fixed
+
+- Corrected broken links in docs/MANUAL-DE-USO.md and synchronized routing/catalog entries.
+
 ## [1.0.0] - 2026-08-21
 
 ### Added

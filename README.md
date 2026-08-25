@@ -12,11 +12,13 @@ Framework canónico para agentes que desarrollan, validan, liberan y documentan 
 
 ## Preparación inicial
 
-```powershell
-.\scripts\Initialize-ApexSkillUpstreams-V2.ps1
-.\scripts\Initialize-ApexCodexProject.ps1 -ProjectPath "<RUTA_PROYECTO_APEX>" -InstallSharedDependencies
-.\scripts\Install-ApexSkillsForCodex.ps1
-```
+Después de clonar el repositorio, ejecute un único comando:
+
+    .\scripts\Setup-ApexSkills.ps1
+
+Este comando prepara upstreams, Python y skills. No configura credenciales ni accede a Oracle. Use -Mode Copy si Codex está en otra unidad.
+
+Para validar TEST/MCP, ejecute después Initialize-ApexCodexProject.ps1 con el proyecto y las aprobaciones correspondientes.
 
 ## Principios
 

@@ -11,6 +11,7 @@ REQUIRED = (
     "skills/oracle-data-change-governance-final/SKILL.md",
     "skills/apex-user-manual/SKILL.md",
     "scripts/Initialize-ApexSkillUpstreams-V2.ps1",
+    "scripts/Setup-ApexSkills.ps1",
     "scripts/Update-ApexSkillUpstreams-V2.ps1",
     "requirements.txt",
     "docs/decisiones-canonicas-finales.md",

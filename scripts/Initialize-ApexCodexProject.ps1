@@ -65,15 +65,23 @@ Write-Host '[3/7] Checking secure TEST profile...'
 $profileStatus = & $python $credentials status --environment test 2>&1
 if ($LASTEXITCODE -ne 0) {
 	if (-not (Test-Path -LiteralPath $envFile)) {
-		throw 'TEST profile is missing and no local .env file was found. Add the ignored .env, then run this command again.'
+		throw 'TEST credentials are required. Create .env in the apex.skills repository root from .env.example, fill DB_TESTING_USER/PASSWORD/HOST/PORT/SID, then import and validate with manage_apex_credentials.py. The .env remains local and is never committed.'
 	}
-	Invoke-QuietPython @($credentials, 'import-env', '--environment', 'test')
-	Invoke-QuietPython @($credentials, 'validate', '--environment', 'test')
+	try {
+		Invoke-QuietPython @($credentials, 'import-env', '--environment', 'test')
+		Invoke-QuietPython @($credentials, 'validate', '--environment', 'test')
+	} catch {
+		throw 'TEST connection failed. Check DB_TESTING_HOST/PORT/SID, VPN or network access, database availability, and TEST credentials in the local .env. The profile was not printed; correct .env and rerun.'
+	}
 }
 Write-Host '      [OK] TEST profile ready.' -ForegroundColor Green
 
 Write-Host '[4/7] Validating TEST MCP handshake...'
-Invoke-QuietPython @($handshake, '--environment', 'test')
+try {
+	Invoke-QuietPython @($handshake, '--environment', 'test')
+} catch {
+	throw 'MCP TEST handshake failed. Confirm the TEST profile validates successfully, apex-mcp is reachable, and the direct-connection patch completed; then rerun this initializer.'
+}
 Write-Host '      [OK] TEST MCP initialize response received.' -ForegroundColor Green
 
 Write-Host '[5/7] Installing agent skills...'

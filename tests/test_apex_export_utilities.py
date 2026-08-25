@@ -95,6 +95,7 @@ class TestExtractApexExportMetadata:
     def test_zip_with_no_root_directory(self):
         """Raise error for ZIP without proper root directory."""
         with NamedTemporaryFile(suffix=".zip", delete=False) as tmp:
+            tmp.close()
             try:
                 with zipfile.ZipFile(tmp.name, "w") as z:
                     z.writestr("file1.txt", "content")
@@ -109,6 +110,7 @@ class TestExtractApexExportMetadata:
     def test_zip_with_multiple_roots(self):
         """Raise error for ZIP with multiple root directories."""
         with NamedTemporaryFile(suffix=".zip", delete=False) as tmp:
+            tmp.close()
             try:
                 with zipfile.ZipFile(tmp.name, "w") as z:
                     z.writestr("f123/file.txt", "content")
@@ -127,6 +129,7 @@ class TestListExportPages:
     def test_list_readable_pages(self):
         """List readable (YAML) pages from export."""
         with NamedTemporaryFile(suffix=".zip", delete=False) as tmp:
+            tmp.close()
             try:
                 with zipfile.ZipFile(tmp.name, "w") as z:
                     z.writestr("f123/readable/application/pages/page1.yaml", "")
@@ -144,6 +147,7 @@ class TestListExportPages:
     def test_list_sql_pages(self):
         """List SQL pages from export."""
         with NamedTemporaryFile(suffix=".zip", delete=False) as tmp:
+            tmp.close()
             try:
                 with zipfile.ZipFile(tmp.name, "w") as z:
                     z.writestr("f123/readable/application/pages/page1.yaml", "")

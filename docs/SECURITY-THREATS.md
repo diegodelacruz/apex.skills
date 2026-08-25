@@ -167,7 +167,7 @@ SELECT * FROM customers WHERE name = ''' || user_input || '''';
 
 **Current Controls:**
 - ✅ Pinned versions in requirements.txt
-- ✅ requirements.txt listed in .gitignore exclusion
+- ✅ requirements.txt is versioned and reviewed; secrets and local environments are excluded
 - ⚠️ No automated dependency scanning (planned)
 
 **Residual Risk:** MEDIUM

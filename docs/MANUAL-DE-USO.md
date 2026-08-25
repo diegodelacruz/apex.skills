@@ -82,7 +82,7 @@ python3 scripts/audit_skill_ecosystem.py
 
 Deberías ver: `AUDIT_PASS: required resources and local Markdown links are valid`
 
-Para detalles avanzados, consulte [Configuración de Claude Code](docs/setup-claude-code.md).
+Para detalles avanzados, consulte [Configuración de Claude Code](setup-claude-code.md).
 
 ## 4. Usar Codex desde terminal
 
@@ -93,7 +93,7 @@ cd "<RUTA_PROYECTO_APEX>"
 codex
 ```
 
-Después describa el trabajo normalmente. Para detalles de instalación, actualización, MCP y validadores consulte [Uso desde terminal](docs/uso-skills-codex-cli.md).
+Después describa el trabajo normalmente. Para detalles de instalación, actualización, MCP y validadores consulte [Uso desde terminal](uso-skills-codex-cli.md).
 
 ## 5. Reiniciar el MCP local (Codex CLI)
 

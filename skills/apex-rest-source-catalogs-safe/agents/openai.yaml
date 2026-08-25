@@ -1,0 +1,5 @@
+interface:
+  display_name: Safe APEX REST Source Catalogs
+  short_description: Assess Fusion REST source catalogs before APEX integration.
+  default_prompt: Assess this Oracle Fusion REST Source Catalog for a safe APEX integration design.
+

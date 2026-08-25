@@ -1,6 +1,6 @@
 # 📚 APEX Skills Catalog
 
-Complete directory of 15 Oracle APEX skills organized by purpose and workflow.
+Complete directory of 18 Oracle APEX skills organized by purpose and workflow.
 
 Use `/skills` in Codex/Claude to see the complete list with descriptions and tags. This page provides detailed navigation and quick reference.
 
@@ -27,6 +27,10 @@ Use `/skills` in Codex/Claude to see the complete list with descriptions and tag
   - *Tags: inspection, design, export, read-only*
 - **[apex-solution-design](./apex-solution-design)** - Design new APEX apps/pages from business requirements
   - *Tags: design, architecture, planning*
+- **[apex-blueprint-design-safe](./apex-blueprint-design-safe)** - Create a reviewable blueprint before implementation
+  - *Tags: blueprint, design, scaffolding, read-only, approval*
+- **[apex-ui-craft-safe](./apex-ui-craft-safe)** - Improve APEX UX, accessibility, responsive behavior, and visual polish
+  - *Tags: ux, ui, responsive, accessibility, motion, read-only*
 
 ### Apex Environment & Alignment
 - **[apex-environment-alignment-complete](./apex-environment-alignment-complete)** - Validate and sync TEST/production environments
@@ -35,6 +39,10 @@ Use `/skills` in Codex/Claude to see the complete list with descriptions and tag
 ### Apex Export & QA
 - **[apex-export-qa-safe](./apex-export-qa-safe)** - Static QA for APEX exports before changes
   - *Tags: qa, validation, export, read-only*
+
+### Apex Integration
+- **[apex-rest-source-catalogs-safe](./apex-rest-source-catalogs-safe)** - Assess Fusion REST catalogs for safe APEX integration
+  - *Tags: rest, fusion, integration, catalog, read-only*
 
 ### Apex Page Range Governance
 - **[apex-page-range-governance](./apex-page-range-governance)** - Reserve and validate page ranges by project
@@ -69,18 +77,19 @@ Use `/skills` in Codex/Claude to see the complete list with descriptions and tag
 ### By Workflow Type
 | Workflow | Skills |
 |----------|--------|
-| **Design & Planning** | apex-solution-design, apex-pattern-mining-safe |
+| **Design & Planning** | apex-solution-design, apex-blueprint-design-safe, apex-pattern-mining-safe, apex-ui-craft-safe |
 | **Engineering & Implementation** | apex-engineering-safe, apex-solution-design |
 | **Quality & Validation** | apex-export-qa-safe, apex-environment-alignment-complete |
 | **Governance & Audit** | apex-page-range-governance, oracle-data-change-governance-final, apex-audit-decisions-log |
 | **Project Management** | apex-project-bootstrap-final, apex-project-workspace |
 | **Delivery & Documentation** | apex-delivery-lifecycle-safe, apex-delivery-lifecycle-complete, apex-user-manual |
 | **Diagnostics** | apex-database-diagnostics |
+| **Integration** | apex-rest-source-catalogs-safe |
 
 ### By Access Level
 | Access | Skills |
 |--------|--------|
-| **Read-only** | apex-engineering-safe, apex-export-qa-safe, apex-pattern-mining-safe, apex-database-diagnostics, apex-audit-decisions-log |
+| **Read-only** | apex-engineering-safe, apex-export-qa-safe, apex-pattern-mining-safe, apex-rest-source-catalogs-safe, apex-ui-craft-safe, apex-database-diagnostics, apex-audit-decisions-log |
 | **Read-write** | apex-solution-design, apex-page-range-governance, apex-project-bootstrap-final, apex-project-workspace, apex-user-manual, apex-delivery-lifecycle-safe, apex-delivery-lifecycle-complete, apex-environment-alignment-complete, oracle-data-change-governance-final |
 
 ---
@@ -96,20 +105,23 @@ Use `/skills` in Codex/Claude to see the complete list with descriptions and tag
 ## 📋 All Skills (Alphabetical)
 
 1. apex-audit-decisions-log (NEW!)
-2. apex-database-diagnostics
-3. apex-delivery-lifecycle-complete
-4. apex-delivery-lifecycle-safe
-5. apex-engineering-safe
-6. apex-environment-alignment-complete
-7. apex-export-qa-safe
-8. apex-page-range-governance
-9. apex-pattern-mining-safe
-10. apex-project-bootstrap-final
-11. apex-project-workspace
-12. apex-solution-design
-13. apex-user-manual
-14. apex (Coordinator)
-15. oracle-data-change-governance-final
+2. apex-blueprint-design-safe
+3. apex-database-diagnostics
+4. apex-delivery-lifecycle-complete
+5. apex-delivery-lifecycle-safe
+6. apex-engineering-safe
+7. apex-environment-alignment-complete
+8. apex-export-qa-safe
+9. apex-page-range-governance
+10. apex-pattern-mining-safe
+11. apex-project-bootstrap-final
+12. apex-project-workspace
+13. apex-rest-source-catalogs-safe
+14. apex-solution-design
+15. apex-ui-craft-safe
+16. apex-user-manual
+17. apex (Coordinator)
+18. oracle-data-change-governance-final
 
 ---
 
