@@ -189,7 +189,7 @@ class PylintChecker:
             import subprocess
 
             result = subprocess.run(
-                ["pylint", filepath, "--disable=all", "--enable=E,F"],
+                [sys.executable, "-m", "pylint", filepath, "--disable=all", "--enable=E,F"],
                 capture_output=True,
                 text=True,
                 timeout=30,
