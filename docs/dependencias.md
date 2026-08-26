@@ -6,13 +6,13 @@ Para una clonación nueva, ejecute primero:
 
 .\scripts\Setup-ApexSkills.ps1
 
-El script descarga los upstreams, crea .venv e instala requirements.txt. También puede ejecutar después python -m pip install -r requirements.txt si necesita repetir la instalación.
+El script descarga los upstreams, crea .venv, instala requirements.txt e instala el runtime MCP local desde .upstreams/apex-mcp. CI y Dependabot usan solo las dependencias base y no requieren acceso a upstreams privados. Si necesita repetir la instalación base, ejecute python -m pip install -r requirements.txt.
 
 ```powershell
 python -m pip install -r requirements.txt
 ```
 
-`requirements.txt` instala `apex-mcp` desde `.upstreams/apex-mcp`, además de `python-docx`, `Pillow` y `pytest`.
+requirements.txt instala las dependencias base. El runtime apex-mcp es opcional para CI/Dependabot y se instala localmente por Setup-ApexSkills.ps1 desde .upstreams/apex-mcp.
 
 ## Upstreams administrados
 
