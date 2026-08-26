@@ -32,7 +32,7 @@ class TypeHintCoverageTest(CodeQualityTestCase):
         self.assertGreater(len(scripts), 0)
 
         for script in scripts:
-            with open(script, "r") as f:
+            with open(script, "r", encoding="utf-8") as f:
                 content = f.read()
 
             # Check for type hint patterns
@@ -52,7 +52,7 @@ class TypeHintCoverageTest(CodeQualityTestCase):
         ]
 
         for script in important_scripts:
-            with open(script, "r") as f:
+            with open(script, "r", encoding="utf-8") as f:
                 content = f.read()
 
             # Check for docstring patterns
@@ -72,7 +72,7 @@ class DocstringComplianceTest(CodeQualityTestCase):
                 # Already tested separately
                 continue
 
-            with open(script, "r") as f:
+            with open(script, "r", encoding="utf-8") as f:
                 content = f.read()
 
             # Extract function definitions
@@ -89,7 +89,7 @@ class DocstringComplianceTest(CodeQualityTestCase):
         scripts = self.get_python_scripts()
 
         for script in scripts:
-            with open(script, "r") as f:
+            with open(script, "r", encoding="utf-8") as f:
                 content = f.read()
 
             # Check for class definitions
@@ -107,7 +107,7 @@ class ImportOrganizationTest(CodeQualityTestCase):
         scripts = self.get_python_scripts()
 
         for script in scripts:
-            with open(script, "r") as f:
+            with open(script, "r", encoding="utf-8") as f:
                 lines = f.readlines()
 
             # Find import section
@@ -131,7 +131,7 @@ class CodeStyleTest(CodeQualityTestCase):
         scripts = self.get_python_scripts()
 
         for script in scripts:
-            with open(script, "r") as f:
+            with open(script, "r", encoding="utf-8") as f:
                 lines = f.readlines()
 
             long_lines = [
@@ -152,7 +152,7 @@ class CodeStyleTest(CodeQualityTestCase):
         scripts = self.get_python_scripts()
 
         for script in scripts:
-            with open(script, "r") as f:
+            with open(script, "r", encoding="utf-8") as f:
                 lines = f.readlines()
 
             trailing_ws_lines = [(i + 1) for i, line in enumerate(lines) if line.rstrip() != line.rstrip("\n").rstrip()]
@@ -168,7 +168,7 @@ class FunctionComplexityTest(CodeQualityTestCase):
         scripts = self.get_python_scripts()
 
         for script in scripts:
-            with open(script, "r") as f:
+            with open(script, "r", encoding="utf-8") as f:
                 content = f.read()
 
             # Simple complexity check: look for excessive nesting
@@ -192,7 +192,7 @@ class ImportHealthTest(CodeQualityTestCase):
         scripts = self.get_python_scripts()
 
         for script in scripts:
-            with open(script, "r") as f:
+            with open(script, "r", encoding="utf-8") as f:
                 content = f.read()
 
             # If using typing annotations, should import typing
