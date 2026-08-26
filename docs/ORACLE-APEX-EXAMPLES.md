@@ -130,7 +130,7 @@ ALTER TABLE user_accounts
 --           p_email      => 'john@example.com',
 --           p_first_name => 'John',
 --           p_last_name  => 'Doe',
---           p_password   => 'SecurePass123!',
+--           p_password   => 'SecurePass123!', -- pragma: allowlist secret
 --           p_user_id    => v_user_id
 --       );
 --       DBMS_OUTPUT.PUT_LINE('Created user: ' || v_user_id);
@@ -449,7 +449,7 @@ END user_accounts_audit_trg;
 --       user_management_pkg.create_user(
 --           p_username => 'jsmith',
 --           p_email => 'jsmith@company.com',
---           p_password => 'InitialPassword123!'
+--           p_password => 'InitialPassword123!' -- pragma: allowlist secret
 --       );
 --       DBMS_OUTPUT.PUT_LINE('User created successfully');
 --   EXCEPTION
@@ -508,4 +508,3 @@ END user_management_pkg;
 ---
 
 **Validation:** Run `python3 scripts/validate-oracle-documentation.py docs/` to check compliance.
-

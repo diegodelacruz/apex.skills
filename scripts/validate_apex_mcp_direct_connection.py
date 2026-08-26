@@ -25,7 +25,7 @@ if not raw_profile:
 profile = json.loads(raw_profile)
 mapping = {
     "ORACLE_DB_USER": "db_user",
-    "ORACLE_DB_PASS": "db_pass",
+    "ORACLE_DB_PASS": "db_pass",  # pragma: allowlist secret
     "ORACLE_DSN": "dsn",
     "APEX_WORKSPACE_ID": "workspace_id",
     "APEX_SCHEMA": "schema",

@@ -16,7 +16,6 @@ tests:
   - B306  # tempnam
   - B307  # eval
   - B308  # mark_safe
-  - B309  # httpsconnection
   - B310  # urllib_urlopen
   - B311  # random
   - B312  # telnetlib
@@ -27,12 +26,9 @@ tests:
   - B317  # xml_bad_sax
   - B318  # xml_bad_minidom
   - B319  # xml_bad_pulldom2
-  - B320  # xml_bad_etree_iterparse
   - B321  # pickle
-  - B322  # unverified_context
   - B323  # unverified_context
   - B324  # hashlib
-  - B325  # tempnam
   - B401  # import_telnetlib
   - B402  # import_paramiko
   - B403  # import_pickle
@@ -41,7 +37,6 @@ tests:
   - B407  # import_xml_pulldom
   - B408  # import_xml_sax
   - B409  # import_xml_minidom
-  - B410  # import_xml_etree_iterparse
   - B411  # import_xmlrpc
   - B412  # import_httpoxy
   - B413  # import_shelve

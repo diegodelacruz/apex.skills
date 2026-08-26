@@ -1,7 +1,7 @@
 # GitHub Configuration & Release Management
 
 **Setup Date:** 2026-08-21
-**Branch Protection:** Pending activation in GitHub repository settings
+**Branch Protection:** Blocked for this private repository by the current GitHub plan
 **Release Strategy:** Semantic Versioning
 
 ---
@@ -253,7 +253,7 @@ echo "✅ Stale reviews dismissed"
 Versioned in this repository:
 - CODEOWNERS defines repository ownership and review routing.
 - Dependabot monitors Python and GitHub Actions dependencies.
-- GitHub Actions CI bootstraps managed upstreams, runs tests, audit, formatting, type, security, secret, and whitespace checks.
+- GitHub Actions CI runs tests, ecosystem audit, formatting, type, security, secret, and whitespace checks. Managed upstream bootstrap remains a local setup step.
 - Pull requests use the repository template.
 
 Still requires a repository administrator in GitHub:
@@ -266,7 +266,7 @@ Still requires a repository administrator in GitHub:
 
 ## IMPLEMENTATION CHECKLIST
 
-- [ ] Enable branch protection on main
+- [ ] Enable branch protection on main (blocked by the current private-repository plan)
 - [ ] Require PR reviews (1 minimum)
 - [ ] Require status checks passing
 - [ ] Require branches up-to-date

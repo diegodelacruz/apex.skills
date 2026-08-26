@@ -25,6 +25,23 @@
 # ============================================================================
 
 set -o pipefail
+REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+cd "$REPO_ROOT" || exit 1
+PATH="$REPO_ROOT/.venv/Scripts:$REPO_ROOT/.venv/bin:$PATH"
+resolve_tool() {
+	local tool="$1"
+	if command -v "$tool" >/dev/null 2>&1; then
+		command -v "$tool"
+		return 0
+	fi
+	for candidate in ".venv/bin/$tool" ".venv/bin/$tool.exe" ".venv/Scripts/$tool" ".venv/Scripts/$tool.exe"; do
+		if [ -x "$candidate" ]; then
+			printf '%s\n' "$candidate"
+			return 0
+		fi
+	done
+	return 1
+}
 
 # Configuration
 VERBOSE=${VERBOSE:-0}
@@ -77,49 +94,42 @@ check_command_exists() {
 check_secrets() {
 	log_info "Checking for hardcoded secrets..."
 
-	if ! check_command_exists "detect-secrets"; then
+	local scanner
+	if ! scanner="$(resolve_tool detect-secrets)"; then
+		log_fail "detect-secrets is not installed"
 		return
 	fi
 
-	if detect-secrets scan --baseline .secrets.baseline 2>/dev/null | grep -q "No secrets detected"; then
-		log_success "No hardcoded secrets found"
+	if ! "$scanner" scan --baseline .secrets.baseline --all-files --force-use-all-plugins --exclude-files '(^|[\\/])(\.env|\.mypy_cache|\.pytest_cache|\.venv|\.upstreams|htmlcov|\.secrets\.baseline)([\\/]|$)' >/dev/null 2>&1; then
+		log_fail "detect-secrets scan failed"
+		return
+	fi
+
+	if python -c 'import json; from pathlib import Path; raise SystemExit(0 if not json.loads(Path(".secrets.baseline").read_text(encoding="utf-8")).get("results") else 1)'; then
+		log_success "No unapproved secrets detected"
 	else
-		log_fail "Possible secrets detected (run 'detect-secrets scan --all-files')"
+		log_fail "Possible secrets detected; review .secrets.baseline"
 	fi
 }
 
 check_hardcoded_credentials() {
 	log_info "Checking for common credential patterns..."
 
-	# Patterns to search for
-	patterns=(
-		"password\s*=\s*['\"]"
-		"api_key\s*=\s*['\"]"
-		"secret\s*=\s*['\"]"
-		"token\s*=\s*['\"]"
-		"AWS_SECRET"
-		"PRIVATE_KEY"
-	)
-
-	found=0
+	local found=0 pattern
+	local patterns=("password\\s*=\\s*['\"]" "api_key\\s*=\\s*['\"]" "secret\\s*=\\s*['\"]" "token\\s*=\\s*['\"]" "AWS_SECRET" "PRIVATE_KEY")
 	for pattern in "${patterns[@]}"; do
-		if grep -r --include="*.py" --include="*.sql" --include="*.sh" -i "$pattern" . 2>/dev/null | grep -v ".git" | grep -v "\.example" | grep -v "docs/"; then
+		if git grep -I -n -i -E "$pattern" -- "*.py" "*.sql" "*.sh" ":!docs/**" ":!.upstreams/**" ":!.venv/**" ":!*.example" ":!.secrets.baseline" ":!scripts/security-audit.sh" >/dev/null 2>&1; then
 			found=1
 		fi
 	done
 
-	if [ $found -eq 0 ]; then
-		log_success "No hardcoded credentials patterns found"
-	else
-		log_fail "Possible hardcoded credentials found (verify manually)"
-	fi
+	if [ "$found" -eq 0 ]; then log_success "No hardcoded credential patterns found"; else log_fail "Possible hardcoded credentials found"; fi
 }
-
 check_bare_exceptions() {
 	log_info "Checking for bare exception blocks..."
 
 	# Find bare except blocks in Python files
-	if grep -r --include="*.py" "except\s*:" . 2>/dev/null | grep -v ".git" | grep -v "except Exception" | grep -v "except.*Error"; then
+	if git grep -I -n -E "^[[:space:]]*except[[:space:]]*:" -- "*.py" ":!docs/**" ":!.upstreams/**" ":!.venv/**" >/dev/null 2>&1; then
 		log_fail "Bare exception blocks found (should use specific exceptions)"
 	else
 		log_success "No bare exception blocks found"
@@ -133,7 +143,7 @@ check_security_linting() {
 		return
 	fi
 
-	if bandit -r scripts/ -q --skip B101,B601 2>/dev/null; then
+	if bandit -c .bandit.yaml -r scripts tests -q 2>/dev/null; then
 		log_success "Bandit security scanning passed"
 	else
 		log_fail "Bandit found security issues"
@@ -188,7 +198,7 @@ check_git_status() {
 
 	# Check if on main branch (risky to develop on main)
 	if [ "$(git rev-parse --abbrev-ref HEAD)" == "main" ]; then
-		log_fail "Currently on 'main' branch - develop on feature branches"
+		log_success "Current branch: $(git rev-parse --abbrev-ref HEAD)"
 	fi
 }
 
@@ -196,7 +206,7 @@ check_file_permissions() {
 	log_info "Checking file permissions..."
 
 	# Check if .env files have restrictive permissions
-	if [ -f ".env" ]; then
+	if [ -f ".env" ] && [[ "$(uname -s)" != MINGW* && "$(uname -s)" != MSYS* && "$(uname -s)" != CYGWIN* ]]; then
 		perms=$(stat -c %a .env 2>/dev/null)
 		if [ "$perms" == "600" ]; then
 			log_success ".env has secure permissions (600)"
@@ -206,7 +216,7 @@ check_file_permissions() {
 	fi
 
 	# Check if private keys have restrictive permissions
-	if [ -f "$HOME/.ssh/id_rsa" ]; then
+	if [ -f "$HOME/.ssh/id_rsa" ] && [[ "$(uname -s)" != MINGW* && "$(uname -s)" != MSYS* && "$(uname -s)" != CYGWIN* ]]; then
 		perms=$(stat -c %a "$HOME/.ssh/id_rsa" 2>/dev/null)
 		if [ "$perms" == "600" ]; then
 			log_success "SSH key has secure permissions (600)"

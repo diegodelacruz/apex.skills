@@ -13,5 +13,5 @@ Security fixes are applied to the default branch and the latest published releas
 ## Repository controls
 
 Dependabot, secret scanning in CI, Bandit, CODEOWNERS, pull-request review, and branch protection
-are part of the repository governance. Branch protection and required status checks must be enabled
+are part of the repository governance. Branch protection and required status checks must be enabled when the current GitHub plan permits them; the private repository is currently plan-blocked
 by a GitHub repository administrator.

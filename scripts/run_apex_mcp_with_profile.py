@@ -11,7 +11,7 @@ from cli_utils import CLIParser, exit_with_error
 SERVICE = "apex-skills"
 REQUIRED_MAPPING = {
     "ORACLE_DB_USER": "db_user",
-    "ORACLE_DB_PASS": "db_pass",
+    "ORACLE_DB_PASS": "db_pass",  # pragma: allowlist secret
     "ORACLE_DSN": "dsn",
     "APEX_WORKSPACE_ID": "workspace_id",
     "APEX_SCHEMA": "schema",
@@ -19,7 +19,7 @@ REQUIRED_MAPPING = {
 }
 OPTIONAL_MAPPING = {
     "ORACLE_WALLET_DIR": "wallet_dir",
-    "ORACLE_WALLET_PASSWORD": "wallet_pass",
+    "ORACLE_WALLET_PASSWORD": "wallet_pass",  # pragma: allowlist secret
 }
 
 

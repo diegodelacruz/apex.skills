@@ -140,14 +140,14 @@ SELECT * FROM customers WHERE name = ''' || user_input || '''';
 **Probability:** LOW (GitHub 2FA)
 
 **Current Controls:**
-- ✅ GitHub branch protection (planned)
-- ✅ Require PR reviews before merge (planned)
+- ⚠️ GitHub branch protection (blocked by private-repository plan)
+- ⚠️ Require PR reviews before merge (blocked by private-repository plan)
 - ✅ SSH key enforcement for commits
 - ✅ Audit logging in GitHub
 
-**Residual Risk:** MEDIUM → LOW (branch protection needed)
+**Residual Risk:** MEDIUM (branch protection is blocked by the current private-repository plan)
 
-**Required Action:** Enable branch protection on main
+**Required Action:** Enable branch protection on main after upgrading the GitHub plan or changing repository visibility
 
 ---
 
@@ -168,7 +168,7 @@ SELECT * FROM customers WHERE name = ''' || user_input || '''';
 **Current Controls:**
 - ✅ Pinned versions in requirements.txt
 - ✅ requirements.txt is versioned and reviewed; secrets and local environments are excluded
-- ⚠️ No automated dependency scanning (planned)
+- ✅ Dependabot monitors Python and GitHub Actions dependencies
 
 **Residual Risk:** MEDIUM
 
@@ -176,7 +176,7 @@ SELECT * FROM customers WHERE name = ''' || user_input || '''';
 1. Regularly audit `pip list --outdated`
 2. Update dependencies quarterly
 3. Test after updates
-4. Use GitHub Dependabot (planned)
+4. Use the configured GitHub Dependabot policy
 
 ---
 
@@ -196,7 +196,7 @@ SELECT * FROM customers WHERE name = ''' || user_input || '''';
 **Current Controls:**
 - ✅ Git history is immutable (cryptographic hashing)
 - ✅ `.bitacora.json` stored in git history
-- ✅ Commit signatures enforced (planned)
+- ⏳ Commit signatures are not enforced yet
 
 **Residual Risk:** LOW (git provides protection)
 
@@ -242,9 +242,9 @@ SELECT * FROM customers WHERE name = ''' || user_input || '''';
 **Probability:** LOW (review process)
 
 **Current Controls:**
-- ✅ Code review required (planned enforcement)
+- ✅ Code review policy documented; enforcement awaits branch protection
 - ✅ Limited contributor access
-- ✅ Automated testing (46 tests)
+- ✅ Automated testing (119 tests)
 - ✅ Security scanning (Bandit)
 
 **Residual Risk:** LOW (review + testing)
@@ -372,11 +372,11 @@ SELECT * FROM customers WHERE name = ''' || user_input || '''';
 - ✅ Threat model documentation
 - ⏳ GitHub branch protection
 - ⏳ Commit signing (GPG)
-- ⏳ Security audit script
+- ✅ Security audit script
 
 ### Q4 2026
 
-- [ ] GitHub Dependabot integration
+- [x] GitHub Dependabot integration
 - [ ] Automated dependency audit
 - [ ] SIEM logging integration
 - [ ] Penetration testing
