@@ -244,3 +244,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 **Last Updated**: 2026-08-21
 **Status**: Production Ready ✅
 **Quality Score**: 92.1/100
+## Unreleased
+
+- Added the agent-neutral quality matrix and deterministic `audit_quality_score.py` gate.
+- Integrated the quality gate into CI and synchronized the repository inventory contract.
+- Started P-001 for the full audit, independent review, and evidence package.

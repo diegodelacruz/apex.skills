@@ -2,6 +2,10 @@
 
 Framework canónico para agentes que desarrollan, validan, liberan y documentan Oracle APEX 24.1.3 y objetos Oracle relacionados.
 
+La calidad del repositorio se mide con la [Matriz de calidad interagentes](docs/MATRIZ-CALIDAD-INTERAGENTES.md) y el auditor reproducible `python .\scripts\audit_quality_score.py`; un `FAIL` bloquea la publicación.
+
+**Inventario actual:** 18 skills portables, verificadas por el auditor.
+
 **Para developers:** Consulte [CLAUDE.md](CLAUDE.md) — estructura del repositorio, configuración, y desarrollo.
 
 **Para usuarios:** Empiece por [docs/MANUAL-DE-USO.md](docs/MANUAL-DE-USO.md). Describa el objetivo en lenguaje natural: el coordinador detecta el contexto Oracle/APEX y elige las skills especializadas necesarias; no debe escribir `usa apex`.

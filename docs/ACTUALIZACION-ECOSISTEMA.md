@@ -1,5 +1,7 @@
 # Política central de cierre del ecosistema APEX Skills
 
+Esta matriz se complementa con la [Matriz de calidad interagentes](MATRIZ-CALIDAD-INTERAGENTES.md), que define una calificación reproducible de 100 puntos y gates bloqueantes.
+
 Esta matriz forma parte de la [Política canónica de evolución del ecosistema](POLITICA-EVOLUCION-ECOSISTEMA.md). La política canónica tiene precedencia para controlar la evolución; este documento conserva la matriz técnica de cierre.
 
 Esta política es el criterio obligatorio para cerrar cualquier actualización de

@@ -7,7 +7,7 @@ validación y revisión independiente según la política canónica.
 
 ## P-001 — Auditoría integral y calificación del ecosistema
 
-**Estado:** pendiente
+**Estado:** en progreso
 **Objetivo:** llevar el repositorio a una calificación cercana a 100/100 en
 cualquier agente compatible, aplicando estándares de industria y un punto medio
 entre las diferencias de criterio de Codex, Claude, Cursor, Gemini y otros.
@@ -28,6 +28,10 @@ de skills y matriz de compatibilidad entre agentes.
 **Criterio de cierre:** todos los controles aplicables en `PASS`, los `N/A`
 justificados, documentación sincronizada, pruebas ejecutadas, limitaciones
 declaradas y revisión independiente registrada.
+
+**Entregables iniciados:** `docs/MATRIZ-CALIDAD-INTERAGENTES.md` y
+`scripts/audit_quality_score.py`. Falta ejecutar la auditoría completa, corregir
+las brechas documentales que encuentre y registrar revisión independiente.
 
 ## P-002 — Prueba controlada del ciclo de actualización de upstreams
 

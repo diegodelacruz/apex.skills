@@ -31,6 +31,8 @@ jobs:
           pip install -r requirements.txt
       - name: Run ecosystem audit
         run: python scripts/audit_skill_ecosystem.py
+      - name: Run agent-neutral quality score
+        run: python scripts/audit_quality_score.py
       - name: Run tests with coverage
         run: python -m pytest tests -v --cov=scripts --cov-report=xml --cov-report=term
       - name: Check formatting and imports
