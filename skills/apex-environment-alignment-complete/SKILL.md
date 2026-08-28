@@ -2,11 +2,13 @@
 name: apex-environment-alignment-complete
 category: "Apex Environment & Alignment"
 order: 5
-tags: ['environment', 'sync', 'validation', 'governance']
-description: "Validate and synchronize TEST and production APEX environments. Ensure alignment and consistency across deployment targets."
+tags: ["environment", "alignment", "validation", "governance"]
+description: "Validate and align TEST and production APEX environments safely."
 ---
 
 # Complete APEX Environment Alignment
+
+## Workflow
 
 - Use `scripts/manage_apex_credentials.py` to set, check, or validate per-user secure profiles. Never request users to paste credentials into chat, source files, Markdown, or Git.
 - On project start, check TEST/production profile status. Validate only with a read-only connection when authorized. Record profile name/state only.

@@ -2,11 +2,13 @@
 name: apex-database-diagnostics
 category: "Apex Database & Diagnostics"
 order: 1
-tags: ['diagnostics', 'inspection', 'oracle', 'read-only']
-description: "Diagnose APEX and Oracle database errors in TEST and production environments. Use MCP profiles for database inspection and read-only queries."
+tags: ["diagnostics", "inspection", "oracle", "read-only"]
+description: "Diagnose Oracle and APEX errors with read-only TEST or production inspection."
 ---
 
 # APEX Database Diagnostics
+
+## Workflow
 
 1. Identify the requested environment, target application/page/object, and whether the request is inspection, comparison, or a proposed correction.
 2. When the requested environment has a configured MCP profile, use that MCP first (`apex-mcp-test` or `apex-mcp-production`). Do not search local files or test `sqlplus`, `sqlcl`, or other clients as a substitute for an available MCP connection.

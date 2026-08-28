@@ -2,8 +2,8 @@
 name: apex-rest-source-catalogs-safe
 category: "Apex Integration"
 order: 16
-tags: ['rest', 'fusion', 'integration', 'catalog', 'read-only']
-description: "Assess Oracle Fusion Apps REST Source Catalogs for safe APEX integration without importing or storing credentials."
+tags: ["rest", "fusion", "integration", "catalog", "read-only"]
+description: "Assess Fusion REST catalogs for safe APEX integration design."
 ---
 
 # Safe APEX REST Source Catalog Assessment

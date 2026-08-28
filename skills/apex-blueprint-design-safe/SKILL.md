@@ -2,8 +2,8 @@
 name: apex-blueprint-design-safe
 category: "Apex Engineering & Design"
 order: 15
-tags: ['blueprint', 'design', 'scaffolding', 'read-only', 'approval']
-description: "Create reviewable Oracle APEX Application Blueprints from requirements and schema metadata before implementation."
+tags: ["blueprint", "design", "scaffolding", "read-only", "approval"]
+description: "Create reviewable APEX blueprints from approved requirements and metadata."
 ---
 
 # Safe Oracle APEX Blueprint Design

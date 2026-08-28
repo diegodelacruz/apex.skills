@@ -2,8 +2,8 @@
 name: oracle-data-change-governance-final
 category: "Oracle Data Governance"
 order: 13
-tags: ['database', 'governance', 'audit']
-description: "Govern DATA changes with complete audit trail and rollback planning. Manage database modifications with full compliance tracking."
+tags: ["database", "governance", "audit"]
+description: "Govern DATA changes with decisions, rollback, validation, and audit evidence."
 ---
 
 # Final DATA Change Governance

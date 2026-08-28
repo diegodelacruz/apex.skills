@@ -2,11 +2,13 @@
 name: apex-export-qa-safe
 category: "Apex Export & QA"
 order: 6
-tags: ['qa', 'validation', 'export', 'read-only']
-description: "Static QA validation for APEX export ZIP files. Check structure, integrity, and readiness before changes."
+tags: ["qa", "validation", "export", "read-only"]
+description: "Validate APEX export ZIP structure and readiness before changes."
 ---
 
 # Safe Oracle APEX Export QA
+
+## Workflow
 
 - Run `scripts/validate_export.py <zip>` and report its SHA-256 evidence.
 - A `STATIC_PASS` covers only export structure and declared settings. Require runtime/browser evidence for authentication, authorization, navigation, integrations, and business results.

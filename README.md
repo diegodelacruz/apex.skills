@@ -10,6 +10,8 @@ La calidad del repositorio se mide con la [Matriz de calidad interagentes](docs/
 
 **Para usuarios:** Empiece por [docs/MANUAL-DE-USO.md](docs/MANUAL-DE-USO.md). Describa el objetivo en lenguaje natural: el coordinador detecta el contexto Oracle/APEX y elige las skills especializadas necesarias; no debe escribir `usa apex`.
 
+**Para agregar una skill:** siga la [guía canónica de creación](docs/GUIA-CREAR-NUEVA-SKILL.md) antes de crear el directorio o actualizar los catálogos.
+
 **Configuración por agente:**
 - **Para Claude Code**: Consulte [Configuración de Claude Code](docs/setup-claude-code.md) — MCP automático, multi-entorno, interfaz gráfica
 - **Para Codex CLI**: Consulte [uso de skills desde terminal](docs/uso-skills-codex-cli.md) — invocación manual desde terminal, almacenamiento en usuario Codex

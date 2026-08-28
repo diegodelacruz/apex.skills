@@ -31,7 +31,8 @@ apex.skills/
 ├── docs/
 │   ├── MANUAL-DE-USO.md       # User manual (Spanish)
 │   ├── TESTING.md             # Testing guide and coverage info
-│   ├── architecture.md        # System architecture documentation
+│   ├── ARCHITECTURE.md        # System architecture documentation
+│   ├── GUIA-CREAR-NUEVA-SKILL.md # Normative guide for new skills
 │   └── [other reference docs]
 │
 ├── scripts/
@@ -260,7 +261,7 @@ scripts_dir = get_script_dir()  # /home/user/apex.skills/scripts
 
 ## Testing & Coverage
 
-- **119 unit tests** (100% pass rate)
+- **122 unit tests** (100% pass rate)
 - **Target coverage:** 80%
 - **Test markers:** unit, integration, slow, requires_oracle
 - **Frameworks:** pytest (main), pytest-cov (coverage)
@@ -298,6 +299,7 @@ python3 scripts/manage_apex_credentials.py validate apex-mcp-test
 ## Documentation
 
 - `docs/MANUAL-DE-USO.md` - User manual and getting started guide
+- `docs/GUIA-CREAR-NUEVA-SKILL.md` - Normative procedure for creating skills
 - `docs/TESTING.md` - Testing procedures and coverage information
 - `skills/README.md` - Master catalog of all 18 skills
 - `skills/SKILLS-QUICK-REFERENCE.md` - Decision matrix and quick lookup

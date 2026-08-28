@@ -28,7 +28,7 @@ Before making any change, read [the canonical ecosystem evolution policy](POLITI
 4. **Run tests to verify setup:**
    ```bash
    pytest tests/ -v
-   # Should show: 119 passed
+   # Should show the current complete suite passing
    ```
 
 ## Development Workflow
@@ -75,7 +75,7 @@ audit-trail-capture.......................PASSED
 
 ```bash
 pytest tests/ -v
-# Expected: 119 passed
+# Expected: the current complete suite passes
 ```
 
 ### Step 5: Commit Your Changes
@@ -127,7 +127,7 @@ Go to GitHub and create a PR.
 - [ ] Tests added/updated
 - [ ] Documentation updated
 - [ ] Pre-commit hooks pass
-- [ ] 119/119 tests pass
+- [ ] Complete test suite passes
 
 ## Code Standards
 
@@ -199,6 +199,12 @@ except ValueError as e:
 
 ### Skill Files
 
+For a new skill, follow the complete normative procedure in
+[`GUIA-CREAR-NUEVA-SKILL.md`](GUIA-CREAR-NUEVA-SKILL.md) before editing the
+repository. That guide defines the decision record, portable contract,
+routing/catalog synchronization, security review, rollback and independent
+review requirements.
+
 #### SKILL.md Format
 
 ```markdown
@@ -206,7 +212,7 @@ except ValueError as e:
 name: apex-skill-name
 category: "Apex Category"
 order: 5
-tags: ['tag1', 'tag2']
+tags: ["tag1", "tag2"]
 description: "One-line description"
 ---
 
@@ -228,8 +234,8 @@ Step-by-step instructions:
 
 Portable minimum: all skills must have name and description. This repository additionally uses:
 - `name`: Unique skill identifier (lowercase, kebab-case)
-- `category`: "Apex [Category]" format
-- `order`: Unique number (0-14)
+- `category`: Coherent category matching the repository taxonomy, such as "Apex [Category]" or "Oracle Data Governance"
+- `order`: Unique integer; verify it against the current inventory
 - `tags`: Array of 3-5 tags
 - `description`: One-line description (50-100 chars)
 
@@ -239,7 +245,7 @@ Portable minimum: all skills must have name and description. This repository add
 
 ```bash
 pytest tests/ -v
-# Output: 119 passed
+# Output: current complete suite passes
 ```
 
 ### Run Specific Markers
@@ -270,7 +276,10 @@ If adding features, update `CLAUDE.md`:
 If adding/modifying skills:
 - Update `skills/README.md`
 - Update `skills/SKILLS-QUICK-REFERENCE.md`
-- Verify alphabetical ordering
+- Update routing and all affected inventory documentation
+- Verify alphabetical ordering, metadata uniqueness and local links
+- Run the ecosystem and quality auditors
+- Obtain independent review; the modified skill cannot be its only reviewer
 
 ### Add Changelog Entry
 

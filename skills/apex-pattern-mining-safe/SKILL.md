@@ -2,11 +2,13 @@
 name: apex-pattern-mining-safe
 category: "Apex Pattern Mining"
 order: 8
-tags: ['patterns', 'analysis', 'export', 'read-only']
-description: "Extract reusable design patterns and best practices from APEX exports. Analyze existing applications for patterns and optimization opportunities."
+tags: ["patterns", "analysis", "export", "read-only"]
+description: "Extract reusable APEX design patterns from application exports safely."
 ---
 
 # Safe APEX Pattern Mining
+
+## Workflow
 
 1. Run `scripts/mine_export_patterns.py <zip> [...] --json` to obtain evidence from exports.
 2. Inspect representative YAML pages before recommending a pattern. Use SQL only for exact implementation detail.

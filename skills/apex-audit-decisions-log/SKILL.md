@@ -3,7 +3,7 @@ name: apex-audit-decisions-log
 category: "Apex Audit & Decisions"
 order: 0
 tags: ["audit", "documentation", "decisions", "governance", "read-only"]
-description: "View, analyze, and export the complete audit trail and decision log for this project. All changes are automatically captured by git. Use this skill to review decisions, generate audit reports, export to Markdown/PDF, or filter by date/skill/type."
+description: "Review and export project decisions and the Git-backed audit trail."
 ---
 
 # Apex Audit & Decisions Log

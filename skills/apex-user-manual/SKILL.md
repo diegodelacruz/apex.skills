@@ -2,8 +2,8 @@
 name: apex-user-manual
 category: "Apex Documentation"
 order: 12
-tags: ['documentation', 'automation', 'export']
-description: "Generate Word user manual with embedded screenshots and documentation. Create professional user guides from QA evidence."
+tags: ["documentation", "automation", "export"]
+description: "Generate and verify Word user manuals from approved APEX QA evidence."
 ---
 
 # APEX User Manual

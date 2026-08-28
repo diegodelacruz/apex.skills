@@ -2,11 +2,13 @@
 name: apex-page-range-governance
 category: "Apex Page Range Governance"
 order: 7
-tags: ['governance', 'pages', 'validation']
-description: "Reserve and validate APEX page ranges by project. Prevent page conflicts and ensure organized page allocation."
+tags: ["governance", "pages", "validation"]
+description: "Reserve and validate conflict-free APEX page ranges by project."
 ---
 
 # APEX Page Range Governance
+
+## Workflow
 
 1. Require application number, project name, and inclusive page range (`desde` / `hasta`). Ask only for any missing value; require `desde <= hasta`.
 2. Keep existing `control-proyecto/` unchanged. In addition, create the layout in `references/layout-and-register.md` inside the application folder.

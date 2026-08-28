@@ -1,9 +1,9 @@
 ---
 name: apex-ui-craft-safe
-category: "APEX UX Craft"
+category: "Apex UX Craft"
 order: 17
-tags: ['ux', 'ui', 'design', 'usability', 'responsive', 'accessibility', 'motion', 'read-only']
-description: "Improve, assess, or design Oracle APEX user experience with Universal Theme-safe, accessible, responsive, and performance-conscious guidance."
+tags: ["ux", "accessibility", "responsive", "motion", "read-only"]
+description: "Assess and improve accessible, responsive APEX UX with Universal Theme."
 ---
 
 # Safe APEX UI Craft

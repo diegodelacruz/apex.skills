@@ -2,11 +2,13 @@
 name: apex-project-bootstrap-final
 category: "Apex Project Management"
 order: 9
-tags: ['setup', 'initialization', 'bootstrap']
-description: "Initialize a new APEX project with workspace structure and governance policies. Set up control-proyecto and project foundations."
+tags: ["setup", "initialization", "bootstrap", "governance"]
+description: "Initialize an APEX project with workspace and governance foundations."
 ---
 
 # Final APEX Project Bootstrap
+
+## Workflow
 
 1. Create the visible `control-proyecto/` workspace and global decision/master-plan files.
 2. Clone all three canonical upstreams for every new project through `Initialize-ApexSkillUpstreams-V2.ps1`: `apex-mcp`, `zaimella-skill`, and `zaimella-apex-oracle`. Record revisions in the global decision record.

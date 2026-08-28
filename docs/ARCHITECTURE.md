@@ -166,39 +166,19 @@ Commit Created
 
 ## Extensibility: Adding a New Skill
 
-### Step 1: Create Skill Directory
-```bash
-mkdir -p skills/apex-new-feature/references
+The complete normative procedure is in
+[`docs/GUIA-CREAR-NUEVA-SKILL.md`](GUIA-CREAR-NUEVA-SKILL.md). In summary,
+first justify the separation from existing skills, then create the portable
+`SKILL.md`, integrate routing and every affected catalog, and run the complete
+ecosystem audit before independent review. A minimal directory is:
+
+```text
+skills/<nombre-de-skill>/
+└── SKILL.md
 ```
 
-### Step 2: Create SKILL.md with Frontmatter
-```markdown
----
-name: apex-new-feature
-category: "Apex [Category]"
-order: 18
-tags: ['tag1', 'tag2', 'tag3']
-description: "One-line description of what this skill does"
----
-
-# Skill Title
-
-## Workflow
-1. Step one
-2. Step two
-3. Step three
-```
-
-### Step 3: Update Documentation
-```bash
-# Add to skills/README.md
-# Add to skills/SKILLS-QUICK-REFERENCE.md
-```
-
-### Step 4: Verify Metadata
-```bash
-python3 scripts/apex_metadata.py validate skills/apex-new-feature/SKILL.md
-```
+Do not publish a skill that is orphaned, duplicated, missing from a catalog, or
+not covered by reproducible validation and rollback evidence.
 
 ## Security Boundaries
 
@@ -238,7 +218,7 @@ python3 scripts/apex_metadata.py validate skills/apex-new-feature/SKILL.md
 | Utils | Python 3.8+ | Reusable components |
 | Hooks | Bash + Python | Git integration, audit trail |
 | Credentials | system-keyring | Secure storage |
-| Testing | pytest + fixtures | 119 tests, 100% pass rate |
+| Testing | pytest + fixtures | 122 tests, 100% pass rate |
 | Documentation | Markdown | GitHub-friendly docs |
 | Version Control | Git + GitHub | History and collaboration |
 
@@ -278,7 +258,7 @@ Production Ready
 
 - **Audit Trail Capture**: <100ms per commit (pure bash/JSON)
 - **Pre-commit Hooks**: ~2-5 seconds total (Black, isort, Bandit)
-- **Test Suite**: ~200ms (119 tests)
+- **Test Suite**: ~200ms (122 tests)
 - **Skill Execution**: Depends on task (typically 30s-5min)
 
 ## Future Enhancements

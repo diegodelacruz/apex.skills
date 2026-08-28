@@ -13,6 +13,11 @@ Una actualización no está terminada hasta revisar el repositorio completo, no
 sólo los archivos modificados. El inventario real de skills es la fuente de
 verdad operativa; al momento de esta revisión contiene **18 skills**.
 
+Para crear una skill nueva desde el inicio, aplica la [guía canónica de
+creación](GUIA-CREAR-NUEVA-SKILL.md). Esta guía operacionaliza el contrato
+portable, la decisión de separación, la integración en routing y catálogos, y
+los gates de validación y revisión independiente definidos aquí.
+
 ## Compatibilidad con Agent Skills
 
 Cada skill portable debe ser un directorio que contenga un `SKILL.md` en su

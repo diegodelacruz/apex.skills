@@ -1,8 +1,8 @@
 # Security Threat Model & Risk Assessment
 
-**Document Date:** 2026-08-21  
-**Classification:** Internal  
-**Review Frequency:** Quarterly  
+**Document Date:** 2026-08-21
+**Classification:** Internal
+**Review Frequency:** Quarterly
 **Owner:** Security Team
 
 ---
@@ -44,7 +44,7 @@ This document identifies threats, assets, and controls for the apex.skills repos
 
 **Vector:** Commit credentials directly to git history
 
-**Impact:** 
+**Impact:**
 - Unauthorized database access
 - Production environment compromise
 - Exposure of API keys
@@ -244,7 +244,7 @@ SELECT * FROM customers WHERE name = ''' || user_input || '''';
 **Current Controls:**
 - ✅ Code review policy documented; enforcement awaits branch protection
 - ✅ Limited contributor access
-- ✅ Automated testing (119 tests)
+- ✅ Automated testing (122 tests)
 - ✅ Security scanning (Bandit)
 
 **Residual Risk:** LOW (review + testing)
@@ -279,7 +279,7 @@ SELECT * FROM customers WHERE name = ''' || user_input || '''';
 2. Injects SQL injection pattern into procedure
 3. Creates PR with malicious code
 
-**Detection:** 
+**Detection:**
 1. Bandit scanning flags SQL pattern
 2. Code review identifies risk
 3. PR blocked until fixed
@@ -297,7 +297,7 @@ SELECT * FROM customers WHERE name = ''' || user_input || '''';
 
 **Detection:** None currently (vulnerability exists)
 
-**Remediation:** 
+**Remediation:**
 1. GitHub Dependabot alerts
 2. Manual audit quarterly
 3. Pin specific versions
@@ -391,8 +391,8 @@ SELECT * FROM customers WHERE name = ''' || user_input || '''';
 
 ## 7. CONTACT & ESCALATION
 
-**Security Lead:** [To be assigned]  
-**Report Security Issue:** security@example.com  
+**Security Lead:** [To be assigned]
+**Report Security Issue:** security@example.com
 **Emergency:** [Escalation procedure TBD]
 
 ---
