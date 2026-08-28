@@ -1,6 +1,6 @@
 # Auditoría obligatoria
 
-Toda mejora de skill, inicializador, documentación, plan de implementación o entrega APEX debe pasar auditoría antes de declararse terminada. No es opcional ni se sustituye por una revisión visual.
+Toda mejora de skill, inicializador, documentación, plan de implementación o entrega APEX debe pasar auditoría antes de declararse terminada. No es opcional ni se sustituye por una revisión visual. El cierre se rige por la política central de actualización del ecosistema (ACTUALIZACION-ECOSISTEMA.md) y revisa el repositorio completo, no sólo los archivos modificados.
 
 ## Mínimo requerido para este repositorio
 
@@ -11,7 +11,7 @@ python .\scripts\audit_skill_ecosystem.py
 git diff --check
 ```
 
-La auditoría verifica recursos requeridos y enlaces Markdown locales. `git diff --check` detecta errores de espacios en blanco. Para código modificado se ejecuta además la validación correspondiente, por ejemplo:
+La auditoría verifica recursos requeridos y enlaces Markdown locales. La revisión de cierre debe comparar además el inventario real de skills con todos los catálogos y documentos que declaran el número de skills. `git diff --check` detecta errores de espacios en blanco. Para código modificado se ejecuta además la validación correspondiente, por ejemplo:
 
 ```powershell
 python -m py_compile .\scripts\nombre_del_script.py

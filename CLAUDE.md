@@ -4,7 +4,7 @@
 
 **apex.skills** is a canonical framework for Oracle APEX application development and deployment. It provides:
 
-- **15 specialized skills** for design, engineering, QA, governance, and lifecycle management
+- **18 specialized skills** for design, engineering, QA, governance, and lifecycle management
 - **Security-hardened pre-commit hooks** for code quality, secrets detection, and exception validation
 - **Comprehensive audit trail system** (Git-based, zero-token automatic capture)
 - **Governance templates** for page ranges, DATA changes, and environment alignment
@@ -41,7 +41,7 @@ apex.skills/
 │   └── [other utility scripts]
 │
 ├── skills/
-│   ├── README.md              # Master navigation guide (15 skills)
+│   ├── README.md              # Master navigation guide (18 skills)
 │   ├── SKILLS-QUICK-REFERENCE.md  # Quick lookup tables
 │   ├── apex/                  # Coordinator skill (routes requests)
 │   ├── apex-audit-decisions-log/  # Audit trail viewer
@@ -49,12 +49,15 @@ apex.skills/
 │   ├── apex-delivery-lifecycle-complete/
 │   ├── apex-delivery-lifecycle-safe/
 │   ├── apex-engineering-safe/
+│   ├── apex-blueprint-design-safe/  # Reviewable blueprints
 │   ├── apex-environment-alignment-complete/
 │   ├── apex-export-qa-safe/
 │   ├── apex-page-range-governance/
 │   ├── apex-pattern-mining-safe/
 │   ├── apex-project-bootstrap-final/
 │   ├── apex-project-workspace/
+│   ├── apex-rest-source-catalogs-safe/
+│   ├── apex-ui-craft-safe/
 │   ├── apex-solution-design/
 │   ├── apex-user-manual/
 │   └── oracle-data-change-governance-final/
@@ -84,10 +87,10 @@ apex.skills/
 
 ## Skills Organization
 
-All 15 skills are organized with:
+All 18 skills are organized with:
 - **"Apex" prefix** (no emojis) for clear branding
 - **Alphabetical ordering** in menus
-- **Unique order numbers** (0-14) for display sequencing
+- **Unique order numbers** (0-17) for display sequencing
 - **Comprehensive tags** for filtering by workflow, access level, cost
 
 ### Skill Categories
@@ -106,6 +109,9 @@ All 15 skills are organized with:
 | Apex Documentation | apex-user-manual | 12 |
 | Oracle Data Governance | oracle-data-change-governance-final | 13 |
 | Apex Coordinator (Router) | apex | 14 |
+| Apex Engineering & Design | apex-blueprint-design-safe | 15 |
+| Apex Integration | apex-rest-source-catalogs-safe | 16 |
+| Apex UX | apex-ui-craft-safe | 17 |
 
 ---
 
@@ -252,7 +258,7 @@ scripts_dir = get_script_dir()  # /home/user/apex.skills/scripts
 
 ## Testing & Coverage
 
-- **46 unit tests** (100% pass rate)
+- **119 unit tests** (100% pass rate)
 - **Target coverage:** 80%
 - **Test markers:** unit, integration, slow, requires_oracle
 - **Frameworks:** pytest (main), pytest-cov (coverage)
@@ -291,14 +297,14 @@ python3 scripts/manage_apex_credentials.py validate apex-mcp-test
 
 - `docs/MANUAL-DE-USO.md` - User manual and getting started guide
 - `docs/TESTING.md` - Testing procedures and coverage information
-- `skills/README.md` - Master catalog of all 15 skills
+- `skills/README.md` - Master catalog of all 18 skills
 - `skills/SKILLS-QUICK-REFERENCE.md` - Decision matrix and quick lookup
 
 ---
 
 ## Next Steps
 
-1. **Read skills/README.md** - Understand the 15 available skills
+1. **Read skills/README.md** - Understand the 18 available skills
 2. **Run `pytest tests/`** - Verify test suite passes
 3. **Review audit trail** - Run `/apex-audit-decisions-log` to see project history
 4. **Explore a skill** - Pick one skill and read its SKILL.md for detailed workflow
@@ -332,6 +338,6 @@ python3 scripts/manage_apex_credentials.py validate apex-mcp-test
 
 ---
 
-**Last Updated:** 2026-08-21  
-**Version:** 1.0 (Phase 4+5 Complete)  
+**Last Updated:** 2026-08-21
+**Version:** 1.0 (Phase 4+5 Complete)
 **Status:** Production Ready (with noted code quality improvements)

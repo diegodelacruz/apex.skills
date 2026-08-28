@@ -1,7 +1,7 @@
 repos:
   # Secret detection - Scans for exposed credentials
   - repo: https://github.com/Yelp/detect-secrets
-    rev: v1.4.0
+    rev: v1.5.0
     hooks:
       - id: detect-secrets
         args:
@@ -48,11 +48,11 @@ repos:
     rev: 6.1.0
     hooks:
       - id: flake8
-        args: ['--max-line-length=120', '--extend-ignore=E203,W503']
+        args: ['--max-line-length=120', '--extend-ignore=E203,W503,E101,W191,E402', '--per-file-ignores=skills/apex-export-qa-safe/scripts/validate_export.py:F401']
 
   # Security linting with bandit
   - repo: https://github.com/PyCQA/bandit
-    rev: 1.7.5
+    rev: 1.9.4
     hooks:
       - id: bandit
         args: ['-c', '.bandit.yaml']

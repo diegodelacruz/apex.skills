@@ -1,7 +1,7 @@
 ---
 name: apex-ui-craft-safe
 category: "APEX UX Craft"
-order: 14
+order: 17
 tags: ['ux', 'ui', 'design', 'usability', 'responsive', 'accessibility', 'motion', 'read-only']
 description: "Improve, assess, or design Oracle APEX user experience with Universal Theme-safe, accessible, responsive, and performance-conscious guidance."
 ---
@@ -83,4 +83,3 @@ This skill adapts selected design, motion-review, and restraint principles from
 `https://github.com/emilkowalski/skills` (MIT), especially its design-engineering, animation review,
 and opportunity-finding materials. It is not a copy of its React/Expo/Swift/library-selection
 workflows. Preserve MIT attribution if substantial upstream text is ever copied.
-

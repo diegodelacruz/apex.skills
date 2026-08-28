@@ -1,69 +1,126 @@
-# Protocolo de actualización del ecosistema APEX Skills
+# Política central de cierre del ecosistema APEX Skills
 
-Este protocolo es obligatorio cuando se agrega, elimina o cambia una skill, un upstream, un
-script, una referencia de Oracle APEX, una política de seguridad o un flujo de entrega. Su objetivo
-es que una actualización sea coherente, descubrible, auditable y reversible.
+Esta política es el criterio obligatorio para cerrar cualquier actualización de
+`apex.skills`, aunque el cambio sólo afecte a documentación. Aplica a skills,
+catálogos, routing, referencias, scripts, assets, plantillas, configuración,
+seguridad, pruebas y documentación Oracle/APEX.
 
-## Alcance y evidencia inicial
+Una actualización no está terminada hasta revisar el repositorio completo, no
+sólo los archivos modificados. El inventario real de skills es la fuente de
+verdad operativa; al momento de esta revisión contiene **18 skills**.
 
-1. Registre el objetivo, alcance, riesgo, responsable, fecha y decisiones en el espacio de
-   proyecto correspondiente.
-2. Revise `git status`, la rama activa y los cambios remotos antes de editar.
-3. Para cada upstream, registre URL, propietario, licencia, rama o tag, commit SHA, fecha de
-   recuperación, versión objetivo de APEX y la clasificación **adopt**, **adapt** o
-   **reference only**. Consulte [UPSTREAMS.md](UPSTREAMS.md).
-4. No incorpore secretos, muestras de datos, application/workspace IDs, privilegios, SQL de negocio
-   ni dependencias de plug-ins sin revisión explícita.
+## Compatibilidad con Agent Skills
 
-## Implementación y coherencia
+Cada skill portable debe ser un directorio que contenga un `SKILL.md` en su
+raíz. La estructura mínima portable es:
 
-1. Cada skill nueva debe incluir `SKILL.md` con front matter válido (`name`, `category`, `order`,
-   `tags`, `description`) y, cuando el agente la exponga, `agents/openai.yaml`.
-2. Actualice el coordinador `skills/apex/references/routing.md` con la intención del usuario y el
-   flujo especialista más pequeño que la resuelva.
-3. Actualice ambos catálogos: `skills/README.md` y `skills/SKILLS-QUICK-REFERENCE.md`; ajuste el
-   total de skills, categorías y decisiones rápidas cuando corresponda.
-4. Actualice las skills relacionadas para que el nuevo flujo sea invocable desde diseño, QA,
-   seguridad y entrega, sin duplicar autoridad ni alterar aprobaciones.
-5. Actualice los documentos de upstream y seguridad cuando cambie la procedencia, licencia,
-   compatibilidad o política de reutilización.
-6. Para scripts o comportamiento automatizado, agregue pruebas unitarias o de integración
-   proporcionales al riesgo y actualice la documentación de uso.
+```text
+skills/<nombre-de-skill>/
+└── SKILL.md
+```
 
-## Validación obligatoria
+El `SKILL.md` debe comenzar con frontmatter YAML válido que incluya, como
+mínimo:
 
-Ejecute desde la raíz del repositorio antes de entregar o abrir una PR:
+```yaml
+---
+name: nombre-de-skill
+description: Descripción clara, breve y orientada al descubrimiento.
+---
+```
+
+Las reglas portables son:
+
+- `name` es único, coincide exactamente con el directorio y usa minúsculas,
+  kebab-case y nombres estables; no contiene espacios, emojis ni aliases
+  ambiguos.
+- `description` explica qué resuelve la skill, para qué intención debe ser
+  descubierta y cuál es su alcance; debe usar términos que un usuario podría
+  emplear al solicitar la capacidad, sin depender de conocer el nombre de la
+  skill.
+- El cuerpo de `SKILL.md` contiene las instrucciones esenciales y se lee de
+  forma progresiva: primero `SKILL.md`, después sólo las `references/`,
+  `scripts/`, `assets/` o plantillas necesarias para la tarea.
+- Los enlaces y rutas dentro de esos recursos deben ser locales, válidos y
+  relativos al recurso que los declara cuando sea portable.
+
+El repositorio puede añadir extensiones propias para organización y
+descubrimiento local: `category`, `order`, `tags` y
+`agents/openai.yaml`. Estas extensiones no sustituyen `name` ni
+`description`, no forman parte del mínimo portable y no deben presentarse
+como requisitos universales de Agent Skills. En este repositorio,
+`category`, `order` y `tags` se validan por unicidad/coherencia;
+`agents/openai.yaml` sólo se exige cuando la skill se expone mediante ese
+agente.
+
+## Flujo obligatorio de actualización
+
+1. Registre objetivo, alcance, riesgo, responsable, fecha, decisiones,
+   limitaciones y evidencia en el plan/espacio de proyecto correspondiente.
+2. Revise estado Git, rama, cambios remotos, inventario real de
+   `skills/*/SKILL.md` y documentos que declaran el número de skills.
+3. Mantenga el routing mínimo y canónico en
+   `skills/apex/references/routing.md`; no duplique autoridad ni relaje
+   aprobaciones de las skills existentes.
+4. Sincronice todos los catálogos y documentos declarativos, incluidos
+   `skills/README.md`, `skills/SKILLS-QUICK-REFERENCE.md`, `README.md`,
+   `CLAUDE.md`, `docs/ARCHITECTURE.md` y cualquier índice equivalente.
+5. Actualice `CHANGELOG.md`, decisiones y planes cuando el cambio afecte
+   capacidades, gobernanza o criterios de cierre.
+6. Ejecute la matriz siguiente sobre el repositorio completo. Cada control se
+   marca `PASS`, `FAIL` o `N/A`. Todo `N/A` debe incluir una justificación
+   concreta; un `FAIL` bloquea el cierre.
+
+## Matriz de consistencia integral
+
+| ID | Control de cierre | Resultado (`PASS`/`FAIL`/`N/A`) | Evidencia o justificación |
+| --- | --- | --- | --- |
+| C01 | Todos los directorios de skill esperados existen y contienen un `SKILL.md` legible, con frontmatter válido. |  |  |
+| C02 | Cada `name` coincide con el nombre de su directorio; no hay nombres duplicados. |  |  |
+| C03 | Metadatos locales (`category`, `order`, `tags`, cuando existan) son válidos, coherentes y no duplican valores que deban ser únicos. |  |  |
+| C04 | El inventario real coincide con el routing completo; no hay skills huérfanas ni rutas a skills inexistentes. |  |  |
+| C05 | El inventario real se compara con todos los catálogos: README de `skills/`, referencia rápida, README raíz y cualquier índice equivalente. |  |  |
+| C06 | Todo documento que declare el número de skills coincide con el inventario real o identifica explícitamente un dato histórico. |  |  |
+| C07 | `README.md`, `CLAUDE.md` y `docs/ARCHITECTURE.md` describen la misma estructura, conteo, categorías y responsabilidades. |  |  |
+| C08 | Los enlaces Markdown locales en `docs/`, `skills/` y documentos raíz existen y resuelven correctamente. |  |  |
+| C09 | Referencias, scripts, assets, ejemplos y plantillas declarados por las skills existen, son alcanzables y no apuntan a rutas obsoletas. |  |  |
+| C10 | La sintaxis de los artefactos modificados es válida y las pruebas relevantes pasan; la suite completa se ejecuta cuando sea posible. |  |  |
+| C11 | No hay secretos, credenciales, datos sensibles ni artefactos no autorizados; se conserva el formato y el diff no contiene errores de espacios. |  |  |
+| C12 | Si corresponde a Oracle/APEX, se ejecutan las validaciones de sólo lectura, QA, ambientes y evidencias definidas por el flujo aplicable. |  |  |
+| C13 | Si hay SQL nuevo o modificado, pasa el validador de estilo y gobierno Oracle; si no hay SQL, marcar `N/A` y explicar por qué. |  |  |
+| C14 | Changelog, decisiones y planes reflejan el cambio, su alcance, riesgos, aprobaciones y resultado. |  |  |
+| C15 | Existe evidencia reproducible de auditoría, pruebas, limitaciones conocidas y decisión final de cierre. |  |  |
+
+## Comandos mínimos de cierre
+
+Desde la raíz del repositorio:
 
 ```powershell
+git diff --check
 python .\scripts\audit_skill_ecosystem.py
 python -m pytest tests -v
-git diff --check
 git status --short
 ```
 
-La auditoría verifica recursos canónicos y enlaces Markdown locales en `docs/` y `skills/`.
-Un resultado `AUDIT_FAIL`, una prueba fallida o una diferencia con espacios inválidos bloquea la
-entrega. Cuando se modifique Python, ejecute además las comprobaciones aplicables configuradas por
-el repositorio: Black, isort, flake8, mypy, Bandit y detección de secretos.
+Para cambios SQL, además:
 
-## Revisión de entrega
+```powershell
+python .\skills\oracle-data-change-governance-final\scripts\validate_sql_style.py <archivo-o-carpeta-sql>
+```
 
-Confirme como mínimo:
+Para cambios de Python, PowerShell, configuración o integraciones, ejecute las
+validaciones específicas disponibles y registre cuáles no pudieron ejecutarse.
+No se puede declarar “completamente validada” una actualización si una
+validación obligatoria no pudo ejecutarse.
 
-- no hay enlaces rotos, skills huérfanas ni rutas faltantes;
-- las skills nuevas aparecen en el enrutador y en ambos catálogos;
-- los flujos de lectura siguen sin efectuar cambios y los de escritura conservan aprobaciones;
-- se declaró la versión APEX compatible y las dependencias del upstream;
-- se preservaron avisos de licencia y no hay secretos, datos sensibles ni datos de ejemplo no
-  aprobados;
-- existe evidencia de pruebas y auditoría; y
-- se actualizó `CHANGELOG.md` si el cambio afecta capacidades disponibles para usuarios.
+## Criterio final
 
-## Patrón oficial: evaluación antes de adopción
+El cierre requiere: todos los controles aplicables en `PASS`, todos los
+`N/A` justificados, evidencia guardada, limitaciones declaradas y una decisión
+final explícita. La auditoría debe comparar siempre el inventario real de skills
+con todos los catálogos y documentos que declaran ese inventario; actualizar sólo
+el archivo que cambió no satisface esta política.
 
-Para cada ejemplo oficial de Oracle APEX, seleccione una versión compatible y evalúe un único
-patrón por vez. Genere una ficha con: objetivo, procedencia, dependencias de esquema, roles,
-artefactos APEX, seguridad, rendimiento, adaptación necesaria, pruebas y decisión final. No
-importe el ejemplo completo como sustituto de la ficha ni lo promueva sin validación en un entorno
-no productivo.
-
+Esta política gobierna el cierre documental sin modificar las políticas
+Oracle/APEX existentes sobre acceso, aprobaciones, seguridad, ambientes, DATA
+o SQL.

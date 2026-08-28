@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ### Added
 
+- Formalized the ecosystem-wide update closure policy and reconciled the current inventory at 18 skills.
 - Added safe APEX blueprint, Fusion REST Source Catalog, and Universal Theme UX craft workflows.
 - Registered upstream provenance, licenses, and pinned commits.
 
@@ -240,6 +241,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ---
 
-**Last Updated**: 2026-08-21  
-**Status**: Production Ready ✅  
+**Last Updated**: 2026-08-21
+**Status**: Production Ready ✅
 **Quality Score**: 92.1/100

@@ -2,7 +2,7 @@
 
 ## System Overview
 
-apex.skills is a canonical framework for Oracle APEX development with 15 specialized skills,
+apex.skills is a canonical framework for Oracle APEX development with 18 specialized skills,
 security-hardened pre-commit hooks, and an automatic audit trail system.
 
 ### Components
@@ -45,7 +45,7 @@ security-hardened pre-commit hooks, and an automatic audit trail system.
 ## Layers
 
 ### 1. Skills Layer (Highest Level)
-- **15 specialized Oracle APEX skills**
+- **18 specialized Oracle APEX skills**
 - Each skill = SKILL.md file with frontmatter (name, category, order, tags, description)
 - Examples:
   - `apex-engineering-safe` → Inspect and design APEX apps
@@ -176,7 +176,7 @@ mkdir -p skills/apex-new-feature/references
 ---
 name: apex-new-feature
 category: "Apex [Category]"
-order: 15
+order: 18
 tags: ['tag1', 'tag2', 'tag3']
 description: "One-line description of what this skill does"
 ---
@@ -238,7 +238,7 @@ python3 scripts/apex_metadata.py validate skills/apex-new-feature/SKILL.md
 | Utils | Python 3.8+ | Reusable components |
 | Hooks | Bash + Python | Git integration, audit trail |
 | Credentials | system-keyring | Secure storage |
-| Testing | pytest + fixtures | 46 tests, 100% pass rate |
+| Testing | pytest + fixtures | 119 tests, 100% pass rate |
 | Documentation | Markdown | GitHub-friendly docs |
 | Version Control | Git + GitHub | History and collaboration |
 
@@ -278,7 +278,7 @@ Production Ready
 
 - **Audit Trail Capture**: <100ms per commit (pure bash/JSON)
 - **Pre-commit Hooks**: ~2-5 seconds total (Black, isort, Bandit)
-- **Test Suite**: ~200ms (46 tests)
+- **Test Suite**: ~200ms (119 tests)
 - **Skill Execution**: Depends on task (typically 30s-5min)
 
 ## Future Enhancements

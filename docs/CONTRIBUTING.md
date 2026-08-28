@@ -26,7 +26,7 @@ This guide explains how to contribute code, documentation, and improvements.
 4. **Run tests to verify setup:**
    ```bash
    pytest tests/ -v
-   # Should show: 46 passed
+   # Should show: 119 passed
    ```
 
 ## Development Workflow
@@ -73,7 +73,7 @@ audit-trail-capture.......................PASSED
 
 ```bash
 pytest tests/ -v
-# Expected: 46 passed
+# Expected: 119 passed
 ```
 
 ### Step 5: Commit Your Changes
@@ -125,7 +125,7 @@ Go to GitHub and create a PR.
 - [ ] Tests added/updated
 - [ ] Documentation updated
 - [ ] Pre-commit hooks pass
-- [ ] 46/46 tests pass
+- [ ] 119/119 tests pass
 
 ## Code Standards
 
@@ -224,7 +224,7 @@ Step-by-step instructions:
 
 #### Frontmatter Requirements
 
-All skills must have:
+Portable minimum: all skills must have name and description. This repository additionally uses:
 - `name`: Unique skill identifier (lowercase, kebab-case)
 - `category`: "Apex [Category]" format
 - `order`: Unique number (0-14)
@@ -237,7 +237,7 @@ All skills must have:
 
 ```bash
 pytest tests/ -v
-# Output: 46 passed
+# Output: 119 passed
 ```
 
 ### Run Specific Markers
