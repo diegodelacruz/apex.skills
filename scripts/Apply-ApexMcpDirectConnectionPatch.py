@@ -8,7 +8,7 @@ logging.basicConfig(level=logging.WARNING, format="%(levelname)s: %(message)s")
 
 
 ROOT = Path(__file__).resolve().parent.parent
-PACKAGE = ROOT / ".upstreams" / "apex-mcp" / "apex_mcp"
+PACKAGE = ROOT / ".upstreams" / "managed" / "apex-mcp" / "apex_mcp"
 
 
 def replace_once(path, old, new, normalized=False):

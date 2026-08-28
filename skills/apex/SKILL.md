@@ -8,6 +8,8 @@ description: "Coordinate all Oracle Database and Oracle APEX work through canoni
 
 # APEX Coordinator
 
+Before modifying this repository, follow `docs/POLITICA-EVOLUCION-ECOSISTEMA.md`.
+
 1. Infer the Oracle/APEX context from the user objective; never require the user to write `usa apex` or name a skill. For an isolated ambiguous typo with no database context, ask one concise clarification rather than routing incorrectly.
 2. Interpret `<application>.<page>` after words such as page, pagina, página, application, or aplicación as two APEX identifiers, never as a decimal number. Confirm the interpretation only when surrounding context makes it ambiguous.
 3. Classify the request using `references/routing.md`. State the selected workflow only when it helps the user understand a non-obvious decision.

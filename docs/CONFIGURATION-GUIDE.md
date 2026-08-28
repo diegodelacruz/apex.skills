@@ -271,7 +271,7 @@ pytest tests/ -m requires_oracle   # Only Oracle tests
 
 ```
 # MCP integration
--e ./.upstreams/apex-mcp
+-e ./.upstreams/managed/apex-mcp
 
 # Credentials
 keyring>=25.0.0
@@ -334,7 +334,8 @@ control-proyecto/**/screenshots/
 control-proyecto/**/traces/
 
 # Upstreams (large, managed separately)
-.upstreams/
+.upstreams/managed/
+.upstreams/references/
 ```
 
 ---
@@ -397,7 +398,7 @@ pre-commit run --all-files
 ### Credentials leak detected?
 ```bash
 # Remove the secret from file
-# Use system keyring: 
+# Use system keyring:
 python3 scripts/manage_apex_credentials.py set <profile>
 
 # Update baseline:

@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
-# Bootstrap all managed upstream repositories required by apex.skills.
+# Bootstrap managed upstream repositories required by apex.skills.
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-UPSTREAMS_DIR="$ROOT/.upstreams"
+MANAGED_DIR="$ROOT/.upstreams/managed"
 
 declare -A REPOS=(
   [apex-mcp]="https://github.com/TechFernandesLTDA/apex-mcp.git"
@@ -11,10 +11,10 @@ declare -A REPOS=(
   [zaimella-apex-oracle]="https://github.com/zaimella/zaimella-apex-oracle.git"
 )
 
-mkdir -p "$UPSTREAMS_DIR"
+mkdir -p "$MANAGED_DIR"
 
 for name in "${!REPOS[@]}"; do
-  target="$UPSTREAMS_DIR/$name"
+  target="$MANAGED_DIR/$name"
   if [[ -d "$target/.git" ]]; then
     echo "[OK] $name already present"
   elif [[ -e "$target" ]]; then
@@ -26,4 +26,4 @@ for name in "${!REPOS[@]}"; do
   fi
 done
 
-echo "[OK] Managed upstreams ready under $UPSTREAMS_DIR"
+echo "[OK] Managed upstreams ready under $MANAGED_DIR"

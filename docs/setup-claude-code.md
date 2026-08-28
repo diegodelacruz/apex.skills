@@ -1,5 +1,7 @@
 # Configuración de apex.skills para Claude Code
 
+Antes de modificar este repositorio, Claude Code debe leer y cumplir [la política canónica de evolución](POLITICA-EVOLUCION-ECOSISTEMA.md). Ningún archivo puede obligar técnicamente a un agente externo arbitrario; la política se refuerza mediante adaptadores, hooks, CI y revisión independiente.
+
 ## Descripción General
 
 Esta guía cubre la configuración de **apex.skills** para usarlo con **Claude Code** (la interfaz de agentes de Anthropic). A diferencia de Codex CLI, Claude Code proporciona acceso automático al MCP (Model Context Protocol) sin configuración manual de conexiones.

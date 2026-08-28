@@ -1,7 +1,7 @@
 # MCP integration from the managed local upstream
 # NOTE: This requires bootstrap - see CLAUDE.md for setup instructions
 # Optional local MCP runtime. Setup-ApexSkills.ps1 installs this after upstream bootstrap.
-# -e ./.upstreams/apex-mcp
+# -e ./.upstreams/managed/apex-mcp
 
 # Secure per-user TEST/production credential profiles
 keyring>=25.0.0

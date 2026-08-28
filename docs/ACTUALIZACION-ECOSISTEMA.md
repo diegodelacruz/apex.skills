@@ -1,5 +1,7 @@
 # Política central de cierre del ecosistema APEX Skills
 
+Esta matriz forma parte de la [Política canónica de evolución del ecosistema](POLITICA-EVOLUCION-ECOSISTEMA.md). La política canónica tiene precedencia para controlar la evolución; este documento conserva la matriz técnica de cierre.
+
 Esta política es el criterio obligatorio para cerrar cualquier actualización de
 `apex.skills`, aunque el cambio sólo afecte a documentación. Aplica a skills,
 catálogos, routing, referencias, scripts, assets, plantillas, configuración,

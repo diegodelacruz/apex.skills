@@ -10,7 +10,7 @@ from pathlib import Path
 import keyring
 
 root = Path(__file__).resolve().parent.parent
-sys.path.insert(0, str(root / ".upstreams" / "apex-mcp"))
+sys.path.insert(0, str(root / ".upstreams" / "managed" / "apex-mcp"))
 
 from apex_mcp.db import db  # noqa: E402
 from apex_mcp.tools.sql_tools import apex_connect  # noqa: E402

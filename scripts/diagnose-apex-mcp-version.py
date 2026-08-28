@@ -5,7 +5,7 @@ import re
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
-PACKAGE = ROOT / ".upstreams" / "apex-mcp" / "apex_mcp"
+PACKAGE = ROOT / ".upstreams" / "managed" / "apex-mcp" / "apex_mcp"
 
 
 def diagnose():

@@ -45,7 +45,7 @@ if ($InstallSharedDependencies) {
 	throw 'Shared runtime missing. Run again with -InstallSharedDependencies.'
 }
 
-$apexMcpPath = Join-Path $skillsRoot '.upstreams\apex-mcp\apex_mcp'
+$apexMcpPath = Join-Path $skillsRoot '.upstreams\managed\apex-mcp\apex_mcp'
 if (-not (Test-Path -LiteralPath $apexMcpPath)) {
 	throw @"
 Managed upstream 'apex-mcp' is missing.

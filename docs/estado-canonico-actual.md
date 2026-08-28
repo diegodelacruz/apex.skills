@@ -9,9 +9,12 @@
 
 | Fuente | Propósito | Gestión |
 | --- | --- | --- |
-| `apex-mcp` | Herramientas MCP APEX | Inicializador/actualizador V2 |
-| `zaimella-skill` | Estándares, QA, Playwright y manuales | Inicializador/actualizador V2 |
-| `zaimella-apex-oracle` | Fuente privada APEX/Oracle | Inicializador/actualizador V2 |
+| `apex-mcp` | Herramientas MCP APEX | `.upstreams/managed/`; inicializador/actualizador V2 |
+| `zaimella-skill` | Estándares, QA, Playwright y manuales | `.upstreams/managed/`; inicializador/actualizador V2 |
+| `zaimella-apex-oracle` | Fuente privada APEX/Oracle | `.upstreams/managed/`; inicializador/actualizador V2 |
+
+Las referencias opcionales `oracle-apex` y `emilkowalski-skills` viven en
+`.upstreams/references/` y sirven únicamente para consulta o adaptación.
 
 Use `scripts/Initialize-ApexSkillUpstreams-V2.ps1` para preparar una copia nueva y `scripts/Update-ApexSkillUpstreams-V2.ps1` para toda actualización manual, con backup y rollback.
 

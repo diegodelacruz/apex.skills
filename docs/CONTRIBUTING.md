@@ -4,6 +4,8 @@ Thank you for your interest in contributing to apex.skills!
 
 This guide explains how to contribute code, documentation, and improvements.
 
+Before making any change, read [the canonical ecosystem evolution policy](POLITICA-EVOLUCION-ECOSISTEMA.md). It applies to every agent and session. No file can technically force an arbitrary external agent; compliance is reinforced through the canonical policy, agent adapters, hooks, CI, and independent review.
+
 ## Before You Start
 
 ### Prerequisites

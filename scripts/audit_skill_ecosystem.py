@@ -6,6 +6,8 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 REQUIRED = (
+    "AGENTS.md",
+    "docs/POLITICA-EVOLUCION-ECOSISTEMA.md",
     "skills/apex-project-bootstrap-final/SKILL.md",
     "skills/apex-delivery-lifecycle-safe/SKILL.md",
     "skills/oracle-data-change-governance-final/SKILL.md",
@@ -15,6 +17,7 @@ REQUIRED = (
     "scripts/Update-ApexSkillUpstreams-V2.ps1",
     "requirements.txt",
     "docs/decisiones-canonicas-finales.md",
+    "upstreams.lock.json",
 )
 LINK = re.compile(r"\[[^\]]+\]\(([^)]+)\)")
 

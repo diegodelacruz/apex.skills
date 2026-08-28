@@ -1,5 +1,7 @@
 # Uso de APEX Skills desde terminal con Codex CLI
 
+Antes de modificar `apex.skills`, Codex debe leer y cumplir [la política canónica de evolución](POLITICA-EVOLUCION-ECOSISTEMA.md). Ningún archivo puede obligar técnicamente a un agente externo arbitrario; la política se refuerza mediante adaptadores, hooks, CI y revisión independiente.
+
 Una skill no es un comando de PowerShell o CMD. Codex CLI es el agente que descubre y aplica las skills; la terminal se usa para instalar las skills, preparar el MCP y abrir Codex dentro del proyecto.
 
 ## Instalación única en el equipo

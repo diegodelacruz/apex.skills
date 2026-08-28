@@ -16,7 +16,7 @@ description: "Generate Word user manual with embedded screenshots and documentat
 
 ## Workflow
 
-1. Use Browser when available; otherwise use the reusable Playwright runner from `.upstreams/zaimella-skill/skill/qa-apex/scripts/ensure-playwright-env.ps1`. It installs the official `@playwright/test` package and browser runtime. Do not vendor the full Microsoft Playwright source repository.
+1. Use Browser when available; otherwise use the reusable Playwright runner from `.upstreams/managed/zaimella-skill/skill/qa-apex/scripts/ensure-playwright-env.ps1`. It installs the official `@playwright/test` package and browser runtime. Do not vendor the full Microsoft Playwright source repository.
 2. Capture desktop-viewport screenshots through the real authorized navigation path. Wait for report data and spinners to finish. Save image, trace, and coverage evidence in `control-proyecto/qa/<id-cambio>/`.
 3. Create editable manual source in `control-proyecto/manuales/fuentes/`. Use the upstream `documentacion-proyecto-sistemas` manual builder where available; otherwise create a DOCX with the active `documents` skill.
 4. Generate `control-proyecto/manuales/manual_usuario_<version>.docx`.

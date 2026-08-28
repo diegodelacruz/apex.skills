@@ -6,17 +6,17 @@ Para una clonación nueva, ejecute primero:
 
 .\scripts\Setup-ApexSkills.ps1
 
-El script descarga los upstreams, crea .venv, instala requirements.txt e instala el runtime MCP local desde .upstreams/apex-mcp. CI y Dependabot usan solo las dependencias base y no requieren acceso a upstreams privados. Si necesita repetir la instalación base, ejecute python -m pip install -r requirements.txt.
+El script descarga los upstreams, crea .venv, instala requirements.txt e instala el runtime MCP local desde .upstreams/managed/apex-mcp. CI y Dependabot usan solo las dependencias base y no requieren acceso a upstreams privados. Si necesita repetir la instalación base, ejecute python -m pip install -r requirements.txt.
 
 ```powershell
 python -m pip install -r requirements.txt
 ```
 
-requirements.txt instala las dependencias base. El runtime apex-mcp es opcional para CI/Dependabot y se instala localmente por Setup-ApexSkills.ps1 desde .upstreams/apex-mcp.
+requirements.txt instala las dependencias base. El runtime apex-mcp es opcional para CI/Dependabot y se instala localmente por Setup-ApexSkills.ps1 desde .upstreams/managed/apex-mcp.
 
 ## Upstreams administrados
 
-El inicializador administra localmente los tres upstreams canónicos. No deben clonarse manualmente dentro de cada proyecto:
+El inicializador administra localmente los tres upstreams canónicos bajo `.upstreams/managed/`. No deben clonarse manualmente dentro de cada proyecto:
 
 | Repositorio | Uso |
 | --- | --- |
@@ -24,7 +24,11 @@ El inicializador administra localmente los tres upstreams canónicos. No deben c
 | `https://github.com/jefersonKel/zaimella-skill` | Estándares, QA, Playwright y manuales. |
 | `https://github.com/zaimella/zaimella-apex-oracle` | Fuente complementaria APEX/Oracle administrada como upstream local. |
 
-Actualice los tres mediante `Update-ApexSkillUpstreams-V2.ps1`; el inicializador reaplica el patch canónico de conexión directa de `apex-mcp`.
+Actualice los tres mediante `Update-ApexSkillUpstreams-V2.ps1`; use `-IncludeReferences` para incluir las referencias. El inicializador reaplica el patch canónico de conexión directa de `apex-mcp`.
+
+## Referencias opcionales
+
+Oracle APEX y `emilkowalski/skills` se clonan bajo `.upstreams/references/` con `Initialize-ApexSkillUpstreams-V2.ps1 -IncludeReferences`. Son fuentes de consulta/adaptación y no runtime ni destino de importación.
 
 ## Node / Playwright
 
@@ -36,3 +40,10 @@ Playwright no es una dependencia Python. El flujo QA/manual usa el runner upstre
 | --- | --- |
 | `https://github.com/microsoft/playwright` | No clonar; usar el paquete npm oficial mediante el runner upstream. |
 | `https://github.com/jlowin/fastmcp` | Dependencia resuelta por `apex-mcp`. |
+
+## Política de actualización
+
+No actualice upstreams manualmente. Use el registro único `upstreams.lock.json`
+y los scripts canónicos. El flujo hace preflight, crea un backup verificable,
+actualiza mediante fast-forward, valida los commits y revierte automáticamente
+todos los checkouts si falla una actualización.

@@ -37,7 +37,13 @@ evaluated independently from the versioned APEX branches.
 2. Classify every candidate as **adopt**, **adapt**, or **reference only**.
 3. Do not import database objects, sample data, secrets, application IDs, workspace IDs, or
    authorization assumptions without explicit approval and environment validation.
-4. Keep any temporary clones under `.upstreams/`; they are intentionally ignored by tooling.
+4. Keep managed clones under `.upstreams/managed/` and optional reference clones under `.upstreams/references/`; both are intentionally ignored by tooling.
+
+The canonical registry is `upstreams.lock.json`. Managed sources support runtime,
+QA, or integration workflows. Reference sources are optional and are used only
+for consultation or adaptation. Initialize references with
+`Initialize-ApexSkillUpstreams-V2.ps1 -IncludeReferences` and update them with
+`Update-ApexSkillUpstreams-V2.ps1 -IncludeReferences`.
 
 
 ## emilkowalski/skills design reference

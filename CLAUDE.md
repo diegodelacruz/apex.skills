@@ -1,5 +1,7 @@
 # apex.skills - Oracle APEX Development Framework
 
+> Regla obligatoria: leer y cumplir [la política canónica de evolución](docs/POLITICA-EVOLUCION-ECOSISTEMA.md) antes de modificar este repositorio. Ningún archivo puede obligar técnicamente a un agente externo arbitrario; la aplicación efectiva combina política canónica, adaptadores, hooks, CI y revisión independiente.
+
 ## Overview
 
 **apex.skills** is a canonical framework for Oracle APEX application development and deployment. It provides:

@@ -1,18 +1,58 @@
 {
-  "version": 2,
+  "version": 3,
   "repositories": {
     "apex-mcp": {
+      "kind": "managed",
+      "path": ".upstreams/managed/apex-mcp",
       "url": "https://github.com/TechFernandesLTDA/apex-mcp.git",
-      "purpose": "MCP integration reference"
+      "branch": "master",
+      "expected_commit": "878196a71ba757257434e789a414c6f0c2e2d00d",
+      "license": "MIT",
+      "classification": "managed",
+      "purpose": "MCP integration runtime and Oracle/APEX inspection reference"
     },
     "zaimella-skill": {
+      "kind": "managed",
+      "path": ".upstreams/managed/zaimella-skill",
       "url": "https://github.com/jefersonKel/zaimella-skill.git",
+      "branch": "main",
+      "expected_commit": "314685289071097c5233d5277e17f02e1c26bcd8",
+      "license": "not-declared",
+      "classification": "managed",
       "purpose": "APEX standards, QA, Playwright, and manuals"
     },
     "zaimella-apex-oracle": {
+      "kind": "managed",
+      "path": ".upstreams/managed/zaimella-apex-oracle",
       "url": "https://github.com/zaimella/zaimella-apex-oracle.git",
+      "branch": "main",
+      "expected_commit": "c07fea2793106a78d62b5020eaf46eab3e6de40f",
+      "license": "not-declared",
+      "classification": "managed",
       "purpose": "Versioned APEX and Oracle source reference"
+    },
+    "oracle-apex": {
+      "kind": "reference",
+      "path": ".upstreams/references/oracle-apex",
+      "url": "https://github.com/oracle/apex.git",
+      "branch": "26.1",
+      "expected_commit": "cf20339ffd2d9f70daa88b90267201f5cc2bf14f",
+      "license": "UPL-1.0",
+      "classification": "reference-only",
+      "purpose": "Official APEX examples, blueprints, plug-ins, code samples, and REST source catalogs"
+    },
+    "emilkowalski-skills": {
+      "kind": "reference",
+      "path": ".upstreams/references/emilkowalski-skills",
+      "url": "https://github.com/emilkowalski/skills.git",
+      "branch": "main",
+      "expected_commit": "d23d7f88a2e21c9e4b1418c7abe420f5c1052ba7",
+      "license": "MIT",
+      "classification": "adapt",
+      "purpose": "Design-engineering, motion-review, and restraint principles for Universal Theme UX"
     }
   },
-  "update_policy": "manual backup then fast-forward; use V2 scripts"
+  "update_policy": "preflight all selected repositories, verified backup, fast-forward only, validate final commits, automatic rollback on failure",
+  "managed_update_command": ".\\scripts\\Update-ApexSkillUpstreams-V2.ps1",
+  "reference_init_command": ".\\scripts\\Initialize-ApexSkillUpstreams-V2.ps1 -IncludeReferences"
 }

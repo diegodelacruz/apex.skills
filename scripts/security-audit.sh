@@ -100,7 +100,7 @@ check_secrets() {
 		return
 	fi
 
-	if ! "$scanner" scan --baseline .secrets.baseline --all-files --force-use-all-plugins --exclude-files '(^|[\\/])(\.env|\.mypy_cache|\.pytest_cache|\.venv|\.upstreams|htmlcov|\.secrets\.baseline)([\\/]|$)' >/dev/null 2>&1; then
+	if ! "$scanner" scan --baseline .secrets.baseline --all-files --force-use-all-plugins --exclude-files '(^|[\\/])(\.env|\.mypy_cache|\.pytest_cache|\.venv|\.upstreams|\.upstream-backups|upstreams\.lock\.json|htmlcov|\.secrets\.baseline)([\\/]|$)' >/dev/null 2>&1; then
 		log_fail "detect-secrets scan failed"
 		return
 	fi

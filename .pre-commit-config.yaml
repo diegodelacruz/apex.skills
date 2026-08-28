@@ -10,6 +10,7 @@ repos:
         exclude: |
           (?x)^(
             \.mcp\.json\.example|
+            upstreams\.lock\.json|
             tests/fixtures/
           )$
 
@@ -57,6 +58,17 @@ repos:
       - id: bandit
         args: ['-c', '.bandit.yaml']
         exclude: tests/
+
+  # Canonical ecosystem policy and local link/resource audit
+  - repo: local
+    hooks:
+      - id: ecosystem-audit
+        name: Ecosystem audit
+        entry: python scripts/audit_skill_ecosystem.py
+        language: system
+        pass_filenames: false
+        always_run: true
+        stages: [commit]
 
   # DISABLED: Custom hooks
   # Note: validate-exception-handling reads stdin instead of file arguments

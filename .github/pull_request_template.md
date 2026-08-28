@@ -2,6 +2,8 @@
 
 Brief explanation of what this PR does.
 
+Read and comply with [the canonical ecosystem evolution policy](../docs/POLITICA-EVOLUCION-ECOSISTEMA.md).
+
 ## Type of Change
 
 - [ ] New feature
@@ -22,10 +24,13 @@ Closes #(issue number)
 
 ## Documentation
 
+- [ ] Recorded objective, scope, risks, dependencies, decision, and rollback evidence
 - [ ] Updated CLAUDE.md if applicable
+- [ ] Updated AGENTS.md or agent adapters if applicable
 - [ ] Updated relevant SKILL.md files
 - [ ] Updated CONTRIBUTING.md if needed
 - [ ] Updated CHANGELOG.md
+- [ ] Verified routing, catalogs, links, paths, assets, scripts, and dependencies
 
 ## Code Quality
 
@@ -46,6 +51,9 @@ Closes #(issue number)
 
 - [ ] My code follows the style guidelines
 - [ ] I have performed a self-review
+- [ ] An independent human or external-agent review was performed; no in-repository skill/agent was the sole approver
+- [ ] If upstreams changed, preflight, verified backup, fast-forward, final commit validation, and rollback evidence are attached
+- [ ] The full repository audit was executed; every FAIL is resolved and every N/A is justified
 - [ ] I have commented my code, particularly complex logic
 - [ ] I have made corresponding changes to documentation
 - [ ] My changes generate no new warnings

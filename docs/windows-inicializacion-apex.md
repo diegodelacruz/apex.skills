@@ -3,8 +3,8 @@
 ## El Error Que Obtuviste
 
 ```
-ERROR: Unsupported upstream revision: expected code not found in 
-D:\Users\ddelacruz\Desktop\Python\codex\apex.skills\.upstreams\apex-mcp\apex_mcp\db.py
+ERROR: Unsupported upstream revision: expected code not found in
+D:\Users\ddelacruz\Desktop\Python\codex\apex.skills\.upstreams\managed\apex-mcp\apex_mcp\db.py
 ```
 
 ## ¿Por Qué Ocurrió?
@@ -31,9 +31,9 @@ cd D:\Users\ddelacruz\Desktop\Python\codex\apex.skills
 ```
 
 **Esto descargará:**
-- `.upstreams\apex-mcp\` (necesario para el parche)
-- `.upstreams\zaimella-skill\`
-- `.upstreams\zaimella-apex-oracle\`
+- `.upstreams\managed\apex-mcp\` (necesario para el parche)
+- `.upstreams\managed\zaimella-skill\`
+- `.upstreams\managed\zaimella-apex-oracle\`
 
 ### 3. **Después de descargados los upstreams, inicializa el proyecto**
 
@@ -60,12 +60,12 @@ Deberías ver `apex-mcp-test` en la lista.
 ```
 1. Initialize-ApexSkillUpstreams-V2.ps1       ← PRIMERO
    └─ Descarga upstreams (.upstreams/)
-   
-2. Initialize-ApexCodexProject.ps1           ← SEGUNDO  
+
+2. Initialize-ApexCodexProject.ps1           ← SEGUNDO
    └─ Configura TEST profile
    └─ Instala skills
    └─ Registra MCP en Codex
-   
+
 3. Abre Codex CLI o Codex Desktop
    └─ En el proyecto que inicializaste
 ```
@@ -78,7 +78,7 @@ Si necesitas verificar que los upstreams están presentes:
 
 ```powershell
 # Verifica que apex-mcp existe
-Test-Path ".\\.upstreams\\apex-mcp\\apex_mcp"
+Test-Path ".\\.upstreams\\managed\\apex-mcp\\apex_mcp"
 
 # Si devuelve True: ✅ OK
 # Si devuelve False: ❌ Necesitas ejecutar Initialize-ApexSkillUpstreams-V2.ps1
@@ -89,15 +89,15 @@ Test-Path ".\\.upstreams\\apex-mcp\\apex_mcp"
 ## ⚠️ Problemas Comunes en Windows
 
 ### A. "Python command failed"
-**Causa:** Python no está instalado o no está en PATH.  
+**Causa:** Python no está instalado o no está en PATH.
 **Solución:** Ejecuta con `-InstallSharedDependencies` para crear el entorno virtual.
 
 ### B. "Could not install APEX skills for Codex CLI"
-**Causa:** Codex CLI no está disponible.  
+**Causa:** Codex CLI no está disponible.
 **Solución:** Instala Codex CLI primero, o usa Claude Code en su lugar.
 
 ### C. "Could not register apex-mcp-test in Codex"
-**Causa:** El MCP anterior existe pero está mal configurado.  
+**Causa:** El MCP anterior existe pero está mal configurado.
 **Solución:** Ejecuta en Codex:
 ```
 codex mcp remove apex-mcp-test
@@ -122,9 +122,9 @@ Incluye esta información al reportar:
 
 ```powershell
 # 1. Estado de upstreams
-Test-Path ".\.upstreams\apex-mcp"
-Test-Path ".\.upstreams\zaimella-skill"
-Test-Path ".\.upstreams\zaimella-apex-oracle"
+Test-Path ".\.upstreams\managed\apex-mcp"
+Test-Path ".\.upstreams\managed\zaimella-skill"
+Test-Path ".\.upstreams\managed\zaimella-apex-oracle"
 
 # 2. Versión de Python
 python --version
@@ -136,6 +136,6 @@ codex mcp list
 
 ---
 
-**Última actualización:** 2026-08-20  
-**Sistema operativo:** Windows 10/11  
+**Última actualización:** 2026-08-20
+**Sistema operativo:** Windows 10/11
 **PowerShell versión:** 5.0+
