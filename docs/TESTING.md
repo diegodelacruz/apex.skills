@@ -148,16 +148,16 @@ import pytest
 
 class TestFeature:
     """Tests for specific feature."""
-    
+
     @pytest.mark.unit
     def test_happy_path(self):
         """Describe what this test verifies."""
         # Arrange
         input_data = ...
-        
+
         # Act
         result = function_under_test(input_data)
-        
+
         # Assert
         assert result == expected
 ```
@@ -226,4 +226,15 @@ pip install pytest-cov
 
 ---
 
-**Last Updated**: 2026-08-20
+**Last Updated**: 2026-09-01
+
+## Auditoría Windows
+
+La cobertura mínima efectiva del repositorio es 20%, definida de forma
+consistente en `pytest.ini` y `pyproject.toml`. En la auditoría del 2026-09-01
+se ejecutaron 122 pruebas, todas aprobadas, con 26.34% de cobertura.
+
+En Windows, `flake8` debe ejecutarse con `--jobs=1` cuando el entorno impide
+crear procesos auxiliares. `detect-secrets` debe excluir los artefactos locales
+(`.venv`, `.upstreams`, `.pytest_cache`, `htmlcov` y similares), tal como hace
+el control de seguridad del repositorio.

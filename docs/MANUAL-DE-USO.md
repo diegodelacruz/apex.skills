@@ -139,6 +139,7 @@ Las skills especializadas no se eliminan: ayudan al coordinador a aplicar reglas
 | Uso desde PowerShell/CMD | [Uso desde terminal](uso-skills-codex-cli.md) |
 | Instalación y problemas | [Inicialización Codex](inicializacion-automatica-codex.md) |
 | Perfiles TEST/Producción | [Credenciales y alineación de ambientes](credenciales-y-alineacion-ambientes.md) |
+| Habilitar escritura APEX | [Habilitar operaciones de escritura APEX desde Codex](habilitar-escritura-apex.md) |
 | Configuración de Python | [Entornos Python en proyectos](entornos-python-proyectos.md) |
 | Iniciar proyecto APEX | [Iniciar proyecto APEX](iniciar-proyecto-apex.md) |
 | MCP Codex Desktop | [Oracle MCP](codex-desktop-mcp-oracle.md) |

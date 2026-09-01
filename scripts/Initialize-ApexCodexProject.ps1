@@ -10,6 +10,8 @@ $python = Join-Path $skillsRoot '.venv\Scripts\python.exe'
 $wrapper = Join-Path $skillsRoot 'scripts\run_apex_mcp_with_profile.py'
 $credentials = Join-Path $skillsRoot 'scripts\manage_apex_credentials.py'
 $patcher = Join-Path $skillsRoot 'scripts\Apply-ApexMcpDirectConnectionPatch.py'
+$compatibilityPatcher = Join-Path $skillsRoot 'scripts\Apply-ApexMcpApex241CompatibilityPatch.py'
+$compatibilityValidator = Join-Path $skillsRoot 'scripts\Validate-ApexMcpApex241Compatibility.py'
 $handshake = Join-Path $skillsRoot 'scripts\validate_apex_mcp_handshake.py'
 $skillInstaller = Join-Path $skillsRoot 'scripts\Install-ApexSkillsForCodex.ps1'
 $envFile = Join-Path $skillsRoot '.env'
@@ -25,7 +27,7 @@ Write-Host ''
 Write-Host 'APEX Codex Bootstrap' -ForegroundColor Cyan
 Write-Host '--------------------' -ForegroundColor Cyan
 
-if (-not (Test-Path -LiteralPath $wrapper) -or -not (Test-Path -LiteralPath $patcher) -or -not (Test-Path -LiteralPath $handshake) -or -not (Test-Path -LiteralPath $skillInstaller)) {
+if (-not (Test-Path -LiteralPath $wrapper) -or -not (Test-Path -LiteralPath $patcher) -or -not (Test-Path -LiteralPath $compatibilityPatcher) -or -not (Test-Path -LiteralPath $compatibilityValidator) -or -not (Test-Path -LiteralPath $handshake) -or -not (Test-Path -LiteralPath $skillInstaller)) {
 	throw 'Required APEX MCP integration scripts are missing.'
 }
 
@@ -59,6 +61,10 @@ Then run this script again.
 
 Write-Host '[2/7] Applying direct Oracle connection compatibility...'
 Invoke-QuietPython @($patcher)
+Write-Host '[2b/7] Applying APEX 24.1.3 metadata compatibility...'
+Invoke-QuietPython @($compatibilityPatcher)
+Invoke-QuietPython @($compatibilityValidator)
+Write-Host '      [OK] APEX 24.1.3 compatibility patch ready.' -ForegroundColor Green
 Write-Host '      [OK] Direct connection supported; wallet is optional.' -ForegroundColor Green
 
 Write-Host '[3/7] Checking secure TEST profile...'

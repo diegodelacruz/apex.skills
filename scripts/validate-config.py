@@ -29,13 +29,13 @@ def validate_json_file(filepath: str) -> bool:
     try:
         with open(filepath) as f:
             json.load(f)
-        print(f"✅ {filepath} is valid JSON")
+        print(f"PASS {filepath} is valid JSON")
         return True
     except json.JSONDecodeError as e:
-        print(f"❌ {filepath} has JSON error: {e}")
+        print(f"FAIL {filepath} has JSON error: {e}")
         return False
     except FileNotFoundError:
-        print(f"⚠️  {filepath} not found (optional)")
+        print(f"SKIP {filepath} not found (optional)")
         return True
 
 
@@ -61,10 +61,10 @@ def validate_all() -> int:
 
     print()
     if all_valid:
-        print("✅ All configuration files are valid!")
+        print("PASS All configuration files are valid")
         return 0
     else:
-        print("❌ Some configuration files have errors")
+        print("FAIL Some configuration files have errors")
         return 1
 
 
