@@ -46,6 +46,9 @@ La cuenta de Producción debe tener los permisos de ejecución sobre las APIs de
 APEX necesarias para el workspace y esquema objetivo. No se debe conceder un
 `UPDATE` general sobre tablas internas como sustituto de la compatibilidad.
 
+La explicación operativa y el texto listo para enviar al DBA están en
+[Solicitud de permisos DBA para APEX 24.1.3](SOLICITUD-PERMISOS-DBA-APEX-2413.md).
+
 Un `GRANT UPDATE ON APEX_240100.WWV_FLOW_PAGE_PLUGS` podría eliminar el primer
 `ORA-00942`, pero no resolvería los nombres de columnas incompatibles ni las
 restantes herramientas. Además, el DML directo evita validaciones de APEX.
