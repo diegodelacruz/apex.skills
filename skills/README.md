@@ -1,6 +1,6 @@
 # 📚 APEX Skills Catalog
 
-Complete directory of 18 Oracle APEX skills organized by purpose and workflow.
+Complete directory of 19 Oracle APEX and Zaimella skills organized by purpose and workflow.
 
 Use `/skills` in Codex/Claude to see the complete list with descriptions and tags. This page provides detailed navigation and quick reference.
 
@@ -44,6 +44,10 @@ Use `/skills` in Codex/Claude to see the complete list with descriptions and tag
 - **[apex-rest-source-catalogs-safe](./apex-rest-source-catalogs-safe)** - Assess Fusion REST catalogs for safe APEX integration
   - *Tags: rest, fusion, integration, catalog, read-only*
 
+### Zaimella Methodology
+- **[apex-zaimella-gestion-proyectos](./apex-zaimella-gestion-proyectos)** - GPZ: Asesor metodológico para gestión integral de proyectos (RI → AD → DP → EJ → CI)
+  - *Tags: zaimella, gpz, metodologia, proyectos, gestion, simon, formativo*
+
 ### Apex Page Range Governance
 - **[apex-page-range-governance](./apex-page-range-governance)** - Reserve and validate page ranges by project
   - *Tags: governance, pages, validation*
@@ -82,6 +86,7 @@ Use `/skills` in Codex/Claude to see the complete list with descriptions and tag
 | **Quality & Validation** | apex-export-qa-safe, apex-environment-alignment-complete |
 | **Governance & Audit** | apex-page-range-governance, oracle-data-change-governance-final, apex-audit-decisions-log |
 | **Project Management** | apex-project-bootstrap-final, apex-project-workspace |
+| **Project Methodology** | apex-zaimella-gestion-proyectos |
 | **Delivery & Documentation** | apex-delivery-lifecycle-safe, apex-delivery-lifecycle-complete, apex-user-manual |
 | **Diagnostics** | apex-database-diagnostics |
 | **Integration** | apex-rest-source-catalogs-safe |
@@ -90,7 +95,7 @@ Use `/skills` in Codex/Claude to see the complete list with descriptions and tag
 | Access | Skills |
 |--------|--------|
 | **Read-only** | apex-engineering-safe, apex-export-qa-safe, apex-pattern-mining-safe, apex-rest-source-catalogs-safe, apex-ui-craft-safe, apex-database-diagnostics, apex-audit-decisions-log |
-| **Read-write** | apex-solution-design, apex-page-range-governance, apex-project-bootstrap-final, apex-project-workspace, apex-user-manual, apex-delivery-lifecycle-safe, apex-delivery-lifecycle-complete, apex-environment-alignment-complete, oracle-data-change-governance-final |
+| **Read-write** | apex-solution-design, apex-page-range-governance, apex-project-bootstrap-final, apex-project-workspace, apex-user-manual, apex-delivery-lifecycle-safe, apex-delivery-lifecycle-complete, apex-environment-alignment-complete, oracle-data-change-governance-final, apex-zaimella-gestion-proyectos |
 
 ---
 
@@ -104,7 +109,7 @@ Use `/skills` in Codex/Claude to see the complete list with descriptions and tag
 
 ## 📋 All Skills (Alphabetical)
 
-1. apex-audit-decisions-log (NEW!)
+1. apex-audit-decisions-log
 2. apex-blueprint-design-safe
 3. apex-database-diagnostics
 4. apex-delivery-lifecycle-complete
@@ -121,7 +126,8 @@ Use `/skills` in Codex/Claude to see the complete list with descriptions and tag
 15. apex-ui-craft-safe
 16. apex-user-manual
 17. apex (Coordinator)
-18. oracle-data-change-governance-final
+18. apex-zaimella-gestion-proyectos (NEW!)
+19. oracle-data-change-governance-final
 
 ---
 

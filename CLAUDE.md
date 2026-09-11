@@ -6,11 +6,12 @@
 
 **apex.skills** is a canonical framework for Oracle APEX application development and deployment. It provides:
 
-- **18 specialized skills** for design, engineering, QA, governance, and lifecycle management
+- **19 specialized skills** for design, engineering, QA, governance, lifecycle management, and project methodology
 - **Security-hardened pre-commit hooks** for code quality, secrets detection, and exception validation
 - **Comprehensive audit trail system** (Git-based, zero-token automatic capture)
 - **Governance templates** for page ranges, DATA changes, and environment alignment
 - **Development patterns** extracted from production deployments
+- **Zaimella Methodology (GPZ)** integration for comprehensive project management
 
 ---
 
@@ -44,7 +45,7 @@ apex.skills/
 │   └── [other utility scripts]
 │
 ├── skills/
-│   ├── README.md              # Master navigation guide (18 skills)
+│   ├── README.md              # Master navigation guide (19 skills)
 │   ├── SKILLS-QUICK-REFERENCE.md  # Quick lookup tables
 │   ├── apex/                  # Coordinator skill (routes requests)
 │   ├── apex-audit-decisions-log/  # Audit trail viewer
@@ -63,6 +64,7 @@ apex.skills/
 │   ├── apex-ui-craft-safe/
 │   ├── apex-solution-design/
 │   ├── apex-user-manual/
+│   ├── apex-zaimella-gestion-proyectos/  # Zaimella Methodology (GPZ)
 │   └── oracle-data-change-governance-final/
 │
 ├── tests/
@@ -90,10 +92,10 @@ apex.skills/
 
 ## Skills Organization
 
-All 18 skills are organized with:
-- **"Apex" prefix** (no emojis) for clear branding
+All 19 skills are organized with:
+- **"Apex" prefix** (no emojis) for clear branding (+ 1 Zaimella Methodology skill)
 - **Alphabetical ordering** in menus
-- **Unique order numbers** (0-17) for display sequencing
+- **Unique order numbers** (0-18) for display sequencing
 - **Comprehensive tags** for filtering by workflow, access level, cost
 
 ### Skill Categories
@@ -115,6 +117,7 @@ All 18 skills are organized with:
 | Apex Engineering & Design | apex-blueprint-design-safe | 15 |
 | Apex Integration | apex-rest-source-catalogs-safe | 16 |
 | Apex UX | apex-ui-craft-safe | 17 |
+| Zaimella Methodology | apex-zaimella-gestion-proyectos | 18 |
 
 ---
 
