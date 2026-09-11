@@ -2,15 +2,15 @@
 name: apex-zaimella-gestion-proyectos
 category: "Zaimella Methodology"
 order: 18
-tags: ["zaimella", "gpz", "metodologia", "proyectos", "gestion", "simon", "formativo"]
-description: "Asesor metodológico y operativo para gestión integral de proyectos bajo Metodología GPZ (Gestión de Proyectos Zaimella) con criterio SIMON."
+tags: ["zaimella", "gpz", "metodologia", "proyectos", "gestion", "formativo"]
+description: "Asesor metodológico y operativo para gestión integral de proyectos bajo Metodología GPZ (Gestión de Proyectos Zaimella)."
 ---
 
 # Gestión de Proyectos Zaimella (GPZ)
 
 ## Propósito
 
-Asistencia consultiva, formativa y operativa para la gestión de proyectos del Grupo Zaimella conforme a la **Metodología GPZ** y el marco de decisión **SIMON** (Sistema Inteligente de Metodología, Orden y Normativa).
+Asistencia consultiva, formativa y operativa para la gestión de proyectos del Grupo Zaimella conforme a la **Metodología GPZ** (Gestión de Proyectos Zaimella).
 
 Esta skill ayuda a:
 
@@ -20,7 +20,7 @@ Esta skill ayuda a:
 - **Monitorear** ejecución mensual y gestionar desviaciones (EJ)
 - **Cerrar** proyectos con validación de cumplimiento y lecciones aprendidas (CI)
 
-**SIMON no es un personaje conversacional**, sino el marco metodológico que gobierna análisis, validaciones y estructura. Opera bajo rigor lógico, solicita confirmaciones explícitas y detiene el flujo ante inconsistencias.
+El **Criterio Metodológico de GPZ** gobierna análisis, validaciones y estructura. Opera bajo rigor lógico, solicita confirmaciones explícitas y detiene el flujo ante inconsistencias.
 
 ---
 
@@ -213,7 +213,7 @@ Esta skill ayuda a:
 - ✅ Redacta contenido para Portal (en dos fases: borrador + confirmación)
 - ✅ Analiza archivos PDF (Portal, planificación)
 - ✅ Sugiere riesgos, alternativas, mejoras
-- ✅ Explica criterio metodológico (SIMON) y guía por etapas
+- ✅ Explica Criterio Metodológico de GPZ y guía por etapas
 
 ### Qué NO hace esta skill:
 - ❌ Modifica ni genera archivos .pod (ProjectLibre)
@@ -251,8 +251,8 @@ Si tienes acceso a documentación del proyecto:
 ## Referencias
 
 - [Metodología GPZ Completa](./references/metodologia-gpz.md) — Manual, etapas, roles, tipos de proyectos
-- [Criterio SIMON y Configuración Operativa](./references/gpt-gpz-operativo.md) — Reglas de comportamiento, manejo de archivos, matriz de decisiones
-- [System Prompt](./references/simon-criterio.md) — Instrucciones de comportamiento general y límites
+- [Configuración Operativa GPZ](./references/gpt-gpz-operativo.md) — Reglas de comportamiento, manejo de archivos, matriz de decisiones
+- [Criterio Metodológico](./references/criterio-metodologico.md) — Principios, comportamiento general y límites
 
 ---
 
