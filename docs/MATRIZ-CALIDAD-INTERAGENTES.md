@@ -17,6 +17,7 @@ tiene precedencia.
 | Upstreams y procedencia | 10 | lock con URL, rama, commit, licencia, clasificación y propósito |
 | Reproducibilidad técnica | 10 | comandos versionados, pruebas y configuración reproducibles |
 | Trazabilidad del cambio | 5 | objetivo, riesgo, dependencias, rollback, evidencia y decisión |
+| Estándares de programación y seguridad | 10 | formato, tipos, seguridad y hooks versionados |
 
 La puntuación es informativa hasta que todos los gates obligatorios estén en
 `PASS`. Un `FAIL` bloquea publicación aunque la suma sea alta; un `N/A` sólo es
