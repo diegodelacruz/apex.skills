@@ -22,7 +22,12 @@ REQUIRED = (
 LINK = re.compile(r"\[[^\]]+\]\(([^)]+)\)")
 
 
-def main():
+def main() -> int:
+    """Audit required resources and validate Markdown links.
+
+    Returns:
+        0 if audit passes, exits with code 1 if audit fails
+    """
     errors = []
     for rel in REQUIRED:
         if not (ROOT / rel).is_file():
@@ -41,6 +46,7 @@ def main():
         print("\n".join(errors))
         raise SystemExit(1)
     print("AUDIT_PASS: required resources and local Markdown links are valid")
+    return 0
 
 
 if __name__ == "__main__":

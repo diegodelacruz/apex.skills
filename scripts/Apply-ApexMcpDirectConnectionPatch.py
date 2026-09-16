@@ -11,20 +11,20 @@ ROOT = Path(__file__).resolve().parent.parent
 PACKAGE = ROOT / ".upstreams" / "managed" / "apex-mcp" / "apex_mcp"
 
 
-def replace_once(path, old, new, normalized=False):
+def replace_once(path: Path, old: str, new: str, normalized: bool = False) -> bool:
     """Replace code pattern once, with error handling and logging.
 
     Args:
-                    path: Path to file to patch
-                    old: Pattern to find
-                    new: Replacement pattern
-                    normalized: If True, normalize whitespace before matching
+        path: Path to file to patch
+        old: Pattern to find
+        new: Replacement pattern
+        normalized: If True, normalize whitespace before matching
 
     Returns:
-                    True if replacement was made, False if new pattern already present
+        True if replacement was made, False if new pattern already present
 
     Raises:
-                    RuntimeError: If old pattern not found (unsupported upstream revision)
+        RuntimeError: If old pattern not found (unsupported upstream revision)
     """
     try:
         content = path.read_text(encoding="utf-8")
@@ -59,7 +59,7 @@ def replace_once(path, old, new, normalized=False):
     return True
 
 
-def main():
+def main() -> int:
     db_file = PACKAGE / "db.py"
     config_file = PACKAGE / "config.py"
     sql_tools_file = PACKAGE / "tools" / "sql_tools.py"

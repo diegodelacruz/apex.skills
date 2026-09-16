@@ -8,7 +8,8 @@ ROOT = Path(__file__).resolve().parent.parent
 PACKAGE = ROOT / ".upstreams" / "managed" / "apex-mcp" / "apex_mcp"
 
 
-def diagnose():
+def diagnose() -> None:
+    """Diagnose apex-mcp db.py file and display connection patterns found."""
     db_file = PACKAGE / "db.py"
     if not db_file.exists():
         print(f"ERROR: {db_file} not found")
