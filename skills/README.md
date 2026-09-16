@@ -1,6 +1,6 @@
 # 📚 APEX Skills Catalog
 
-Complete directory of 19 Oracle APEX and Zaimella skills organized by purpose and workflow.
+Complete directory of 21 Oracle APEX, Database, and Zaimella skills organized by purpose and workflow.
 
 Use `/skills` in Codex/Claude to see the complete list with descriptions and tags. This page provides detailed navigation and quick reference.
 
@@ -15,6 +15,10 @@ Use `/skills` in Codex/Claude to see the complete list with descriptions and tag
 ### Apex Database & Diagnostics
 - **[apex-database-diagnostics](./apex-database-diagnostics)** - Diagnose APEX and Oracle database errors
   - *Tags: diagnostics, inspection, oracle, read-only*
+
+### Apex Database & Schema
+- **[apex-schema-automation-safe](./apex-schema-automation-safe)** - Create, modify, and drop database objects (tables, views, procedures, functions)
+  - *Tags: database, schema, ddl, automation, full-stack, approval-gated*
 
 ### Apex Delivery & Lifecycle
 - **[apex-delivery-lifecycle-complete](./apex-delivery-lifecycle-complete)** - Complete lifecycle with environment validation and DATA governance
@@ -31,6 +35,10 @@ Use `/skills` in Codex/Claude to see the complete list with descriptions and tag
   - *Tags: blueprint, design, scaffolding, read-only, approval*
 - **[apex-ui-craft-safe](./apex-ui-craft-safe)** - Improve APEX UX, accessibility, responsive behavior, and visual polish
   - *Tags: ux, ui, responsive, accessibility, motion, read-only*
+
+### Apex Page Automation
+- **[apex-page-automation-safe](./apex-page-automation-safe)** - Create, modify, and delete APEX pages with full component control
+  - *Tags: page-creation, automation, design, full-stack, approval-gated*
 
 ### Apex Environment & Alignment
 - **[apex-environment-alignment-complete](./apex-environment-alignment-complete)** - Validate and sync TEST/production environments
@@ -82,7 +90,7 @@ Use `/skills` in Codex/Claude to see the complete list with descriptions and tag
 | Workflow | Skills |
 |----------|--------|
 | **Design & Planning** | apex-solution-design, apex-blueprint-design-safe, apex-pattern-mining-safe, apex-ui-craft-safe |
-| **Engineering & Implementation** | apex-engineering-safe, apex-solution-design |
+| **Engineering & Implementation** | apex-engineering-safe, apex-page-automation-safe, apex-solution-design |
 | **Quality & Validation** | apex-export-qa-safe, apex-environment-alignment-complete |
 | **Governance & Audit** | apex-page-range-governance, oracle-data-change-governance-final, apex-audit-decisions-log |
 | **Project Management** | apex-project-bootstrap-final, apex-project-workspace |
@@ -95,7 +103,7 @@ Use `/skills` in Codex/Claude to see the complete list with descriptions and tag
 | Access | Skills |
 |--------|--------|
 | **Read-only** | apex-engineering-safe, apex-export-qa-safe, apex-pattern-mining-safe, apex-rest-source-catalogs-safe, apex-ui-craft-safe, apex-database-diagnostics, apex-audit-decisions-log |
-| **Read-write** | apex-solution-design, apex-page-range-governance, apex-project-bootstrap-final, apex-project-workspace, apex-user-manual, apex-delivery-lifecycle-safe, apex-delivery-lifecycle-complete, apex-environment-alignment-complete, oracle-data-change-governance-final, apex-zaimella-gestion-proyectos |
+| **Read-write** | apex-solution-design, apex-page-automation-safe, apex-page-range-governance, apex-project-bootstrap-final, apex-project-workspace, apex-user-manual, apex-delivery-lifecycle-safe, apex-delivery-lifecycle-complete, apex-environment-alignment-complete, oracle-data-change-governance-final, apex-zaimella-gestion-proyectos |
 
 ---
 

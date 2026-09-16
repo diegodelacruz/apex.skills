@@ -6,11 +6,13 @@ One-line descriptions for rapid lookup.
 |-------|---------|
 | **apex-audit-decisions-log** | View audit trail, decisions, and generate compliance reports |
 | **apex-database-diagnostics** | Diagnose APEX and Oracle database errors in TEST/production |
+| **apex-schema-automation-safe** | Create, modify, and drop database objects with full control and governance |
 | **apex-delivery-lifecycle-complete** | Complete APEX project lifecycle with governance and releases |
 | **apex-delivery-lifecycle-safe** | Safe end-to-end workflow: design → dev → QA → documentation |
 | **apex-engineering-safe** | Inspect, design, and document APEX apps using exports |
 | **apex-environment-alignment-complete** | Validate and synchronize TEST and production environments |
 | **apex-export-qa-safe** | Static QA validation for APEX export ZIP files |
+| **apex-page-automation-safe** | Create, modify, and delete APEX pages with full component control |
 | **apex-page-range-governance** | Reserve and validate APEX page ranges for projects |
 | **apex-pattern-mining-safe** | Extract design patterns and best practices from exports |
 | **apex-project-bootstrap-final** | Initialize new APEX project with workspace and policies |
@@ -35,6 +37,8 @@ One-line descriptions for rapid lookup.
 | Inspect an existing APEX app | apex-engineering-safe |
 | Design a new APEX app | apex-solution-design |
 | Create a reviewable blueprint first | apex-blueprint-design-safe |
+| Create or modify APEX pages with full control | apex-page-automation-safe |
+| Create or modify database objects (tables, views, procedures) | apex-schema-automation-safe |
 | Learn patterns from existing exports | apex-pattern-mining-safe |
 | Assess a Fusion REST source catalog | apex-rest-source-catalogs-safe |
 | Review UX or responsive/accessibility behavior | apex-ui-craft-safe |
@@ -61,7 +65,7 @@ One-line descriptions for rapid lookup.
 | **Free (On-demand)** | apex-audit-decisions-log (automatic capture, tokens only on view) |
 | **Low (Typical)** | apex-solution-design, apex-page-range-governance, apex-environment-alignment-complete |
 | **Medium (Complex)** | apex-project-bootstrap-final, apex-project-workspace, apex-user-manual, apex-zaimella-gestion-proyectos |
-| **High (Full workflow)** | apex-delivery-lifecycle-safe, apex-delivery-lifecycle-complete, oracle-data-change-governance-final |
+| **High (Full workflow)** | apex-delivery-lifecycle-safe, apex-delivery-lifecycle-complete, apex-page-automation-safe, apex-schema-automation-safe, oracle-data-change-governance-final |
 
 ---
 
