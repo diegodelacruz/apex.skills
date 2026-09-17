@@ -13,11 +13,7 @@ from path_setup import setup_test_path  # noqa: E402
 
 setup_test_path(__file__)
 
-from apex_export_utilities import (  # noqa: E402
-    extract_apex_export_metadata,
-    get_yaml_field,
-    list_export_pages,
-)
+from apex_export_utilities import extract_apex_export_metadata, get_yaml_field, list_export_pages  # noqa: E402
 
 
 class TestGetYamlField:

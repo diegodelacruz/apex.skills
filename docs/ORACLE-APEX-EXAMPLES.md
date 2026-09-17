@@ -1,7 +1,7 @@
 # Oracle/APEX Documentation Policy - Concrete Examples
 
-**Established:** 2026-08-22  
-**Policy Version:** 1.0  
+**Established:** 2026-08-22
+**Policy Version:** 1.0
 **Classification:** Internal Reference
 
 This document provides concrete examples showing how to apply the ORACLE-APEX-DOCUMENTATION-POLICY.md to real code.
@@ -34,44 +34,44 @@ CREATE TABLE user_accounts (
 );
 
 -- Column Documentation: user_id
-comment on column user_accounts.user_id 
+comment on column user_accounts.user_id
 	IS 'Unique identifier for user account. Primary key. Auto-generated sequence.';
 
 -- Column Documentation: username
-comment on column user_accounts.username 
+comment on column user_accounts.username
 	IS 'Unique login username. 3-100 characters. Used for authentication. Case-sensitive.';
 
 -- Column Documentation: email
-comment on column user_accounts.email 
+comment on column user_accounts.email
 	IS 'User email address. Must be unique. Used for password reset and notifications.';
 
 -- Column Documentation: password_hash
-comment on column user_accounts.password_hash 
+comment on column user_accounts.password_hash
 	IS 'SHA-256 hash of password. Never store plain text. Hash includes salt.';
 
 -- Column Documentation: first_name
-comment on column user_accounts.first_name 
+comment on column user_accounts.first_name
 	IS 'User first name. Optional. Maximum 100 characters. For display purposes.';
 
 -- Column Documentation: last_name
-comment on column user_accounts.last_name 
+comment on column user_accounts.last_name
 	IS 'User last name. Optional. Maximum 100 characters. For display purposes.';
 
 -- Column Documentation: created_date
-comment on column user_accounts.created_date 
+comment on column user_accounts.created_date
 	IS 'Timestamp when account created. Automatically set to SYSDATE. Used for audit.';
 
 -- Column Documentation: last_login_date
-comment on column user_accounts.last_login_date 
+comment on column user_accounts.last_login_date
 	IS 'Timestamp of last successful login. NULL if never logged in. Updated by login procedure.';
 
 -- Column Documentation: account_status
-comment on column user_accounts.account_status 
+comment on column user_accounts.account_status
 	IS 'Account status: ACTIVE, SUSPENDED, LOCKED, DELETED. Controls login eligibility.';
 
 -- Table Comment
-ALTER TABLE user_accounts 
-	ADD COMMENT ON TABLE user_accounts 
+ALTER TABLE user_accounts
+	ADD COMMENT ON TABLE user_accounts
 	IS 'User account master table. Stores credentials and profile. Referenced by sessions and permissions.';
 ```
 
@@ -160,9 +160,9 @@ BEGIN
 		RAISE INVALID_USERNAME_FORMAT;
 	END IF;
 
-	SELECT COUNT(*) INTO v_count FROM user_accounts 
+	SELECT COUNT(*) INTO v_count FROM user_accounts
 		WHERE LOWER(username) = LOWER(p_username);
-	
+
 	IF v_count > 0 THEN
 		RAISE USERNAME_ALREADY_EXISTS;
 	END IF;
@@ -172,9 +172,9 @@ BEGIN
 		RAISE INVALID_EMAIL_FORMAT;
 	END IF;
 
-	SELECT COUNT(*) INTO v_count FROM user_accounts 
+	SELECT COUNT(*) INTO v_count FROM user_accounts
 		WHERE LOWER(email) = LOWER(p_email);
-	
+
 	IF v_count > 0 THEN
 		RAISE EMAIL_ALREADY_EXISTS;
 	END IF;
@@ -389,12 +389,12 @@ BEGIN
 	END;
 
 	INSERT INTO audit_log (
-		table_name, operation, user_id, changed_columns, 
+		table_name, operation, user_id, changed_columns,
 		old_values, new_values, timestamp, session_user
 	) VALUES (
-		'USER_ACCOUNTS', v_operation, 
+		'USER_ACCOUNTS', v_operation,
 		NVL(:NEW.user_id, :OLD.user_id),
-		CASE 
+		CASE
 			WHEN UPDATING THEN get_changed_columns('user_accounts', :OLD, :NEW)
 			ELSE NULL
 		END,
@@ -501,7 +501,7 @@ END user_management_pkg;
 3. **Procedures** need PARAMETERS, EXCEPTIONS, and LOGIC FLOW sections
 4. **Functions** require PARAMETERS, RETURNS, and LOGIC FLOW sections
 5. **Views** need BASE QUERY and FILTERS sections
-6. **Triggers** require FIRES, ACTIONS sections  
+6. **Triggers** require FIRES, ACTIONS sections
 7. **Packages** need listing of PUBLIC and PRIVATE procedures/functions
 8. **Comments should be detailed** - future maintainers need to understand the intent, not just the code
 

@@ -37,4 +37,3 @@ The approach selectively adapts the MIT-licensed repository
 motion review, and restraint criteria. React Native, Swift, Sonner, and library-selection skills
 are explicitly out of scope. See [UPSTREAMS.md](UPSTREAMS.md) and
 [ACTUALIZACION-ECOSISTEMA.md](ACTUALIZACION-ECOSISTEMA.md) for provenance and update controls.
-

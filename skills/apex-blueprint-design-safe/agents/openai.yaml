@@ -2,4 +2,3 @@ interface:
   display_name: Safe Oracle APEX Blueprint Design
   short_description: Produce a reviewable APEX blueprint before application implementation.
   default_prompt: Create a safe Oracle APEX Application Blueprint from these requirements and schema metadata.
-

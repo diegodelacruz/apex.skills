@@ -1,7 +1,7 @@
 # Reglas de Formateo Canónicas
 
-**Versión**: 1.0  
-**Estado**: Canónico - Aplica a todos los lenguajes y archivos del proyecto  
+**Versión**: 1.0
+**Estado**: Canónico - Aplica a todos los lenguajes y archivos del proyecto
 **Última actualización**: 2026-08-20
 
 Estas 116 reglas definen el estándar de formateo para SQL, PL/SQL, Python, PowerShell y otros lenguajes aplicables en apex.skills. Son **no negociables** y prevalecen sobre configuraciones automáticas (Black, isort, formatters, etc.).
