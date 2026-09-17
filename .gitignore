@@ -1,3 +1,6 @@
+# OS artifacts
+.DS_Store
+
 # Secrets and local profiles
 .env
 .env.*

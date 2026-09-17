@@ -7,245 +7,135 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ---
 
-## [Unreleased] - 2026-08-25
+## [Unreleased]
 
 ### Added
 
-- Formalized the ecosystem-wide update closure policy and reconciled the current inventory at 18 skills.
-- Added safe APEX blueprint, Fusion REST Source Catalog, and Universal Theme UX craft workflows.
-- Registered upstream provenance, licenses, and pinned commits.
+- Synchronized SKILLS-QUICK-REFERENCE.md with 4 missing skills (apex-code-generation-safe, apex-api-client-safe, apex-automated-testing-safe, apex-data-migration-safe).
+- Re-enabled `validate-exception-handling` pre-commit hook (Python-based, cross-platform).
+- Added 12 new tests for `manage_apex_credentials.py` (coverage 35% → 77%).
+- Documented 7 infrastructure scripts with Status/Tests/Dependencies metadata.
+- Added Infrastructure Scripts table to root README.md.
+- Updated `skills/README.md` alphabetical list to all 30 skills.
+- Added return type annotations to `path_setup.py` functions.
+
+### Removed
+
+- Removed stale milestone files (`HITO-0-DIAGNOSTICO.md`, `HITO-0-RESULTADO.md`, `HITO-2-RESULTADO.md`, `HITO-3-RESULTADO.md`, `PLAN-LARGO-PLAZO.md`).
+- Removed redundant `skills/CANONICAL-SKILLS-ULTIMATE.md` (superseded by `skills/README.md`).
+- Removed tracked `.DS_Store` and added it to `.gitignore`.
+- Cleaned up `.upstream-backups/` directory.
 
 ### Fixed
 
-- Corrected broken links in docs/MANUAL-DE-USO.md and synchronized routing/catalog entries.
+- Fixed test expectation from 21 → 30 skills in `test_quality_audit.py`.
+- Fixed stale reference in `docs/setup-claude-code.md` pointing to removed file.
+
+---
+
+## [1.2.0] - 2026-09-17
+
+### Added
+
+- **4 new technical skills** (HITOs 1-5):
+  - `apex-code-generation-safe` — Safe code generation with validation
+  - `apex-api-client-safe` — REST API client with OAuth2 and retry logic
+  - `apex-automated-testing-safe` — Selenium test generation for APEX UI
+  - `apex-data-migration-safe` — Data migration with rollback support
+- **1 new orchestrator**: `apex-application-generator-complete` — End-to-end APEX app generation (HITOs 1-5)
+- **4 new coordinator orchestrators**:
+  - `apex-data-orchestrator-safe` — Coordinates schema → migration → sync
+  - `apex-design-review-orchestrator` — Coordinates design review workflow
+  - `apex-qa-orchestrator-safe` — Coordinates QA workflows
+  - `apex-delivery-lifecycle-zaimella` — Integrates GPZ + APEX delivery
+- Orchestrator hierarchy tests (`test_orchestrator_hierarchy.py`, `test_orchestration_coordination.py`).
+- Skill dependency matrix (`docs/SKILL-DEPENDENCY-MATRIX.md`).
+- Cross-skill integration guide (`docs/CROSS-SKILL-INTEGRATION.md`).
+- Orchestrator audit documentation (`docs/ORCHESTRATOR-AUDIT.md`).
+- Agent-neutral quality matrix and deterministic `audit_quality_score.py` gate.
+
+### Changed
+
+- Skills inventory: 21 → **30 skills** (26 technical + 4 orchestrators).
+- Orchestration hierarchy: flat → **3-level** (1 Maestro → 5 Coordinators → 26 Technical).
+- Test suite: 202 → **426 tests** (100% pass rate).
+- Quality audit score: 85/100 → **100/100** (all Q01-Q09 passing).
+
+---
+
+## [1.1.0] - 2026-09-17
+
+### Added
+
+- **2 new skills**: `apex-page-automation-safe`, `apex-schema-automation-safe`.
+- Corresponding script modules: `apex_page_generator.py`, `apex_schema_generator.py`, `apex_application_generator.py`, `apex_code_generators.py`, `apex_rest_client.py`, `apex_test_generators.py`, `apex_data_migration.py`.
+- Zaimella Methodology (GPZ) skill (`apex-zaimella-gestion-proyectos`).
+- Input validation for `apex_export_utilities.py`.
+- Ecosystem evolution policy (`docs/POLITICA-EVOLUCION-ECOSISTEMA.md`).
+- Upstream provenance and governance controls.
+- Quality gate integration in CI.
+- APEX 24.1.3 MCP compatibility documentation and patches.
+
+### Changed
+
+- Skills inventory: 15 → 21.
+- Test suite expanded with coverage for new modules.
+- Aligned quality matrix scoring across agents.
+
+---
 
 ## [1.0.0] - 2026-08-21
 
 ### Added
 
-#### Core Framework (Phase 1-5)
-- **15 specialized Oracle APEX skills** with hierarchical organization and menu structure
-- **Coordinator skill** (apex) for intelligent routing to specialized skills
-- **Apex prefix naming convention** (no emojis) for consistent skills menu display
-- **Alphabetical ordering** with unique order numbers (0-14) for display sequencing
+#### Core Framework (Phases 1-5)
+- **15 specialized Oracle APEX skills** with hierarchical organization.
+- **Coordinator skill** (`apex`) for intelligent routing to specialized skills.
+- **Apex prefix naming convention** (no emojis) for consistent display.
+- **Alphabetical ordering** with unique order numbers for sequencing.
 
 #### Security Hardening (Phase 1)
-- **Pre-commit hooks configuration** with 8 integrated checks:
-  - detect-secrets: Prevents committing API keys and credentials
-  - Black: Code formatting (120-char lines, tabs)
-  - isort: Import organization and sorting
-  - Bandit: 73 security linting checks
-  - Flake8: General code quality linting
-  - Custom exception validation: Rejects bare except blocks
-  - Audit trail capture: Zero-token change logging
-  - Large file detection: Prevents >1000 KB commits
-- **Exception validation enforcement** across all Python files
-- **Credentials management via system keyring** (not files, not git)
-- **.secrets.baseline** for detecting known credentials
+- Pre-commit hooks with 8 integrated checks: detect-secrets, Black, isort, Bandit, Flake8, exception validation, audit trail capture, large file detection.
+- Credentials management via system keyring (`manage_apex_credentials.py`).
+- `.secrets.baseline` for known credential detection.
 
-#### Code Quality & Testing (Phase 2-3)
-- **46 comprehensive tests** (100% passing)
-  - Unit tests for CLI, metadata, paths utilities
-  - Integration tests for export processing
-  - Test markers: unit, integration, slow, requires_oracle
-- **Code deduplication**: 3 reusable utility modules
-  - CLIParser: Unified argument parsing (98 lines)
-  - ApexMetadata: YAML field extraction (114 lines)
-  - path_setup: Centralized path handling (80 lines)
-- **Type hints and mypy compatibility** across all modules
-- **Docstrings and documentation** (Google style)
-- **pytest configuration** with coverage targets (80% minimum)
-- **Test fixtures**: f109.zip and f130.zip (actual APEX exports)
+#### Code Quality & Testing (Phases 2-3)
+- 46 comprehensive tests (100% passing).
+- 3 reusable utility modules: CLIParser, ApexMetadata, path_setup.
+- Type hints and docstrings across all modules.
+- Test fixtures: f109.zip and f130.zip (actual APEX exports).
 
 #### Skills Organization (Phase 4)
-- **15 skills with complete frontmatter**:
-  - name: Unique identifier
-  - category: "Apex [Category]" format
-  - order: Unique number (0-14)
-  - tags: Relevant keywords for filtering
-  - description: One-line purpose statement
-- **Alphabetical ordering in menus** with consistent naming
-- **Comprehensive skills catalog** (skills/README.md)
-  - Master navigation with 15 skills
-  - Organized by workflow type (Design, Engineering, QA, Governance, etc.)
-  - Organized by access level (Read-only vs Read-write)
-  - Getting started guide
-- **Quick reference guide** (skills/SKILLS-QUICK-REFERENCE.md)
-  - One-line descriptions for rapid lookup
-  - Decision trees ("I want to..." → which skill to use)
-  - Skills organized by token cost (Free → High)
+- 15 skills with complete YAML frontmatter (name, category, order, tags, description).
+- Skills catalog (`skills/README.md`) and quick reference (`skills/SKILLS-QUICK-REFERENCE.md`).
 
 #### Audit Trail System (Phase 5)
-- **Git-based automatic audit trail capture** (zero tokens for background)
-  - audit-trail-capture pre-commit hook (.hooks/pre-commit.sh)
-  - Records: timestamp, author, branch, files changed
-  - Stored in control-proyecto/.bitacora.json (auto-generated, not committed)
-- **Apex Audit & Decisions Log skill** (apex-audit-decisions-log)
-  - Visualize audit trail and decisions
-  - Filter by date, skill, author
-  - Export to Markdown/PDF
-  - Read-only safe access
-- **Audit report template** (.bitacora.template.md)
-  - Executive summary structure
-  - Decisions ledger
-  - Skills invocation history
-  - Compliance audit checklist
-- **Configuration file** (.claude/settings.json)
-  - Audit system settings (enabled, auto_capture, smart_analysis)
-  - Hooks configuration with script paths
-  - Skills organization metadata
+- Git-based automatic audit trail capture (zero tokens).
+- `apex-audit-decisions-log` skill for visualization and export.
+- Configuration in `.claude/settings.json`.
 
 #### Repository Organization
-- **Clean root directory** (12 focused files)
-- **Organized docs/ directory** (MANUAL-DE-USO.md, TESTING.md, ARCHITECTURE.md, etc.)
-- **Test fixtures** in tests/fixtures/apex-exports/ (2 APEX export ZIPs)
-- **Hooks in .hooks/** directory (.hooks/pre-commit.sh, .hooks/README.md)
-- **CLAUDE.md** - Comprehensive repository documentation (337 lines)
-- **CONTRIBUTING.md** - Developer workflow guide with examples
-- **CONFIGURATION-GUIDE.md** - Detailed configuration documentation
-- **ARCHITECTURE.md** - System design with component diagrams
-- **PR template** (.github/pull_request_template.md)
-- **validate-config.py** - Configuration validation script
-
-### Fixed
-
-#### Phase 1-2
-- Hardened security with 8-hook pre-commit framework
-- Eliminated code duplication across 11 scripts
-- Standardized argument parsing and path handling
-
-#### Phase 3
-- Expanded test coverage from 13 to 46 tests (+254% improvement)
-- Normalized indentation across 14 Python files (100% tabs)
-- Added missing type hints and docstrings
-
-#### Phase 4-5
-- Fixed missing 'description' field in 13 SKILL.md files
-- Fixed MCP configuration (.mcp.json.example) with incorrect script invocation
-- Fixed repository organization (moved docs, fixtures, hooks)
-- Verified all 15 skills have complete frontmatter
-
-### Changed
-
-#### Repository Structure
-- Moved MANUAL-DE-USO.md and TESTING.md to docs/
-- Moved test data from apps/ to tests/fixtures/apex-exports/
-- Moved pre-commit hook from .bitacora.hook.sh to .hooks/pre-commit.sh
-- Updated .claude/settings.json references to new paths
-- Updated .pre-commit-config.yaml to reference new hook location
-
-#### Configuration
-- Enhanced .mcp.json.example with correct paths
-- Updated .pre-commit-config.yaml with audit-trail-capture hook
-- Added pytest-cov to requirements.txt for coverage reporting
-- Added .bitacora.json to .gitignore to prevent audit bloat
+- CLAUDE.md, CONTRIBUTING.md, ARCHITECTURE.md, CONFIGURATION-GUIDE.md.
+- PR template, CI workflow, security audit script.
 
 ### Security
 
-- ✅ No hardcoded secrets in codebase
-- ✅ Pre-commit secrets detection enabled (detect-secrets hook)
-- ✅ Credentials stored securely in system keyring (per-user, encrypted)
-- ✅ Exception validation preventing bare except blocks
-- ✅ Bandit security scanning with 73 checks enabled
-- ✅ Private key detection for all file types
-- ✅ Screenshots and traces excluded from version control
-
-### Performance
-
-- **Audit trail capture**: <100ms per commit (pure bash/JSON, zero tokens)
-- **Pre-commit hooks**: ~2-5 seconds total (Black, isort, Bandit)
-- **Test suite**: ~200ms (46 tests, 100% pass rate)
-- **Skill execution**: Depends on task (typically 30s-5min)
-- **Zero-token audit trail**: Automatic background capture, tokens only on visualization
-
-### Testing
-
-- **46 tests: 100% passing** (from baseline of 13)
-- **Test coverage**: 80% minimum (branch coverage enabled)
-- **Test markers**: unit, integration, slow, requires_oracle
-- **Fixtures**: 2 APEX export ZIPs (f109.zip, f130.zip)
-- **Test organization**: 5 test files covering 4 core utility modules
-- **Pytest configuration**: Comprehensive with coverage reports
+- No hardcoded secrets in codebase.
+- Pre-commit secrets detection, Bandit scanning (73 checks), private key detection.
+- Credentials stored in system keyring (per-user, encrypted).
 
 ---
 
-## Future Roadmap
+## Metrics
 
-### Version 1.1.0 (Planned)
-- [ ] GitHub Actions CI/CD pipeline
-- [ ] Type hints 100% coverage
-- [ ] Integration tests for skill workflows
-- [ ] API documentation and SDK
-
-### Version 1.2.0 (Planned)
-- [ ] Skill marketplace/registry
-- [ ] Analytics dashboard for audit trail
-- [ ] Advanced filtering and export options
-- [ ] Multi-language support (Spanish/English)
-
-### Version 2.0.0 (Long-term Vision)
-- [ ] Web UI for skill management
-- [ ] Advanced audit trail analytics
-- [ ] Enterprise deployment options
-- [ ] Team collaboration features
-- [ ] Skill versioning and rollback
+| Metric | Value |
+|--------|-------|
+| Skills | 30 (26 technical + 4 orchestrators) |
+| Tests | 426 (100% pass rate) |
+| Coverage | 62.68% |
+| Quality Score | 100/100 |
+| Pre-commit Hooks | 14/14 passing |
 
 ---
 
-## Metrics & Health
-
-### Project Health Score: 92.1/100 ⭐⭐⭐⭐⭐
-
-| Category | Score | Status |
-|----------|-------|--------|
-| Skill Metadata | 100/100 | PERFECT ✅ |
-| Structure | 98/100 | EXCELLENT ✅ |
-| Configuration | 98/100 | EXCELLENT ✅ |
-| Documentation | 95/100 | EXCELLENT ✅ |
-| Security | 95/100 | EXCELLENT ✅ |
-| Git Practices | 92/100 | EXCELLENT ✅ |
-| Testing | 85/100 | GOOD ✅ |
-| Code Quality | 82/100 | GOOD ✅ |
-| Audit Trail | 90/100 | GOOD ✅ |
-
-### Improvement from Baseline
-
-- **Starting Point**: 82/100 (Phase 1-3 complete)
-- **After Reorganization**: 92.1/100
-- **Improvement**: +10.1 points (+12.3%)
-
----
-
-## Versioning Strategy
-
-- **MAJOR** (1.0.0): Breaking changes or major feature releases
-- **MINOR** (1.1.0): New features (backward compatible)
-- **PATCH** (1.0.1): Bug fixes (backward compatible)
-
----
-
-## How to Use This Changelog
-
-- **For users**: Check latest version to see new skills and features
-- **For developers**: Read "Added" section for new APIs and utilities
-- **For maintainers**: Reference for version planning and roadmap
-
----
-
-## Links
-
-- [1.0.0 Release](https://github.com/diegodelacruz/apex.skills/releases/tag/v1.0.0)
-- [CLAUDE.md](CLAUDE.md) - Repository documentation
-- [CONTRIBUTING.md](docs/CONTRIBUTING.md) - Developer guide
-- [ARCHITECTURE.md](docs/ARCHITECTURE.md) - System design
-
----
-
-**Last Updated**: 2026-08-21
-**Status**: Production Ready ✅
-**Quality Score**: 92.1/100
-## Unreleased
-
-- Added the agent-neutral quality matrix and deterministic `audit_quality_score.py` gate.
-- Integrated the quality gate into CI and synchronized the repository inventory contract.
-- Started P-001 for the full audit, independent review, and evidence package.
+**Last Updated**: 2026-09-17

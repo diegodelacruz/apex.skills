@@ -118,7 +118,7 @@ Los skills se invocaban automáticamente según el contexto Oracle/APEX detectad
 | `apex-database-diagnostics` | Diagnosticar problemas DB | Manual o error detectado |
 | `oracle-data-change-governance-final` | Gobernar cambios en datos | Manual o cambios DATA detectados |
 
-Consulta `skills/CANONICAL-SKILLS-ULTIMATE.md` para la lista completa.
+Consulta `skills/README.md` para la lista completa.
 
 ## Comparación: Codex CLI vs Claude Code
 
