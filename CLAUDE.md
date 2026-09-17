@@ -324,14 +324,14 @@ python3 scripts/manage_apex_credentials.py validate apex-mcp-test
 - `docs/MANUAL-DE-USO.md` - User manual and getting started guide
 - `docs/GUIA-CREAR-NUEVA-SKILL.md` - Normative procedure for creating skills
 - `docs/TESTING.md` - Testing procedures and coverage information
-- `skills/README.md` - Master catalog of all 21 skills
+- `skills/README.md` - Master catalog of all 30 skills
 - `skills/SKILLS-QUICK-REFERENCE.md` - Decision matrix and quick lookup
 
 ---
 
 ## Next Steps
 
-1. **Read skills/README.md** - Understand the 21 available skills
+1. **Read skills/README.md** - Understand the 30 available skills
 2. **Run `pytest tests/`** - Verify test suite passes
 3. **Review audit trail** - Run `/apex-audit-decisions-log` to see project history
 4. **Explore a skill** - Pick one skill and read its SKILL.md for detailed workflow

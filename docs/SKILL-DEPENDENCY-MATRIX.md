@@ -153,7 +153,7 @@ DEPENDENCIES:
 COORDINATES:
   - apex-schema-automation-safe (DDL governance)
   - apex-data-migration-safe (DATA governance)
-  D ▶ scripts/validate_sql_style.py (security gate)
+  D ▶ skills/oracle-data-change-governance-final/scripts/validate_sql_style.py (security gate)
 
 BLOCKS:
   C ✗ No direct SQL execution (use orchestrators)
@@ -420,7 +420,7 @@ DEPENDENCIES:
 COORDINATES:
   - apex-schema-automation-safe (DDL)
   - apex-data-migration-safe (DATA)
-  D ▶ scripts/validate_sql_style.py (security)
+  D ▶ skills/oracle-data-change-governance-final/scripts/validate_sql_style.py (security)
 
 GATES:
   - All DATA changes must pass governance
@@ -554,7 +554,7 @@ DEPENDENCIES:
 
 COORDINATES:
   - apex-export-qa-safe (evidence source)
-  - scripts/audit_docx_images.py (image audit)
+  - upstream: zaimella-skill audit_docx_images.py (image audit)
 
 PRODUCES:
   - Word manual (.docx)

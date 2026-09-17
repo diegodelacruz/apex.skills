@@ -178,13 +178,13 @@ jobs:
           python-version: '3.11'
       - run: pip install -r requirements.txt
       - run: pytest tests/ -v
-      - run: python scripts/security-audit.sh
-      - run: bash scripts/validate-oracle-documentation.py
+      - run: bash scripts/security-audit.sh
+      - run: python scripts/validate-oracle-documentation.py
 ```
 
 ### Checks Required
 
-- ✅ Tests passing (46/46)
+- ✅ Tests passing (426/426)
 - ✅ Security audit passing
 - ✅ Type checking (mypy)
 - ✅ Linting (pylint, flake8)

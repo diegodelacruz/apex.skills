@@ -276,7 +276,7 @@ When creating a new skill, verify it:
 | apex-database-diagnostics | Diagnostics, analysis | None (read-only) | oracle-data-change-governance-final (if corrections) |
 | apex-audit-decisions-log | Audit visualization | None (read-only) | (displays .bitacora.json) |
 | apex-rest-source-catalogs-safe | REST integration guidance | apex-solution-design (context) | (advisory only) |
-| apex-user-manual | Documentation generation | apex-export-qa-safe (approved QA) | scripts/audit_docx_images.py |
+| apex-user-manual | Documentation generation | apex-export-qa-safe (approved QA) | (upstream: zaimella-skill audit_docx_images.py) |
 | apex-zaimella-gestion-proyectos | Methodology guidance | None (advisory) | apex-delivery-lifecycle-zaimella |
 
 ---
