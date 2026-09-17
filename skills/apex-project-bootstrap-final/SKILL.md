@@ -12,7 +12,7 @@ description: "Initialize an APEX project with workspace and governance foundatio
 
 1. Create the visible `control-proyecto/` workspace and global decision/master-plan files.
 2. Clone all three canonical upstreams for every new project through `Initialize-ApexSkillUpstreams-V2.ps1`: `apex-mcp`, `zaimella-skill`, and `zaimella-apex-oracle`. Record revisions in the global decision record.
-3. Run `Initialize-ApexCodexProject.ps1 -ProjectPath <project-root>` to verify the global `apex-mcp-test` registration without duplicating it. If its shared runtime is absent, install dependencies only when automatic approval is enabled; otherwise ask once and use `-InstallSharedDependencies` only after approval.
+3. Run `Initialize-ApexCodexProject.ps1 -ProjectPath <project-root>` only to prepare local resources and observe the separate Oracle/APEX profile states. The bootstrap does not register MCP, run a handshake, or alter the managed upstream. Use `-SkipRemoteProbe` when no Oracle connection is authorized; otherwise a ready profile may receive only the read-only `dual` probe.
 4. Use the shared `<skills-repository>/.venv` by default. Create a project `.venv` only for project-specific dependencies, isolated CI, or explicit user instruction.
 5. Present relevant canonical decisions before implementation. A documented explicit project decision overrides a canonical default only for that project.
 6. APEX target is 24.1.3. The 24.2 `apex-mcp` upstream is inspection/dry-run only until a compatibility test in TEST is explicitly approved and passes. Do not execute its mutating tools against APEX 24.1.3.

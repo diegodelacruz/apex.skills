@@ -9,16 +9,23 @@ import pytest
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "scripts"))
 
-from manage_apex_credentials import (
+from manage_apex_credentials import (  # noqa: E402
     ALLOWED_MODULES,
+    APEX_REQUIRED_FIELDS,
+    APEX_SERVICE,
     REQUIRED_FIELDS,
     SERVICE,
+    apex_status,
+    classify_connection_error,
     connection_kwargs,
     get_profile,
     import_env_profile,
     import_module_safe,
     main,
+    oracle_error_code,
     parse_env,
+    probe,
+    save_apex_profile,
     save_profile,
     status,
     validate,
@@ -108,12 +115,18 @@ class TestGetProfile:
 
     @pytest.mark.unit
     def test_get_profile_invalid_json(self):
-        """Handle invalid JSON in keyring."""
+        """Malformed keyring JSON is treated as an invalid, non-throwing profile."""
         mock_keyring = MagicMock()
         mock_keyring.get_password.return_value = "invalid json"
 
-        with pytest.raises(json.JSONDecodeError):
-            get_profile(mock_keyring, "test")
+        assert get_profile(mock_keyring, "test") is None
+
+    @pytest.mark.unit
+    def test_get_profile_keyring_exception_is_non_throwing(self):
+        mock_keyring = MagicMock()
+        mock_keyring.get_password.side_effect = RuntimeError("backend unavailable")
+
+        assert get_profile(mock_keyring, "test") is None
 
 
 class TestSaveProfile:
@@ -380,6 +393,23 @@ class TestStatus:
 
         assert result == 1
 
+
+class TestApexProfiles:
+    @pytest.mark.unit
+    def test_apex_profile_is_stored_in_a_separate_service(self):
+        keyring = MagicMock()
+        profile = {field: f"value_{field}" for field in APEX_REQUIRED_FIELDS}
+        with patch("builtins.print"):
+            save_apex_profile(keyring, "test", profile)
+        assert keyring.set_password.call_args[0][0] == APEX_SERVICE
+
+    @pytest.mark.unit
+    def test_apex_status_missing_does_not_use_oracle_profile(self):
+        keyring = MagicMock()
+        keyring.get_password.return_value = None
+        with patch("builtins.print"):
+            assert apex_status(keyring, "test") == 1
+
     @pytest.mark.unit
     def test_status_profile_incomplete(self):
         """Status returns 1 for incomplete profile."""
@@ -454,6 +484,131 @@ class TestValidate:
         assert result == 1
 
 
+class TestProbe:
+    @pytest.mark.unit
+    def test_probe_missing_profile_is_non_throwing(self):
+        keyring = MagicMock()
+        keyring.get_password.return_value = None
+        with patch("builtins.print") as output:
+            assert probe(keyring, "test") == 1
+        assert "ORACLE_PROFILE_MISSING" in output.call_args[0][0]
+
+    @pytest.mark.unit
+    def test_probe_uses_only_dual_for_session_identity(self):
+        source = (
+            Path(__file__)
+            .resolve()
+            .parent.parent.joinpath("scripts", "manage_apex_credentials.py")
+            .read_text(encoding="utf-8")
+        )
+        probe_source = source[source.index("def probe") : source.index("def main")]
+        assert "from dual" in probe_source.lower()
+        assert "v$instance" not in probe_source.lower()
+
+    @pytest.mark.unit
+    @pytest.mark.parametrize("code", ("01017", "28000", "28001"))
+    def test_authentication_errors_are_classified(self, code):
+        assert classify_connection_error(Exception(f"ORA-{code}: simulated")) == "ORACLE_AUTH_FAIL"
+
+    @pytest.mark.unit
+    @pytest.mark.parametrize("code", ("12154", "12514", "12541"))
+    def test_connection_errors_are_classified(self, code):
+        assert classify_connection_error(Exception(f"ORA-{code}: simulated")) == "ORACLE_CONNECTION_FAIL"
+
+    @pytest.mark.unit
+    def test_unknown_error_is_probe_failure(self):
+        assert classify_connection_error(Exception("unclassified")) == "ORACLE_PROBE_FAIL"
+        assert oracle_error_code(Exception("unclassified")) is None
+
+    @pytest.mark.unit
+    def test_probe_invalid_json(self):
+        keyring = MagicMock()
+        keyring.get_password.return_value = "not json"
+        with patch("builtins.print") as output:
+            assert probe(keyring, "test") == 1
+        assert "ORACLE_PROFILE_INVALID" in output.call_args[0][0]
+
+    @pytest.mark.unit
+    def test_probe_keyring_exception(self):
+        keyring = MagicMock()
+        keyring.get_password.side_effect = RuntimeError("backend unavailable")
+        with patch("builtins.print") as output:
+            assert probe(keyring, "test") == 1
+        assert "ORACLE_PROFILE_INVALID" in output.call_args[0][0]
+
+    @pytest.mark.unit
+    def test_probe_incomplete_profile(self):
+        keyring = MagicMock()
+        keyring.get_password.return_value = json.dumps({"db_user": "user"})
+        with patch("builtins.print") as output:
+            assert probe(keyring, "test") == 1
+        assert "ORACLE_PROFILE_INCOMPLETE" in output.call_args[0][0]
+
+    @pytest.mark.unit
+    def test_probe_connection_error_does_not_expose_detail(self):
+        keyring = MagicMock()
+        keyring.get_password.return_value = json.dumps(COMPLETE_PROFILE)
+        driver = MagicMock()
+        driver.connect.side_effect = Exception("ORA-01017: secret-host")
+        with patch("manage_apex_credentials.import_module_safe", return_value=driver):
+            with patch("builtins.print") as output:
+                assert probe(keyring, "test") == 1
+        assert output.call_args[0][0] == "ORACLE_AUTH_FAIL environment=test error=ORA-01017"
+
+    @pytest.mark.unit
+    def test_probe_connection_fail_does_not_expose_detail(self):
+        keyring = MagicMock()
+        keyring.get_password.return_value = json.dumps(COMPLETE_PROFILE)
+        driver = MagicMock()
+        driver.connect.side_effect = Exception("ORA-12154: could not resolve the connect identifier")
+        with patch("manage_apex_credentials.import_module_safe", return_value=driver):
+            with patch("builtins.print") as output:
+                assert probe(keyring, "test") == 1
+        assert output.call_args[0][0] == "ORACLE_CONNECTION_FAIL environment=test error=ORA-12154"
+
+    @pytest.mark.unit
+    def test_probe_post_connection_failure_does_not_expose_detail(self):
+        keyring = MagicMock()
+        keyring.get_password.return_value = json.dumps(COMPLETE_PROFILE)
+        cursor = MagicMock()
+        cursor.__enter__ = MagicMock(return_value=cursor)
+        cursor.__exit__ = MagicMock(return_value=False)
+        cursor.execute.side_effect = Exception("ORA-00600: internal error code")
+        connection = MagicMock()
+        connection.cursor.return_value = cursor
+        connection.__enter__ = MagicMock(return_value=connection)
+        connection.__exit__ = MagicMock(return_value=False)
+        driver = MagicMock()
+        driver.connect.return_value = connection
+        with patch("manage_apex_credentials.import_module_safe", return_value=driver):
+            with patch("builtins.print") as output:
+                assert probe(keyring, "test") == 1
+        assert output.call_args[0][0] == "ORACLE_PROBE_FAIL environment=test error=ORA-00600"
+
+    @pytest.mark.unit
+    def test_probe_success_uses_dual_identity_query(self):
+        keyring = MagicMock()
+        keyring.get_password.return_value = json.dumps(COMPLETE_PROFILE)
+        cursor = MagicMock()
+        cursor.fetchone.return_value = ("SCOTT", "SCOTT")
+        cursor.__enter__ = MagicMock(return_value=cursor)
+        cursor.__exit__ = MagicMock(return_value=False)
+        connection = MagicMock()
+        connection.cursor.return_value = cursor
+        connection.__enter__ = MagicMock(return_value=connection)
+        connection.__exit__ = MagicMock(return_value=False)
+        driver = MagicMock()
+        driver.connect.return_value = connection
+        with patch("manage_apex_credentials.import_module_safe", return_value=driver):
+            with patch("builtins.print") as output:
+                assert probe(keyring, "test") == 0
+        observed = output.call_args[0][0]
+        assert "ORACLE_CONNECTION_PASS" in observed
+        assert "workspace=" not in observed
+        assert "localhost" not in observed
+        assert "from dual" in cursor.execute.call_args[0][0].lower()
+
+
 class TestImportEnvProfile:
     """Test import_env_profile function."""
 
@@ -483,6 +638,100 @@ class TestImportEnvProfile:
         saved = json.loads(mock_keyring.set_password.call_args[0][2])
         assert saved["db_user"] == "testuser"
         assert saved["dsn"] == "dbhost:1521/ORCL"
+
+    @pytest.mark.unit
+    def test_import_env_with_apex_credentials(self, tmp_path):
+        """Import both Oracle DB and APEX profiles from .env."""
+        env_file = tmp_path / ".env"
+        env_file.write_text(
+            "DB_TESTING_USER=testuser\n"
+            "DB_TESTING_PASSWORD=testpwd\n"  # pragma: allowlist secret
+            "DB_TESTING_HOST=dbhost\n"
+            "DB_TESTING_PORT=1521\n"
+            "DB_TESTING_SID=ORCL\n"
+            "APEX_TESTING_BASE_URL=http://apex.example.com/ords/\n"
+            "APEX_TESTING_WORKSPACE=MYWS\n"
+            "APEX_TESTING_USER=apexadmin\n"
+            "APEX_TESTING_PASSWORD=apexpwd\n",  # pragma: allowlist secret
+            encoding="utf-8",
+        )
+
+        mock_keyring = MagicMock()
+
+        with patch(
+            "manage_apex_credentials.discover_apex_metadata",
+            side_effect=lambda p: p.update({"workspace_id": "1", "schema": "TESTUSER", "workspace_name": "WS"}) or p,
+        ):
+            with patch("builtins.print"):
+                import_env_profile(mock_keyring, "test", env_file)
+
+        assert mock_keyring.set_password.call_count == 2
+        oracle_call = mock_keyring.set_password.call_args_list[0]
+        assert oracle_call[0][0] == SERVICE
+        apex_call = mock_keyring.set_password.call_args_list[1]
+        assert apex_call[0][0] == APEX_SERVICE
+        apex_saved = json.loads(apex_call[0][2])
+        assert apex_saved["base_url"] == "http://apex.example.com/ords"
+        assert apex_saved["workspace"] == "MYWS"
+        assert apex_saved["apex_user"] == "apexadmin"
+
+    @pytest.mark.unit
+    def test_import_env_apex_incomplete_is_skipped(self, tmp_path):
+        """Incomplete APEX fields are skipped without error."""
+        env_file = tmp_path / ".env"
+        env_file.write_text(
+            "DB_TESTING_USER=testuser\n"
+            "DB_TESTING_PASSWORD=testpwd\n"  # pragma: allowlist secret
+            "DB_TESTING_HOST=dbhost\n"
+            "DB_TESTING_PORT=1521\n"
+            "DB_TESTING_SID=ORCL\n"
+            "APEX_TESTING_BASE_URL=http://apex.example.com/ords/\n",
+            encoding="utf-8",
+        )
+
+        mock_keyring = MagicMock()
+
+        with patch(
+            "manage_apex_credentials.discover_apex_metadata",
+            side_effect=lambda p: p.update({"workspace_id": "1", "schema": "TESTUSER", "workspace_name": "WS"}) or p,
+        ):
+            with patch("builtins.print") as output:
+                import_env_profile(mock_keyring, "test", env_file)
+
+        mock_keyring.set_password.assert_called_once()
+        printed = [call[0][0] for call in output.call_args_list]
+        assert any("APEX_PROFILE_SKIPPED" in line for line in printed)
+
+    @pytest.mark.unit
+    def test_import_env_production_apex(self, tmp_path):
+        """Production APEX uses APEX_PRODUCTION_ prefix."""
+        env_file = tmp_path / ".env"
+        env_file.write_text(
+            "DB_PRODUCTION_USER=produser\n"
+            "DB_PRODUCTION_PASSWORD=prodpwd\n"  # pragma: allowlist secret
+            "DB_PRODUCTION_HOST=prodhost\n"
+            "DB_PRODUCTION_PORT=1521\n"
+            "DB_PRODUCTION_SID=PROD\n"
+            "APEX_PRODUCTION_BASE_URL=http://prod.example.com/apex\n"
+            "APEX_PRODUCTION_WORKSPACE=PRODWS\n"
+            "APEX_PRODUCTION_USER=prodapex\n"  # pragma: allowlist secret
+            "APEX_PRODUCTION_PASSWORD=prodapexpwd\n",  # pragma: allowlist secret
+            encoding="utf-8",
+        )
+
+        mock_keyring = MagicMock()
+
+        with patch(
+            "manage_apex_credentials.discover_apex_metadata",
+            side_effect=lambda p: p.update({"workspace_id": "2", "schema": "PRODUSER", "workspace_name": "PWS"}) or p,
+        ):
+            with patch("builtins.print"):
+                import_env_profile(mock_keyring, "production", env_file)
+
+        assert mock_keyring.set_password.call_count == 2
+        apex_call = mock_keyring.set_password.call_args_list[1]
+        assert apex_call[0][0] == APEX_SERVICE
+        assert apex_call[0][1] == "production"
 
     @pytest.mark.unit
     def test_import_env_missing_values(self, tmp_path):

@@ -1,5 +1,9 @@
 # Solicitud de permisos DBA para MCP y Oracle APEX 24.1.3
 
+> **RETIRADA — NO EJECUTAR.** Este documento histórico propone grants sobre
+> `WWV_FLOW_*` y `WWV_FLOW_IMP*`, que no son una vía aprobada. No solicite ni
+> ejecute sus sentencias; consulte `CAPACIDADES-CONTROLADAS-ORACLE-APEX.md`.
+
 ## Objetivo
 
 Habilitar una cuenta técnica Oracle dedicada exclusivamente al MCP para leer,

@@ -1,6 +1,6 @@
 ---
 name: apex-api-client-safe
-description: REST API client for Oracle APEX deployment and environment management
+description: Retired simulated REST adapter; it must not be used for Oracle APEX deployment.
 category: Apex Integration
 order: 22
 tags:
@@ -16,6 +16,11 @@ status: development
 ---
 
 # apex-api-client-safe
+
+> **No operativo.** El cliente asociado no tenía transporte HTTP ni contrato
+> oficial APEX; falla cerrada con `ADAPTER_INCOMPATIBLE`. No use los ejemplos
+> históricos de este archivo. La ruta vigente es la de App Builder autenticado o
+> export/import nativo descrita en `docs/CAPACIDADES-CONTROLADAS-ORACLE-APEX.md`.
 
 REST API client for Oracle APEX: create, deploy, and synchronize applications across environments.
 

@@ -18,6 +18,10 @@ SETUP = MCP_ROOT / "tools" / "setup_tools.py"
 
 
 def main() -> int:
+    raise SystemExit(
+        "ADAPTER_INCOMPATIBLE: retired validator. Qualified access to WWV_FLOW_* "
+        "does not make it an approved APEX CRUD route."
+    )
     if not INSPECT.is_file() or not SETUP.is_file():
         raise SystemExit("Managed apex-mcp checkout is missing; initialize upstreams first.")
 

@@ -3,10 +3,15 @@ name: apex-page-automation-safe
 category: "Apex Engineering & Design"
 order: 19
 tags: ["page-creation", "automation", "design", "full-stack", "approval-gated"]
-description: "Create, modify, and delete APEX pages with full control over components, items, processes, and validations."
+description: "Retired internal-table page automation; not approved for APEX CRUD."
 ---
 
 # Safe APEX Page Automation
+
+> **No operativo para CRUD.** Este flujo histórico usa `WWV_FLOW_*` y no debe
+> invocarse para crear, modificar ni eliminar páginas. Use exclusivamente App
+> Builder autenticado o export/import nativo, con el contrato vigente en
+> `docs/CAPACIDADES-CONTROLADAS-ORACLE-APEX.md`.
 
 Activate this workflow when the user requests to create, modify, or delete one or more APEX pages with specific components, items, buttons, processes, validations, or dynamic actions.
 

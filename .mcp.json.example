@@ -4,7 +4,7 @@
       "command": "python3",
       "args": ["scripts/manage_apex_credentials.py", "validate"],
       "env": {
-        "APEX_SKILLS_ENV": "production",
+        "APEX_SKILLS_ENV": "test",
         "PYTHONPATH": "."
       },
       "description": "Oracle APEX Skills Framework - Credential Management & Validation"
@@ -43,7 +43,7 @@
     "testRunner": "pytest",
     "testCoverageTarget": 80,
     "credentialStorage": "system-keyring",
-    "defaultEnvironment": "production",
+    "defaultEnvironment": "test",
     "logLevel": "INFO"
   }
 }

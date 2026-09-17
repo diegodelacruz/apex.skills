@@ -1,12 +1,16 @@
 #!/usr/bin/env python3
-"""Oracle APEX REST API client for deployment and environment management."""
+"""Deprecated placeholder retained only for import compatibility.
+
+It never performed HTTP transport and therefore is not an Oracle APEX API client.
+All mutating methods fail closed rather than fabricating a successful operation.
+"""
 
 import time
 from typing import Any, Dict, Optional
 
 
 class ApexRestClient:
-    """REST client for Oracle APEX operations."""
+    """Non-operational legacy facade; use a verified official APEX route instead."""
 
     def __init__(self, base_url: str, username: str, password: str, timeout: int = 30):
         """Initialize APEX REST client.
@@ -31,13 +35,10 @@ class ApexRestClient:
         Returns:
             OAuth2 access token
         """
-        if self.token and self.token_expiry and time.time() < self.token_expiry:
-            return self.token
-
-        self.token = f"token_{int(time.time())}"
-        self.token_expiry = time.time() + 3600
-        self._log_operation("POST", "/auth/token", 200)
-        return self.token
+        raise RuntimeError(
+            "ADAPTER_INCOMPATIBLE: ApexRestClient has no HTTP transport or official APEX REST contract. "
+            "Use authenticated App Builder or native APEX export/import."
+        )
 
     def _log_operation(self, method: str, endpoint: str, status: int) -> None:
         """Log API operation for audit trail.

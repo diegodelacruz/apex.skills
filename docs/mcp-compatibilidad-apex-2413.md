@@ -1,76 +1,39 @@
-# Compatibilidad global del MCP con APEX 24.1.3
+# Compatibilidad del MCP con APEX 24.1.3
 
-## Evidencia de Producción
+> **BOOTSTRAP LOCAL CORREGIDO; VALIDACIÓN REMOTA TEST PENDIENTE**
 
-La conexión MCP de Producción y el perfil seguro validan correctamente. La base
-reporta APEX `24.1.3` y el diccionario interno corresponde al propietario
-`APEX_240100`.
+## Estado del upstream completo
 
-El upstream actual de `apex-mcp` está acoplado a otra forma del diccionario:
+La inspección local de `.upstreams/managed/apex-mcp/apex_mcp/tools/` detecta
+operaciones `UPDATE` y `DELETE` contra `APEX_240100` y la llamada
+`wwv_flow_page_dev.delete_page`. El wrapper
+`scripts/run_apex_mcp_with_profile.py` inicia ese upstream completo. Por ello,
+el bootstrap no registra automáticamente `apex-mcp-test`, ni siquiera cuando
+se solicita `-ValidateOracleTest`.
 
-- consulta `WWV_FLOW_PAGE_PLUGS` sin propietario;
-- espera `NAME` y `DISPLAY_SEQUENCE` donde APEX 24.1.3 expone
-  `REGION_NAME` y `PLUG_DISPLAY_SEQUENCE`;
-- consulta `PARENT_REGION`, pero la vista expone `PARENT_REGION_ID` y
-  `PARENT_REGION_NAME`;
-- consulta `CSS_INLINE`, que no existe en la vista de páginas de este entorno.
+El estado local para una inscripción ausente es
+`MCP_REGISTRATION_SKIPPED_UNSAFE_SURFACE`. Una inscripción previa no se elimina
+ni modifica: se informa como `MCP_REGISTRATION_PREEXISTING_UNVERIFIED`.
+Producción no se registra desde el bootstrap y reporta
+`MCP_REGISTRATION_NOT_SUPPORTED_IN_THIS_BOOTSTRAP`.
 
-Esto produce `ORA-00942` y `ORA-00904` en varias herramientas, no solamente en
-`apex_update_region`.
+## Contrato de conexión y límites
 
-## Solución global implementada en el adaptador
+`scripts/validate_apex_mcp_adapter.py` lee el código administrado sin importarlo
+ni ejecutarlo. Comprueba la construcción `connect_kwargs`,
+`oracledb.connect(**connect_kwargs)` y wallet condicional. El resultado
+`MCP_ADAPTER_READY` sólo confirma el contrato de conexión directa por lectura
+local. La superficie se informa independientemente y la ausencia de una
+allowlist aplicable no equivale a seguridad.
 
-El parche canónico `scripts/Apply-ApexMcpApex241CompatibilityPatch.py` se
-aplica automáticamente durante la inicialización y cubre las rutas del
-upstream que inspeccionan o mutan páginas existentes:
+No se ejecuta `Apply-ApexMcpDirectConnectionPatch.py` desde el bootstrap. Toda
+preparación que escriba el upstream debe ser una operación explícita,
+versionada y revisada fuera del bootstrap.
 
-1. Las lecturas usan vistas públicas `APEX_APPLICATION_*` y las columnas
-   incompatibles se adaptan (`CSS_INLINE`, `PARENT_REGION` y opciones de
-   plantilla).
-2. Lecturas, modificaciones, copias y eliminaciones que aún requieren tablas
-   internas usan `APEX_240100.WWV_FLOW_*` y los nombres reales de 24.1.3.
-3. Las operaciones de creación y componentes nuevos conservan las APIs de
-   importación `WWV_FLOW_IMP*`/`WWV_FLOW_IMP_PAGE` del upstream.
-4. El comprobador de permisos y el script de grants generan referencias al
-   propietario correcto.
-5. El inicializador ejecuta también
-   `scripts/Validate-ApexMcpApex241Compatibility.py`.
-6. Ejecutar un preflight de capacidades antes de exponer herramientas mutantes:
-   versión, propietario, vistas, paquetes, `EXECUTE`, workspace y aplicación.
-7. Añadir pruebas de contrato para páginas, regiones, items, botones, procesos,
-   acciones dinámicas, LOVs, copias y eliminaciones.
+## Operación pendiente
 
-## Permisos requeridos
-
-La cuenta de Producción debe tener los permisos de ejecución sobre las APIs de
-APEX necesarias para el workspace y esquema objetivo. No se debe conceder un
-`UPDATE` general sobre tablas internas como sustituto de la compatibilidad.
-
-La explicación operativa y el texto listo para enviar al DBA están en
-[Solicitud de permisos DBA para APEX 24.1.3](SOLICITUD-PERMISOS-DBA-APEX-2413.md).
-
-Un `GRANT UPDATE ON APEX_240100.WWV_FLOW_PAGE_PLUGS` podría eliminar el primer
-`ORA-00942`, pero no resolvería los nombres de columnas incompatibles ni las
-restantes herramientas. Además, el DML directo evita validaciones de APEX.
-
-## Estado operativo
-
-La validación estática del adaptador pasa. Eso no equivale a privilegios Oracle:
-en la Producción revisada el usuario todavía no tiene los grants DML sobre las
-tablas internas. Por tanto, las creaciones vía APIs con `EXECUTE` pueden estar
-disponibles, pero las modificaciones/eliminaciones de componentes existentes
-seguirán devolviendo `ORA-01031` hasta que el DBA otorgue los permisos exactos
-al usuario del perfil. El MCP no puede concederlos por sí mismo.
-
-## Criterio de finalización
-
-La capacidad se considerará habilitada únicamente cuando el mismo adaptador
-compatible pase, en TEST y después en Producción, pruebas controladas de:
-
-- leer una aplicación y una página;
-- crear una página;
-- agregar y modificar una región, item, botón y proceso;
-- copiar una página;
-- eliminar un componente de prueba;
-- exportar y validar la aplicación;
-- confirmar rollback o eliminación de la prueba.
+APEX CRUD sigue bloqueado hasta disponer de una fachada que aplique una
+allowlist técnica, no cargue herramientas internas, no permita SQL/DDL/DML
+arbitrario y pruebe el inventario efectivamente expuesto. La validación remota
+TEST requiere autorización explícita. Producción requiere autorización separada
+y permanece sin registro ni handshake.

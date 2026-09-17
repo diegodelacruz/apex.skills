@@ -1,8 +1,10 @@
 #!/usr/bin/env python3
-"""Builder and ORM for creating Oracle APEX objects (pages, regions, items, buttons, etc.).
+"""In-memory APEX page specifications.
 
-Supports APEX 24.1.3 via direct database access to wwv_flow_* tables.
-Provides both low-level (exact field control) and high-level (convenience) interfaces.
+This module does not connect to Oracle and must not be treated as an APEX CRUD
+adapter. In particular it never accesses ``WWV_FLOW_*`` tables. Apply a reviewed
+specification only through the authenticated App Builder or native APEX
+export/import route governed by ``controlled_capabilities``.
 """
 
 import json

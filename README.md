@@ -24,7 +24,9 @@ Después de clonar el repositorio, ejecute un único comando:
 
 Este comando prepara upstreams, Python y skills. No configura credenciales ni accede a Oracle. Use -Mode Copy si Codex está en otra unidad.
 
-Para validar TEST/MCP, ejecute después Initialize-ApexCodexProject.ps1 con el proyecto y las aprobaciones correspondientes.
+El bootstrap local no registra el upstream completo `apex-mcp`: su superficie
+contiene rutas APEX internas inseguras. La validación remota TEST requiere
+autorización explícita y no convierte ese upstream en un MCP registrable.
 
 ## Principios
 
@@ -43,12 +45,12 @@ The following scripts support development infrastructure and do not require auto
 | Script | Purpose | Status |
 |--------|---------|--------|
 | validate-config.py | Configuration file validation | Active |
-| run_apex_mcp_with_profile.py | MCP profile runner (keyring → env) | Active |
+| run_apex_mcp_with_profile.py | Runner del upstream completo; sin registro automático por superficie insegura | Blocked |
 | add-type-hints.py | Type hints analysis utility | Active |
 | audit_skill_ecosystem.py | Pre-commit ecosystem validation hook | Active |
 | diagnose-apex-mcp-version.py | apex-mcp version diagnostics | Active |
-| validate_apex_mcp_handshake.py | MCP initialize handshake validation | Active |
+| validate_apex_mcp_handshake.py | MCP initialize handshake validation | Diagnostic only (not used by bootstrap) |
 | validate_apex_mcp_direct_connection.py | Direct Oracle connection validation | Active |
-| Validate-ApexMcpApex241Compatibility.py | APEX 24.1.3 static contract checks | Active |
-| Apply-ApexMcpApex241CompatibilityPatch.py | APEX 24.1.3 metadata compatibility patch | Active |
-| Apply-ApexMcpDirectConnectionPatch.py | Direct connection patch for apex-mcp | Active |
+| Validate-ApexMcpApex241Compatibility.py | Retired internal-metadata validator | Disabled |
+| Apply-ApexMcpApex241CompatibilityPatch.py | Retired internal-metadata patch | Disabled |
+| Apply-ApexMcpDirectConnectionPatch.py | Preparación explícita y versionada fuera del bootstrap | Manual only |

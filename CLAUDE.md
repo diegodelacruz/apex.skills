@@ -311,10 +311,11 @@ open htmlcov/index.html
 **NEVER** hardcode credentials. Use secure per-user profiles:
 
 ```bash
-python3 scripts/manage_apex_credentials.py set apex-mcp-test
+python3 scripts/manage_apex_credentials.py set --environment test
 # Credentials stored in system keyring (not git, not files)
 
-python3 scripts/manage_apex_credentials.py validate apex-mcp-test
+python3 scripts/manage_apex_credentials.py probe --environment test
+# Read-only session identity check against dual
 ```
 
 ---

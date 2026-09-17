@@ -1,5 +1,9 @@
 # Hallazgos de la revisión del repositorio `mcp`
 
+> **Referencia histórica, no ruta operativa.** Las llamadas `wwv_flow_imp_page`
+> no se autorizan como mecanismo de CRUD. Consulte
+> `CAPACIDADES-CONTROLADAS-ORACLE-APEX.md`.
+
 ## Qué hace diferente
 
 El repositorio local `D:\Users\ddelacruz\Desktop\Python\codex\mcp` es un

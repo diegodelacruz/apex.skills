@@ -1,19 +1,25 @@
 # Oracle MCP en Codex Desktop
 
-Codex Desktop registra servidores MCP por usuario, disponibles desde cualquier proyecto. Las skills guían el flujo; no crean por sí solas una conexión Oracle.
+> **BOOTSTRAP LOCAL CORREGIDO; VALIDACIÓN REMOTA TEST PENDIENTE**
 
-Use primero [el inicializador](inicializacion-automatica-codex.md). Si necesita registrar manualmente un servidor, reemplace `<RUTA_APEX_SKILLS>` por la ruta absoluta del repositorio:
+Codex Desktop registra servidores MCP por usuario, pero el upstream
+`apex-mcp` administrado en este repositorio no debe registrarse mediante
+`run_apex_mcp_with_profile.py`. El wrapper inicia el upstream completo y la
+inspección local de sus herramientas detecta DML interno APEX y una API de
+eliminación de páginas.
 
-```powershell
-codex mcp add apex-mcp-test -- "<RUTA_APEX_SKILLS>\.venv\Scripts\python.exe" "<RUTA_APEX_SKILLS>\scripts\run_apex_mcp_with_profile.py" --environment test
-```
+El inicializador no agrega ni modifica registros MCP. Si detecta un registro
+TEST anterior, lo informa como `MCP_REGISTRATION_PREEXISTING_UNVERIFIED`; si no
+existe, informa `MCP_REGISTRATION_SKIPPED_UNSAFE_SURFACE`. El mismo criterio
+aplica a Producción: registro previo se informa como
+`MCP_REGISTRATION_PREEXISTING_UNVERIFIED`; sin registro, como
+`MCP_REGISTRATION_SKIPPED_UNSAFE_SURFACE`.
 
-Para un diagnóstico comparativo autorizado:
+Un futuro registro sólo será admisible tras construir una fachada que aplique
+una allowlist técnica, no cargue las herramientas internas, bloquee SQL/DDL/DML
+arbitrario y compruebe el inventario realmente expuesto. Esa evaluación es
+independiente de un perfil de keyring y de una sonda Oracle.
 
-```powershell
-codex mcp add apex-mcp-production -- "<RUTA_APEX_SKILLS>\.venv\Scripts\python.exe" "<RUTA_APEX_SKILLS>\scripts\run_apex_mcp_with_profile.py" --environment production
-```
-
-Compruebe el registro con `codex mcp list` y abra una tarea nueva en Codex Desktop. `Unsupported` en `Auth` es normal para un MCP local `stdio`; no representa un error.
-
-El wrapper lee el perfil desde el keyring del sistema y no coloca secretos en `config.toml`, comandos, documentación, repositorios ni chat. APEX 24.1.3 limita el upstream 24.2 a inspección/dry-run hasta aprobar compatibilidad en TEST.
+TEST requiere autorización explícita para conexión. Producción requiere una
+autorización separada y permanece sin registro ni handshake desde este
+bootstrap.

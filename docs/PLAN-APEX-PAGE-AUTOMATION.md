@@ -1,5 +1,9 @@
 # Plan: Skill apex-page-automation-safe (Skill #20)
 
+> **Retirado para ejecución.** Este documento conserva un diseño histórico que
+> proponía DML directo contra `wwv_flow_*`. No es una ruta aprobada ni operativa.
+> Consulte `CAPACIDADES-CONTROLADAS-ORACLE-APEX.md` para el contrato vigente.
+
 **Estado:** Propuesta para revisión independiente
 **Fecha:** 2026-09-16
 **Autor:** Claude Code

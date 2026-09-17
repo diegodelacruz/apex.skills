@@ -28,6 +28,10 @@ def replace_all(text: str, old: str, new: str) -> tuple[str, int]:
 
 
 def main() -> int:
+    raise SystemExit(
+        "ADAPTER_INCOMPATIBLE: disabled. This legacy patch changes an upstream to use "
+        "APEX_240100.WWV_FLOW_* and is not an approved APEX CRUD route."
+    )
     if not TARGET.is_file():
         raise SystemExit("Managed apex-mcp checkout is missing; initialize upstreams first.")
     if not SETUP_TARGET.is_file():
