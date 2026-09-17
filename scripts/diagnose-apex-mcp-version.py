@@ -1,5 +1,13 @@
 #!/usr/bin/env python3
-"""Diagnose apex-mcp version and show what patterns are present."""
+"""Diagnose apex-mcp version and show what patterns are present.
+
+Reads the managed apex-mcp db.py and displays connection patterns, method
+signatures, and oracledb.connect calls for troubleshooting.
+
+Status: ACTIVE
+Tests: Infrastructure script (no automated tests)
+Dependencies: managed apex-mcp checkout
+"""
 
 import re
 from pathlib import Path

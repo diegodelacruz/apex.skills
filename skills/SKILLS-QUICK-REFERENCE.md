@@ -29,6 +29,10 @@ One-line descriptions for rapid lookup.
 | **apex-qa-orchestrator-safe** (NEW) | Orchestrator for static QA → automated testing → environment validation |
 | **apex-design-review-orchestrator** (NEW) | Orchestrator for design review with approval gates |
 | **apex-delivery-lifecycle-zaimella** (NEW) | Orchestrator integrating GPZ (Zaimella) with APEX delivery |
+| **apex-code-generation-safe** | Generate APEX components automatically from schema and metadata |
+| **apex-api-client-safe** | REST API client for Oracle APEX deployment and environment management |
+| **apex-automated-testing-safe** | Selenium test generation, performance testing, and regression validation |
+| **apex-data-migration-safe** | Schema mapping, data validation, ETL pipeline, and rollback management |
 | **oracle-data-change-governance-final** | Govern DATA changes with complete audit trail |
 
 ---
@@ -63,6 +67,10 @@ One-line descriptions for rapid lookup.
 | Coordinate full data workflow (schema → migration → sync) | apex-data-orchestrator-safe |
 | Coordinate full QA workflow (static → automated → environment) | apex-qa-orchestrator-safe |
 | Coordinate design review (solution → blueprint → engineering) | apex-design-review-orchestrator |
+| Generate APEX components from schema (forms, reports) | apex-code-generation-safe |
+| Define REST API clients for deployment | apex-api-client-safe |
+| Run automated testing suite (Selenium, performance) | apex-automated-testing-safe |
+| Execute data migration and ETL pipelines | apex-data-migration-safe |
 | Run APEX delivery with Zaimella governance | apex-delivery-lifecycle-zaimella |
 
 ---
@@ -75,7 +83,7 @@ One-line descriptions for rapid lookup.
 | **Free (On-demand)** | apex-audit-decisions-log (automatic capture, tokens only on view) |
 | **Low (Typical)** | apex-solution-design, apex-page-range-governance, apex-environment-alignment-complete |
 | **Medium (Complex)** | apex-project-bootstrap-final, apex-project-workspace, apex-user-manual, apex-zaimella-gestion-proyectos |
-| **High (Full workflow)** | apex-delivery-lifecycle-safe, apex-delivery-lifecycle-complete, apex-delivery-lifecycle-zaimella, apex-page-automation-safe, apex-schema-automation-safe, apex-application-generator-complete, apex-data-orchestrator-safe, apex-qa-orchestrator-safe, apex-design-review-orchestrator, oracle-data-change-governance-final |
+| **High (Full workflow)** | apex-delivery-lifecycle-safe, apex-delivery-lifecycle-complete, apex-delivery-lifecycle-zaimella, apex-page-automation-safe, apex-schema-automation-safe, apex-application-generator-complete, apex-data-orchestrator-safe, apex-qa-orchestrator-safe, apex-design-review-orchestrator, oracle-data-change-governance-final, apex-code-generation-safe, apex-api-client-safe, apex-automated-testing-safe, apex-data-migration-safe |
 
 ---
 

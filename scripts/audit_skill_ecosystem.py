@@ -1,5 +1,13 @@
 #!/usr/bin/env python3
-"""Audit controlled local Markdown links and required canonical resources."""
+"""Audit controlled local Markdown links and required canonical resources.
+
+Pre-commit hook that verifies all required governance files exist and all
+local Markdown links resolve to existing targets.
+
+Status: ACTIVE (pre-commit hook)
+Tests: Covered indirectly by test_quality_audit.py (Q03 link checks)
+Dependencies: none (stdlib only)
+"""
 
 import re
 from pathlib import Path

@@ -1,5 +1,13 @@
 #!/usr/bin/env python3
-"""Start apex-mcp with a TEST or production profile held in the OS keyring."""
+"""Start apex-mcp with a TEST or production profile held in the OS keyring.
+
+Retrieves credentials from the system keyring, maps them to the environment
+variables apex-mcp expects, and launches the MCP server subprocess.
+
+Status: ACTIVE
+Tests: Infrastructure script (no automated tests)
+Dependencies: keyring, manage_apex_credentials.py (for profile setup)
+"""
 
 import json
 import os

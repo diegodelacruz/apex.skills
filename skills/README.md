@@ -31,6 +31,10 @@ Use `/skills` in Codex/Claude to see the complete list with descriptions and tag
 - **[apex-delivery-lifecycle-zaimella](./apex-delivery-lifecycle-zaimella)** (NEW) - Integrate GPZ (Zaimella) methodology with APEX delivery lifecycle
   - *Tags: lifecycle, orchestration, methodology, gpz, zaimella*
 
+### Apex Code Generation
+- **[apex-code-generation-safe](./apex-code-generation-safe)** - Generate APEX components automatically from schema and metadata
+  - *Tags: code-generation, apex, forms, reports, validations*
+
 ### Apex Engineering & Design
 - **[apex-engineering-safe](./apex-engineering-safe)** - Safely inspect, design, and document APEX applications
   - *Tags: inspection, design, export, read-only*
@@ -52,8 +56,13 @@ Use `/skills` in Codex/Claude to see the complete list with descriptions and tag
 ### Apex Export & QA
 - **[apex-export-qa-safe](./apex-export-qa-safe)** - Static QA for APEX exports before changes
   - *Tags: qa, validation, export, read-only*
+- **[apex-automated-testing-safe](./apex-automated-testing-safe)** - Selenium test generation, performance testing, and regression validation
+  - *Tags: testing, automation, selenium, performance*
+  - *Tags: qa, validation, export, read-only*
 
 ### Apex Integration
+- **[apex-api-client-safe](./apex-api-client-safe)** - REST API client for Oracle APEX deployment and environment management
+  - *Tags: rest-api, deployment, environment-sync, automation*
 - **[apex-rest-source-catalogs-safe](./apex-rest-source-catalogs-safe)** - Assess Fusion REST catalogs for safe APEX integration
   - *Tags: rest, fusion, integration, catalog, read-only*
 
@@ -94,6 +103,10 @@ Use `/skills` in Codex/Claude to see the complete list with descriptions and tag
   - *Tags: orchestration, qa, testing, automation, approval-gated*
 - **[apex-design-review-orchestrator](./apex-design-review-orchestrator)** (NEW) - Coordinate design review with approval gates
   - *Tags: orchestration, design, review, approval-gated, governance*
+
+### Apex Data Migration
+- **[apex-data-migration-safe](./apex-data-migration-safe)** - Schema mapping, data validation, ETL pipeline, and rollback management
+  - *Tags: data-migration, etl, schema-mapping, validation*
 
 ### Oracle Data Governance
 - **[oracle-data-change-governance-final](./oracle-data-change-governance-final)** - Govern DATA changes with audit trail
@@ -136,25 +149,36 @@ Use `/skills` in Codex/Claude to see the complete list with descriptions and tag
 
 ## 📋 All Skills (Alphabetical)
 
-1. apex-audit-decisions-log
-2. apex-blueprint-design-safe
-3. apex-database-diagnostics
-4. apex-delivery-lifecycle-complete
-5. apex-delivery-lifecycle-safe
-6. apex-engineering-safe
-7. apex-environment-alignment-complete
-8. apex-export-qa-safe
-9. apex-page-range-governance
-10. apex-pattern-mining-safe
-11. apex-project-bootstrap-final
-12. apex-project-workspace
-13. apex-rest-source-catalogs-safe
-14. apex-solution-design
-15. apex-ui-craft-safe
-16. apex-user-manual
-17. apex (Coordinator)
-18. apex-zaimella-gestion-proyectos (NEW!)
-19. oracle-data-change-governance-final
+1. apex (Maestro Coordinator)
+2. apex-api-client-safe
+3. apex-application-generator-complete (Orchestrator)
+4. apex-audit-decisions-log
+5. apex-automated-testing-safe
+6. apex-blueprint-design-safe
+7. apex-code-generation-safe
+8. apex-data-migration-safe
+9. apex-data-orchestrator-safe (Orchestrator)
+10. apex-database-diagnostics
+11. apex-delivery-lifecycle-complete
+12. apex-delivery-lifecycle-safe
+13. apex-delivery-lifecycle-zaimella (Orchestrator)
+14. apex-design-review-orchestrator (Orchestrator)
+15. apex-engineering-safe
+16. apex-environment-alignment-complete
+17. apex-export-qa-safe
+18. apex-page-automation-safe
+19. apex-page-range-governance
+20. apex-pattern-mining-safe
+21. apex-project-bootstrap-final
+22. apex-project-workspace
+23. apex-qa-orchestrator-safe (Orchestrator)
+24. apex-rest-source-catalogs-safe
+25. apex-schema-automation-safe
+26. apex-solution-design
+27. apex-ui-craft-safe
+28. apex-user-manual
+29. apex-zaimella-gestion-proyectos
+30. oracle-data-change-governance-final
 
 ---
 

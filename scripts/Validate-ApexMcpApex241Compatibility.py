@@ -1,5 +1,13 @@
 #!/usr/bin/env python3
-"""Static contract checks for the managed APEX 24.1.3 compatibility patch."""
+"""Static contract checks for the managed APEX 24.1.3 compatibility patch.
+
+Verifies that the patched apex-mcp uses qualified APEX_240100 table references
+and does not contain unqualified DML against internal metadata tables.
+
+Status: ACTIVE
+Tests: Infrastructure script (no automated tests)
+Dependencies: managed apex-mcp checkout, Apply-ApexMcpApex241CompatibilityPatch.py
+"""
 
 from pathlib import Path
 

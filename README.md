@@ -35,3 +35,20 @@ Para validar TEST/MCP, ejecute después Initialize-ApexCodexProject.ps1 con el p
 - Gobierno DATA, decisiones, planes, validación SQL y auditoría antes del cierre.
 
 Consulte [dependencias](docs/dependencias.md), [casos de uso](docs/casos-de-uso-apex.md) y [auditoría obligatoria](docs/auditoria-obligatoria.md).
+
+## Infrastructure Scripts
+
+The following scripts support development infrastructure and do not require automated test coverage:
+
+| Script | Purpose | Status |
+|--------|---------|--------|
+| validate-config.py | Configuration file validation | Active |
+| run_apex_mcp_with_profile.py | MCP profile runner (keyring → env) | Active |
+| add-type-hints.py | Type hints analysis utility | Active |
+| audit_skill_ecosystem.py | Pre-commit ecosystem validation hook | Active |
+| diagnose-apex-mcp-version.py | apex-mcp version diagnostics | Active |
+| validate_apex_mcp_handshake.py | MCP initialize handshake validation | Active |
+| validate_apex_mcp_direct_connection.py | Direct Oracle connection validation | Active |
+| Validate-ApexMcpApex241Compatibility.py | APEX 24.1.3 static contract checks | Active |
+| Apply-ApexMcpApex241CompatibilityPatch.py | APEX 24.1.3 metadata compatibility patch | Active |
+| Apply-ApexMcpDirectConnectionPatch.py | Direct connection patch for apex-mcp | Active |

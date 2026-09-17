@@ -15,7 +15,7 @@ import sys
 from pathlib import Path
 
 
-def setup_scripts_path(script_file: str = __file__):
+def setup_scripts_path(script_file: str = __file__) -> Path:
     """Add the scripts directory to sys.path for imports.
 
     This centralizes the path setup logic used across multiple CLI scripts.
@@ -39,7 +39,7 @@ def setup_scripts_path(script_file: str = __file__):
     return scripts_dir
 
 
-def setup_skills_path(script_file: str = __file__):
+def setup_skills_path(script_file: str = __file__) -> Path:
     """Add the skills/*/scripts directory's parent scripts to sys.path.
 
     Used by skill-level scripts that need to import from the main scripts directory.

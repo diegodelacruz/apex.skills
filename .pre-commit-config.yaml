@@ -70,25 +70,12 @@ repos:
         always_run: true
         stages: [commit]
 
-  # DISABLED: Custom hooks
-  # Note: validate-exception-handling reads stdin instead of file arguments
-  # Note: audit-trail-capture references non-existent .hooks/pre-commit.sh
-  # Re-enable after fixing:
-  #   1. Add pass_filenames: true to validate-exception-handling
-  #   2. Create .hooks/pre-commit.sh or remove hook
-  # - repo: local
-  #   hooks:
-  #     - id: validate-exception-handling
-  #       name: Validate exception handling
-  #       entry: python3 -c "import sys; import re; content=sys.stdin.read(); sys.exit(1 if re.search(r'except\s*:\s*(pass|continue)', content) else 0)"
-  #       language: system
-  #       types: [python]
-  #       stages: [commit]
-  #
-  #     - id: audit-trail-capture
-  #       name: Capture audit trail
-  #       entry: bash .hooks/pre-commit.sh
-  #       language: system
-  #       stages: [commit]
-  #       pass_filenames: false
-  #       always_run: true
+  # Validate exception handling (no bare except)
+  - repo: local
+    hooks:
+      - id: validate-exception-handling
+        name: Validate exception handling (no bare except)
+        entry: python -c "import re,sys;bad=[f for f in sys.argv[1:] if re.search(r'except\s*:',open(f,encoding='utf-8').read())];sys.exit('Bare except found in '+', '.join(bad)) if bad else None"
+        language: system
+        types: [python]
+        stages: [commit]

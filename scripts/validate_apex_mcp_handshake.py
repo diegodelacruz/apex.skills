@@ -1,5 +1,13 @@
 #!/usr/bin/env python3
-"""Validate that the profile wrapper returns an MCP initialize response."""
+"""Validate that the profile wrapper returns an MCP initialize response.
+
+Sends an MCP initialize JSON-RPC request to the profile wrapper subprocess
+and verifies the server responds with a valid initialize result.
+
+Status: ACTIVE
+Tests: Infrastructure script (requires Oracle connection)
+Dependencies: run_apex_mcp_with_profile.py, keyring
+"""
 
 import argparse
 import json

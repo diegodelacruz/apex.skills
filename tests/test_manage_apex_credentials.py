@@ -15,9 +15,13 @@ from manage_apex_credentials import (
     SERVICE,
     connection_kwargs,
     get_profile,
+    import_env_profile,
     import_module_safe,
+    main,
     parse_env,
     save_profile,
+    status,
+    validate,
 )
 
 
@@ -262,6 +266,39 @@ class TestConnectionKwargs:
         assert result["dsn"] == "localhost:1521/orcl"
 
     @pytest.mark.unit
+    def test_connection_kwargs_with_wallet(self):
+        """Build connection kwargs including wallet parameters."""
+        profile = {  # pragma: allowlist secret
+            "db_user": "admin",
+            "db_pass": "secret",  # pragma: allowlist secret
+            "dsn": "mydb_high",
+            "wallet_dir": "/opt/wallets/mydb",
+            "wallet_pass": "walletpwd",  # pragma: allowlist secret
+        }
+
+        result = connection_kwargs(profile)
+
+        assert result["config_dir"] == "/opt/wallets/mydb"
+        assert result["wallet_location"] == "/opt/wallets/mydb"
+        assert result["wallet_password"] == "walletpwd"  # pragma: allowlist secret
+
+    @pytest.mark.unit
+    def test_connection_kwargs_wallet_no_password(self):
+        """Build connection kwargs with wallet dir but no wallet password."""
+        profile = {  # pragma: allowlist secret
+            "db_user": "admin",
+            "db_pass": "secret",  # pragma: allowlist secret
+            "dsn": "mydb_high",
+            "wallet_dir": "/opt/wallets/mydb",
+        }
+
+        result = connection_kwargs(profile)
+
+        assert result["config_dir"] == "/opt/wallets/mydb"
+        assert result["wallet_location"] == "/opt/wallets/mydb"
+        assert "wallet_password" not in result
+
+    @pytest.mark.unit
     def test_connection_kwargs_extra_fields(self):
         """Build connection kwargs with extra fields in profile."""
         profile = {  # pragma: allowlist secret
@@ -279,7 +316,6 @@ class TestConnectionKwargs:
         assert "user" in result
         assert "password" in result
         assert "dsn" in result
-        # Extra fields should not cause errors
         assert isinstance(result, dict)
 
 
@@ -307,3 +343,182 @@ class TestIntegration:
         """Verify SERVICE constant is set."""
         assert SERVICE == "apex-skills"
         assert isinstance(SERVICE, str)
+
+
+COMPLETE_PROFILE = {
+    "db_user": "scott",
+    "db_pass": "tiger",  # pragma: allowlist secret
+    "dsn": "localhost:1521/orcl",
+    "workspace_id": "100",
+    "schema": "SCOTT",
+    "workspace_name": "INTERNAL",
+}
+
+
+class TestStatus:
+    """Test status function."""
+
+    @pytest.mark.unit
+    def test_status_profile_ready(self):
+        """Status returns 0 for complete profile."""
+        mock_keyring = MagicMock()
+        mock_keyring.get_password.return_value = json.dumps(COMPLETE_PROFILE)
+
+        with patch("builtins.print"):
+            result = status(mock_keyring, "test")
+
+        assert result == 0
+
+    @pytest.mark.unit
+    def test_status_profile_missing(self):
+        """Status returns 1 when profile is missing."""
+        mock_keyring = MagicMock()
+        mock_keyring.get_password.return_value = None
+
+        with patch("builtins.print"):
+            result = status(mock_keyring, "test")
+
+        assert result == 1
+
+    @pytest.mark.unit
+    def test_status_profile_incomplete(self):
+        """Status returns 1 for incomplete profile."""
+        mock_keyring = MagicMock()
+        incomplete = {"db_user": "scott", "db_pass": "tiger"}  # pragma: allowlist secret
+        mock_keyring.get_password.return_value = json.dumps(incomplete)
+
+        with patch("builtins.print"):
+            result = status(mock_keyring, "test")
+
+        assert result == 1
+
+
+class TestValidate:
+    """Test validate function."""
+
+    @pytest.mark.unit
+    def test_validate_missing_profile(self):
+        """Validate exits when profile missing."""
+        mock_keyring = MagicMock()
+        mock_keyring.get_password.return_value = None
+
+        with pytest.raises(SystemExit):
+            validate(mock_keyring, "test")
+
+    @pytest.mark.unit
+    def test_validate_incomplete_profile(self):
+        """Validate exits when profile incomplete."""
+        mock_keyring = MagicMock()
+        mock_keyring.get_password.return_value = json.dumps({"db_user": "x"})
+
+        with pytest.raises(SystemExit):
+            validate(mock_keyring, "test")
+
+    @pytest.mark.unit
+    def test_validate_connection_success(self):
+        """Validate returns 0 on successful connection."""
+        mock_keyring = MagicMock()
+        mock_keyring.get_password.return_value = json.dumps(COMPLETE_PROFILE)
+
+        mock_conn = MagicMock()
+        mock_cursor = MagicMock()
+        mock_cursor.fetchone.return_value = ("SCOTT",)
+        mock_conn.__enter__ = MagicMock(return_value=mock_conn)
+        mock_conn.__exit__ = MagicMock(return_value=False)
+        mock_cursor.__enter__ = MagicMock(return_value=mock_cursor)
+        mock_cursor.__exit__ = MagicMock(return_value=False)
+        mock_conn.cursor.return_value = mock_cursor
+
+        mock_oracledb = MagicMock()
+        mock_oracledb.connect.return_value = mock_conn
+
+        with patch("manage_apex_credentials.import_module_safe", return_value=mock_oracledb):
+            with patch("builtins.print"):
+                result = validate(mock_keyring, "test")
+
+        assert result == 0
+
+    @pytest.mark.unit
+    def test_validate_connection_failure(self):
+        """Validate returns 1 on connection failure."""
+        mock_keyring = MagicMock()
+        mock_keyring.get_password.return_value = json.dumps(COMPLETE_PROFILE)
+
+        mock_oracledb = MagicMock()
+        mock_oracledb.connect.side_effect = Exception("ORA-12154: TNS:could not resolve")
+
+        with patch("manage_apex_credentials.import_module_safe", return_value=mock_oracledb):
+            with patch("builtins.print"):
+                result = validate(mock_keyring, "test")
+
+        assert result == 1
+
+
+class TestImportEnvProfile:
+    """Test import_env_profile function."""
+
+    @pytest.mark.unit
+    def test_import_env_test_profile(self, tmp_path):
+        """Import test profile from .env file."""
+        env_file = tmp_path / ".env"
+        env_file.write_text(
+            "DB_TESTING_USER=testuser\n"
+            "DB_TESTING_PASSWORD=testpwd\n"  # pragma: allowlist secret
+            "DB_TESTING_HOST=dbhost\n"
+            "DB_TESTING_PORT=1521\n"
+            "DB_TESTING_SID=ORCL\n",
+            encoding="utf-8",
+        )
+
+        mock_keyring = MagicMock()
+
+        with patch(
+            "manage_apex_credentials.discover_apex_metadata",
+            side_effect=lambda p: p.update({"workspace_id": "1", "schema": "TESTUSER", "workspace_name": "WS"}) or p,
+        ):
+            with patch("builtins.print"):
+                import_env_profile(mock_keyring, "test", env_file)
+
+        mock_keyring.set_password.assert_called_once()
+        saved = json.loads(mock_keyring.set_password.call_args[0][2])
+        assert saved["db_user"] == "testuser"
+        assert saved["dsn"] == "dbhost:1521/ORCL"
+
+    @pytest.mark.unit
+    def test_import_env_missing_values(self, tmp_path):
+        """Import fails when required .env values are missing."""
+        env_file = tmp_path / ".env"
+        env_file.write_text("DB_TESTING_USER=testuser\n", encoding="utf-8")
+
+        mock_keyring = MagicMock()
+
+        with pytest.raises(SystemExit):
+            import_env_profile(mock_keyring, "test", env_file)
+
+
+class TestMain:
+    """Test main entry point."""
+
+    @pytest.mark.unit
+    def test_main_status_action(self):
+        """Main dispatches status action."""
+        mock_keyring = MagicMock()
+        mock_keyring.get_password.return_value = json.dumps(COMPLETE_PROFILE)
+
+        with patch("manage_apex_credentials.import_module_safe", return_value=mock_keyring):
+            with patch("sys.argv", ["prog", "status", "--environment", "test"]):
+                with patch("builtins.print"):
+                    result = main()
+
+        assert result == 0
+
+    @pytest.mark.unit
+    def test_main_validate_action(self):
+        """Main dispatches validate action."""
+        mock_keyring = MagicMock()
+        mock_keyring.get_password.return_value = None
+
+        with patch("manage_apex_credentials.import_module_safe", return_value=mock_keyring):
+            with patch("sys.argv", ["prog", "validate", "--environment", "test"]):
+                with pytest.raises(SystemExit):
+                    main()

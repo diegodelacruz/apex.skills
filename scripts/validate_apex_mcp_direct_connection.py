@@ -1,5 +1,13 @@
 #!/usr/bin/env python3
-"""Validate the patched apex-mcp direct connection without mutations."""
+"""Validate the patched apex-mcp direct connection without mutations.
+
+Loads the managed apex-mcp modules, injects keyring credentials into
+environment variables, and verifies a read-only SELECT against the database.
+
+Status: ACTIVE
+Tests: Infrastructure script (requires Oracle connection)
+Dependencies: keyring, managed apex-mcp checkout, oracledb
+"""
 
 import argparse
 import json

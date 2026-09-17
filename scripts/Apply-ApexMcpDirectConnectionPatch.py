@@ -1,5 +1,13 @@
 #!/usr/bin/env python3
-"""Patch the managed apex-mcp checkout for direct Oracle connections."""
+"""Patch the managed apex-mcp checkout for direct Oracle connections.
+
+Replaces the default wallet-only oracledb.connect() call with a keyword-based
+pattern that works with direct TCP connections (no wallet required).
+
+Status: ACTIVE
+Tests: Infrastructure script (no automated tests)
+Dependencies: managed apex-mcp checkout via Initialize-ApexSkillUpstreams-V2.ps1
+"""
 
 import logging
 from pathlib import Path
