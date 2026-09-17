@@ -553,8 +553,8 @@ git push origin hito-N-complete
 
 | Hito | Estado | Progreso | Inicio | Fin |
 |------|--------|----------|--------|-----|
-| **HITO 0** | 🔴 PENDIENTE | 0% | - | - |
-| **HITO 1** | 🔴 PENDIENTE | 0% | - | - |
+| **HITO 0** | 🟡 PARCIAL | 85% | 2026-09-17 | 2026-09-17 |
+| **HITO 1** | 🔵 EN PROGRESO | 5% | 2026-09-17 | - |
 | **HITO 2** | 🔴 PENDIENTE | 0% | - | - |
 | **HITO 3** | 🔴 PENDIENTE | 0% | - | - |
 | **HITO 4** | 🔴 PENDIENTE | 0% | - | - |
