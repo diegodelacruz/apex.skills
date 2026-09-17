@@ -24,6 +24,11 @@ One-line descriptions for rapid lookup.
 | **apex-user-manual** | Generate Word user manual with embedded screenshots |
 | **apex-zaimella-gestion-proyectos** (GPZ) | Asesor metodológico para gestión integral de proyectos Zaimella (RI → AD → DP → EJ → CI) |
 | **apex** (Coordinator) | Main entry point: understands requests and routes to skills |
+| **apex-application-generator-complete** (NEW) | Orchestrator for end-to-end APEX app generation (HITOs 1-5) |
+| **apex-data-orchestrator-safe** (NEW) | Orchestrator for schema → migration → sync workflows |
+| **apex-qa-orchestrator-safe** (NEW) | Orchestrator for static QA → automated testing → environment validation |
+| **apex-design-review-orchestrator** (NEW) | Orchestrator for design review with approval gates |
+| **apex-delivery-lifecycle-zaimella** (NEW) | Orchestrator integrating GPZ (Zaimella) with APEX delivery |
 | **oracle-data-change-governance-final** | Govern DATA changes with complete audit trail |
 
 ---
@@ -54,6 +59,11 @@ One-line descriptions for rapid lookup.
 | Manage Zaimella project methodology (GPZ) | apex-zaimella-gestion-proyectos |
 | Handle DATA changes | oracle-data-change-governance-final |
 | Ask about anything APEX-related | apex (Coordinator) |
+| Run end-to-end app generation (orchestrated) | apex-application-generator-complete |
+| Coordinate full data workflow (schema → migration → sync) | apex-data-orchestrator-safe |
+| Coordinate full QA workflow (static → automated → environment) | apex-qa-orchestrator-safe |
+| Coordinate design review (solution → blueprint → engineering) | apex-design-review-orchestrator |
+| Run APEX delivery with Zaimella governance | apex-delivery-lifecycle-zaimella |
 
 ---
 
@@ -65,7 +75,7 @@ One-line descriptions for rapid lookup.
 | **Free (On-demand)** | apex-audit-decisions-log (automatic capture, tokens only on view) |
 | **Low (Typical)** | apex-solution-design, apex-page-range-governance, apex-environment-alignment-complete |
 | **Medium (Complex)** | apex-project-bootstrap-final, apex-project-workspace, apex-user-manual, apex-zaimella-gestion-proyectos |
-| **High (Full workflow)** | apex-delivery-lifecycle-safe, apex-delivery-lifecycle-complete, apex-page-automation-safe, apex-schema-automation-safe, oracle-data-change-governance-final |
+| **High (Full workflow)** | apex-delivery-lifecycle-safe, apex-delivery-lifecycle-complete, apex-delivery-lifecycle-zaimella, apex-page-automation-safe, apex-schema-automation-safe, apex-application-generator-complete, apex-data-orchestrator-safe, apex-qa-orchestrator-safe, apex-design-review-orchestrator, oracle-data-change-governance-final |
 
 ---
 

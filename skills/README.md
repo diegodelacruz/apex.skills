@@ -1,6 +1,9 @@
 # 📚 APEX Skills Catalog
 
-Complete directory of 21 Oracle APEX, Database, and Zaimella skills organized by purpose and workflow.
+Complete directory of **30 skills** (26 technical + 4 orchestrators) organized by purpose and workflow:
+- **26 Technical Skills:** Code generation, testing, data integration, design, QA, governance, project management
+- **4 Orchestrators (NEW):** Coordinate entire workflows with approval gates
+- **1 Maestro:** Central routing coordinator (apex)
 
 Use `/skills` in Codex/Claude to see the complete list with descriptions and tags. This page provides detailed navigation and quick reference.
 
@@ -25,6 +28,8 @@ Use `/skills` in Codex/Claude to see the complete list with descriptions and tag
   - *Tags: lifecycle, workflow, complete, governance*
 - **[apex-delivery-lifecycle-safe](./apex-delivery-lifecycle-safe)** - Safe end-to-end workflow: design → dev → QA → docs
   - *Tags: lifecycle, workflow, safe, governance*
+- **[apex-delivery-lifecycle-zaimella](./apex-delivery-lifecycle-zaimella)** (NEW) - Integrate GPZ (Zaimella) methodology with APEX delivery lifecycle
+  - *Tags: lifecycle, orchestration, methodology, gpz, zaimella*
 
 ### Apex Engineering & Design
 - **[apex-engineering-safe](./apex-engineering-safe)** - Safely inspect, design, and document APEX applications
@@ -74,9 +79,21 @@ Use `/skills` in Codex/Claude to see the complete list with descriptions and tag
 - **[apex-user-manual](./apex-user-manual)** - Generate Word manual from QA evidence
   - *Tags: documentation, automation, export*
 
-### Apex Coordinator
+### Apex Coordinators & Orchestrators
+
+#### Maestro (Entry Point)
 - **[apex](./apex)** - Main entry point: understands requests and routes to specialists
-  - *Tags: coordinator, routing, gateway*
+  - *Tags: coordinator, routing, gateway, orchestration*
+
+#### Sub-Coordinators (NEW - Specialized Orchestrators)
+- **[apex-application-generator-complete](./apex-application-generator-complete)** - End-to-end APEX app generation (orchestrates HITOs 1-5)
+  - *Tags: orchestration, application-generation, end-to-end, automation*
+- **[apex-data-orchestrator-safe](./apex-data-orchestrator-safe)** (NEW) - Coordinate schema → migration → sync
+  - *Tags: orchestration, data-integration, schema, etl, automation*
+- **[apex-qa-orchestrator-safe](./apex-qa-orchestrator-safe)** (NEW) - Coordinate static QA → automated testing → environment validation
+  - *Tags: orchestration, qa, testing, automation, approval-gated*
+- **[apex-design-review-orchestrator](./apex-design-review-orchestrator)** (NEW) - Coordinate design review with approval gates
+  - *Tags: orchestration, design, review, approval-gated, governance*
 
 ### Oracle Data Governance
 - **[oracle-data-change-governance-final](./oracle-data-change-governance-final)** - Govern DATA changes with audit trail
@@ -89,13 +106,15 @@ Use `/skills` in Codex/Claude to see the complete list with descriptions and tag
 ### By Workflow Type
 | Workflow | Skills |
 |----------|--------|
+| **Orchestration & Coordination** | apex, apex-delivery-lifecycle-complete, apex-delivery-lifecycle-safe, apex-delivery-lifecycle-zaimella, apex-application-generator-complete, apex-data-orchestrator-safe, apex-qa-orchestrator-safe, apex-design-review-orchestrator |
 | **Design & Planning** | apex-solution-design, apex-blueprint-design-safe, apex-pattern-mining-safe, apex-ui-craft-safe |
-| **Engineering & Implementation** | apex-engineering-safe, apex-page-automation-safe, apex-solution-design |
-| **Quality & Validation** | apex-export-qa-safe, apex-environment-alignment-complete |
+| **Engineering & Implementation** | apex-engineering-safe, apex-page-automation-safe, apex-code-generation-safe, apex-schema-automation-safe |
+| **Quality & Validation** | apex-export-qa-safe, apex-automated-testing-safe, apex-environment-alignment-complete |
+| **Data Integration** | apex-data-migration-safe, apex-api-client-safe, oracle-data-change-governance-final |
 | **Governance & Audit** | apex-page-range-governance, oracle-data-change-governance-final, apex-audit-decisions-log |
 | **Project Management** | apex-project-bootstrap-final, apex-project-workspace |
 | **Project Methodology** | apex-zaimella-gestion-proyectos |
-| **Delivery & Documentation** | apex-delivery-lifecycle-safe, apex-delivery-lifecycle-complete, apex-user-manual |
+| **Documentation** | apex-user-manual |
 | **Diagnostics** | apex-database-diagnostics |
 | **Integration** | apex-rest-source-catalogs-safe |
 
