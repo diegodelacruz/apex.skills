@@ -4,7 +4,7 @@ Framework canónico para agentes que desarrollan, validan, liberan y documentan 
 
 La calidad del repositorio se mide con la [Matriz de calidad interagentes](docs/MATRIZ-CALIDAD-INTERAGENTES.md) y el auditor reproducible `python .\scripts\audit_quality_score.py`; un `FAIL` bloquea la publicación.
 
-**Inventario actual:** 19 skills portables, verificadas por el auditor.
+**Inventario actual:** 21 skills portables, verificadas por el auditor.
 
 **Para developers:** Consulte [CLAUDE.md](CLAUDE.md) — estructura del repositorio, configuración, y desarrollo.
 

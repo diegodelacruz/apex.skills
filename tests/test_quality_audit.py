@@ -23,5 +23,5 @@ def test_quality_audit_current_repository_passes() -> None:
 
 def test_skill_and_catalog_checks_use_current_inventory() -> None:
     result = audit_result()
-    assert result["checks"][0]["evidence"] == "19 SKILL.md files inspected"
+    assert result["checks"][0]["evidence"] == "21 SKILL.md files inspected"
     assert result["checks"][1]["passed"] is True
