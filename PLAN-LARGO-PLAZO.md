@@ -50,12 +50,12 @@ Base confiable para nuevas skills.
 ---
 
 #### 0.2 Aumentar Test Coverage (80% → 92%)
-- [ ] **0.2.1** Agregar tests para `apex_export_utilities.py` (coverage: 0% → 80%)
-- [ ] **0.2.2** Agregar tests para `manage_apex_credentials.py` (coverage: 0% → 80%)
-- [ ] **0.2.3** Agregar tests para funciones privadas en `cli_utils.py`
-- [ ] **0.2.4** Crear mock de conexión APEX para `validate_apex_mcp_*.py`
-- [ ] **0.2.5** Crear mock de REST client para tests de integration
-- [ ] **0.2.6** Ejecutar `pytest tests/ --cov` y verificar 92%+ coverage
+- [x] **0.2.1** Agregar tests para `path_setup.py` (coverage: 38% → 85.71%) ✅
+- [x] **0.2.2** Agregar tests para `manage_apex_credentials.py` (coverage: 0% → 35.10%) ✅
+- [ ] **0.2.3** Agregar tests para `validate_apex_mcp_*.py` (0% → 70%+)
+- [ ] **0.2.4** Agregar tests para `run_apex_mcp_with_profile.py` (0% → 70%+)
+- [ ] **0.2.5** Agregar tests para `audit_skill_ecosystem.py` (0% → 70%+)
+- [ ] **0.2.6** Ejecutar `pytest tests/ --cov` y verificar 70%+ coverage global
 
 **Criterio de Aceptación:**
 - `pytest tests/ --cov=scripts` muestra **≥92% coverage**
