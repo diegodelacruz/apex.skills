@@ -1,0 +1,116 @@
+def apex_open_app(app_id: int) -> str:
+    """Open an existing APEX application for modification (add pages, regions, items).
+
+    Starts an import session targeting the existing application without
+    recreating it.  After this call, use apex_add_page(), apex_add_region(),
+    etc. to add new components, then call apex_finalize_app() to commit.
+
+    Args:
+        app_id: Numeric application ID of an existing app (e.g., 109).
+
+    Returns:
+        JSON with status, app details, and existing page list.
+
+    Requires:
+        - Active connection (call apex_connect first)
+        - The application must already exist in the workspace
+    """
+    try:
+        validate_app_id(app_id)
+    except ValueError as e:
+        return _json({"status": "error", "error": str(e)})
+
+    if not db.is_connected():
+        return _json({"status": "error", "error": "Not connected. Call apex_connect() first."})
+
+    if session.import_begun and not session.import_ended:
+        return _json({
+            "status": "error",
+            "error": (
+                f"An import session is already active for app {session.app_id}. "
+                "Call apex_finalize_app() first, then apex_open_app()."
+            ),
+        })
+
+    try:
+        # Verify the app exists
+        rows = db.execute("""
+            SELECT application_id, application_name, pages
+              FROM apex_applications
+             WHERE application_id = :app_id
+        """, {"app_id": app_id})
+
+        if not rows:
+            return _json({
+                "status": "error",
+                "error": f"Application {app_id} not found. Use apex_list_apps() to see available apps.",
+            })
+
+        app_info = rows[0]
+        app_name = app_info.get("APPLICATION_NAME", f"App {app_id}")
+
+        # Get existing pages so session knows about them
+        page_rows = db.execute("""
+            SELECT page_id, page_name, page_mode
+              FROM apex_application_pages
+             WHERE application_id = :app_id
+             ORDER BY page_id
+        """, {"app_id": app_id})
+
+        # Reset session and ID generator
+        session.reset()
+        ids.reset()
+
+        # Start import session targeting the existing app
+        db.plsql(_blk(f"""
+wwv_flow_imp.import_begin (
+ p_version_yyyy_mm_dd=>'{APEX_VERSION_DATE}'
+,p_release=>'24.2.13'
+,p_default_workspace_id=>{WORKSPACE_ID}
+,p_default_application_id=>{app_id}
+,p_default_id_offset=>0
+,p_default_owner=>'{APEX_SCHEMA}'
+);"""))
+
+        # Update session state
+        session.app_id = app_id
+        session.app_name = app_name
+        session.workspace_id = WORKSPACE_ID
+        session.import_begun = True
+
+        # Register existing pages in session to prevent collisions
+        from ..session import PageInfo
+        for pr in page_rows:
+            pid = pr.get("PAGE_ID")
+            pname = pr.get("PAGE_NAME", "")
+            pmode = (pr.get("PAGE_MODE") or "normal").lower()
+            session.pages[pid] = PageInfo(
+                page_id=pid,
+                page_name=pname,
+                page_type=pmode,
+            )
+
+        return _json({
+            "status": "ok",
+            "app_id": app_id,
+            "app_name": app_name,
+            "existing_pages": len(page_rows),
+            "page_list": [
+                {"page_id": p.get("PAGE_ID"), "page_name": p.get("PAGE_NAME")}
+                for p in page_rows
+            ],
+            "next_step": (
+                "Import session active. Use apex_add_page() to add new pages, "
+                "apex_add_region()/apex_add_item()/etc. to add components, "
+                "then call apex_finalize_app() to commit all changes."
+            ),
+        })
+
+    except Exception as e:
+        try:
+            db.plsql("begin wwv_flow_imp.import_end(p_auto_install_sup_obj=>false); end;")
+        except Exception:
+            pass
+        session.reset()
+        ids.reset()
+        return _json({"status": "error", "error": str(e)})

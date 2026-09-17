@@ -38,6 +38,7 @@ Require:
 3. Validate credentials: database connection, workspace access, schema authorization.
 4. List existing pages to prevent collisions.
 5. If modifying or deleting an existing page, capture current state for rollback.
+6. **For existing applications:** call `apex_open_app(app_id)` instead of `apex_create_app()`. This starts an import session targeting the existing app without recreating it, so `apex_add_page()` and all component tools work against it.
 
 ### Specification generation (Assistant Mode)
 
@@ -57,7 +58,10 @@ Require:
 ### Creation / Modification / Deletion
 
 1. Connect to APEX via apex-mcp with user-provided credentials (never hardcode).
-2. Execute specification:
+2. Open the target application:
+   - **New app:** `apex_create_app(app_id, app_name)` — creates a new application.
+   - **Existing app:** `apex_open_app(app_id)` — opens the existing app for modification. Existing pages are registered in the session to prevent collisions.
+3. Execute specification:
    - **Create page**: Insert into `wwv_flow_steps` (page) + `wwv_flow_page_plugs` (regions) + `wwv_flow_step_items` (items) + `wwv_flow_step_buttons` (buttons) + processes/validations/actions.
    - **Modify page**: Update existing page structure, add/remove regions, items, buttons; preserve existing components unless explicitly overridden.
    - **Delete page**: Remove page and all dependent objects (regions, items, buttons, processes, validations); confirm deletion intent.
