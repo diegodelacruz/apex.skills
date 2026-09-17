@@ -6,7 +6,7 @@
 
 **apex.skills** is a canonical framework for Oracle APEX application development and deployment. It provides:
 
-- **21 specialized skills** for design, engineering, QA, governance, lifecycle management, and project methodology
+- **30 skills** (26 technical + 4 orchestrators) for design, engineering, QA, governance, lifecycle management, project methodology, and workflow coordination
 - **Security-hardened pre-commit hooks** for code quality, secrets detection, and exception validation
 - **Comprehensive audit trail system** (Git-based, zero-token automatic capture)
 - **Governance templates** for page ranges, DATA changes, and environment alignment
@@ -45,9 +45,14 @@ apex.skills/
 │   └── [other utility scripts]
 │
 ├── skills/
-│   ├── README.md              # Master navigation guide (21 skills)
+│   ├── README.md              # Master navigation guide (30 skills: 26 technical + 4 orchestrators)
 │   ├── SKILLS-QUICK-REFERENCE.md  # Quick lookup tables
-│   ├── apex/                  # Coordinator skill (routes requests)
+│   ├── apex/                  # Maestro coordinator (routes requests)
+│   ├── apex-application-generator-complete/  # Orchestrator for end-to-end APEX app generation
+│   ├── apex-data-orchestrator-safe/  # Orchestrator for data workflows
+│   ├── apex-design-review-orchestrator/  # Orchestrator for design review
+│   ├── apex-qa-orchestrator-safe/  # Orchestrator for QA workflows
+│   ├── apex-delivery-lifecycle-zaimella/  # Orchestrator for Zaimella + APEX delivery
 │   ├── apex-audit-decisions-log/  # Audit trail viewer
 │   ├── apex-database-diagnostics/
 │   ├── apex-delivery-lifecycle-complete/
@@ -94,14 +99,26 @@ apex.skills/
 
 ## Skills Organization
 
-All 21 skills are organized with:
-- **"Apex" prefix** (no emojis) for clear branding (+ 1 Zaimella Methodology skill)
+All 30 skills (26 technical + 4 orchestrators) are organized with:
+- **"Apex" prefix** (no emojis) for clear branding (+ 1 Zaimella Methodology skill, + 5 orchestrators)
 - **Alphabetical ordering** in menus
-- **Unique order numbers** (0-20) for display sequencing
+- **Unique order numbers** for display sequencing
 - **Comprehensive tags** for filtering by workflow, access level, cost
+- **3-level orchestration hierarchy:** 1 Maestro (apex) → 4 Coordinators → 26 Technical Skills
 
 ### Skill Categories
 
+#### Orchestrators (Coordinators & Maestro)
+| Category | Skills | Order |
+|----------|--------|-------|
+| Maestro (Entry Point) | apex | 14 |
+| Delivery Orchestration | apex-delivery-lifecycle-zaimella | 3.5 |
+| Application Generation Orchestrator | apex-application-generator-complete | 5 |
+| Design Review Orchestrator | apex-design-review-orchestrator | 11.5 |
+| QA Orchestrator | apex-qa-orchestrator-safe | 6.5 |
+| Data Orchestrator | apex-data-orchestrator-safe | 13.5 |
+
+#### Technical Skills (26)
 | Category | Skills | Order |
 |----------|--------|-------|
 | Apex Audit & Decisions | apex-audit-decisions-log | 0 |
@@ -115,8 +132,7 @@ All 21 skills are organized with:
 | Apex Project Management | apex-project-bootstrap-final, apex-project-workspace | 9-10 |
 | Apex Documentation | apex-user-manual | 12 |
 | Oracle Data Governance | oracle-data-change-governance-final | 13 |
-| Apex Coordinator (Router) | apex | 14 |
-| Apex Engineering & Design | apex-blueprint-design-safe | 15 |
+| Apex Blueprint Design | apex-blueprint-design-safe | 15 |
 | Apex Integration | apex-rest-source-catalogs-safe | 16 |
 | Apex UX | apex-ui-craft-safe | 17 |
 | Zaimella Methodology | apex-zaimella-gestion-proyectos | 18 |
