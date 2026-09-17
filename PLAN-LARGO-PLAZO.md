@@ -34,12 +34,12 @@ Base confiable para nuevas skills.
 
 ### 📋 Checklist de Actividades
 
-#### 0.1 Diagnóstico Inicial
-- [ ] **0.1.1** Ejecutar `pytest tests/ --cov=scripts --cov-report=html`
-- [ ] **0.1.2** Documentar gaps de coverage (qué archivos/funciones faltan tests)
-- [ ] **0.1.3** Ejecutar `grep -r "TODO\|FIXME\|XXX" scripts/` para deuda técnica
-- [ ] **0.1.4** Revisar warnings de Flake8 en `scripts/`
-- [ ] **0.1.5** Generar reporte de code quality (black, isort, bandit)
+#### 0.1 Diagnóstico Inicial ✅
+- [x] **0.1.1** Ejecutar `pytest tests/ --cov=scripts --cov-report=html`
+- [x] **0.1.2** Documentar gaps de coverage (qué archivos/funciones faltan tests)
+- [x] **0.1.3** Ejecutar `grep -r "TODO\|FIXME\|XXX" scripts/` para deuda técnica
+- [x] **0.1.4** Revisar warnings de Flake8 en `scripts/`
+- [x] **0.1.5** Generar reporte de code quality (black, isort, bandit)
 
 **Criterio de Aceptación:**
 - Documento `HITO-0-DIAGNOSTICO.md` con:
