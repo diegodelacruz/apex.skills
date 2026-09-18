@@ -89,7 +89,7 @@ apex.skills/
 │   └── [other utility scripts]
 │
 ├── skills/
-│   ├── README.md              # Master navigation guide (30 skills: 26 technical + 4 orchestrators)
+│   ├── README.md              # Master navigation guide (30 skills: 24 technical + 6 orchestrators)
 │   ├── SKILLS-QUICK-REFERENCE.md  # Quick lookup tables
 │   ├── apex/                  # Maestro coordinator (routes requests)
 │   ├── apex-application-generator-complete/  # Orchestrator for end-to-end APEX app generation
@@ -120,13 +120,12 @@ apex.skills/
 │
 ├── tests/
 │   ├── fixtures/
-│   │   ├── apex-exports/      # APEX export ZIP files (f109.zip, f130.zip)
-│   │   └── sql-examples/      # SQL/PL-SQL test cases
+│   │   └── apex-exports/      # APEX export ZIP files (f109.zip, f130.zip)
 │   ├── test_cli_utils.py
 │   ├── test_apex_metadata.py
 │   ├── test_path_setup.py
 │   ├── test_apex_export_utilities.py
-│   └── test_apex_mcp_manager.py
+│   └── [23 test files total]
 │
 ├── control-proyecto/
 │   └── .bitacora.json        # Audit trail (auto-generated, added to .gitignore)
