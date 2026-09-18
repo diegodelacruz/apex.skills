@@ -291,7 +291,7 @@ class RegressionTestValidator:
             self.baseline = current_results
             return {"status": "baseline_created", "test_count": len(current_results)}
 
-        comparison = {"matches": 0, "deviations": 0, "details": []}
+        comparison: Dict[str, Any] = {"matches": 0, "deviations": 0, "details": []}
 
         for test_name, current_metrics in current_results.items():
             baseline_metrics = self.baseline.get(test_name, {})

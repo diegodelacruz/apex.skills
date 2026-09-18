@@ -381,7 +381,7 @@ def probe(keyring: Any, environment: str) -> int:
     if profile_state == "missing":
         print(f"ORACLE_PROFILE_MISSING environment={environment}")
         return 1
-    if any(not profile.get(field) for field in REQUIRED_FIELDS):
+    if profile is None or any(not profile.get(field) for field in REQUIRED_FIELDS):
         print(f"ORACLE_PROFILE_INCOMPLETE environment={environment}")
         return 1
     try:

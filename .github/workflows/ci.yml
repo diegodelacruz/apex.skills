@@ -42,7 +42,7 @@ jobs:
           python -m flake8 scripts tests --max-line-length=120
       - name: Check types and security
         run: |
-          python -m mypy --ignore-missing-imports scripts tests
+          python -m mypy --ignore-missing-imports --explicit-package-bases scripts tests
           python -m bandit -c .bandit.yaml -r scripts tests
       - name: Check secrets and patch whitespace
         run: |

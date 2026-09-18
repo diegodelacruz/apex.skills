@@ -295,14 +295,12 @@ class ApexCodeGeneratorFactory:
         Raises:
             ValueError: If generator_type is unknown
         """
-        generators = {
-            "form": lambda: ApexFormGenerator(**kwargs),
-            "report": lambda: ApexReportGenerator(**kwargs),
-            "validation": lambda: ApexValidationGenerator(),
-            "javascript": lambda: ApexJavaScriptGenerator(),
-        }
-
-        if generator_type not in generators:
-            raise ValueError(f"Unknown generator type: {generator_type}")
-
-        return generators[generator_type]()
+        if generator_type == "form":
+            return ApexFormGenerator(**kwargs)
+        if generator_type == "report":
+            return ApexReportGenerator(**kwargs)
+        if generator_type == "validation":
+            return ApexValidationGenerator()
+        if generator_type == "javascript":
+            return ApexJavaScriptGenerator()
+        raise ValueError(f"Unknown generator type: {generator_type}")

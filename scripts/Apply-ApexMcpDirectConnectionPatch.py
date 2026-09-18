@@ -166,6 +166,8 @@ def main() -> int:
         logging.exception(f"Unexpected error during patch: {err}")
         raise SystemExit(1) from err
 
+    return 0
+
 
 if __name__ == "__main__":
     main()

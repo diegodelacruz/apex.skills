@@ -217,6 +217,9 @@ class ApplicationGenerationOrchestrator:
 
     def _execute_verification(self, config: Dict[str, Any]) -> None:
         """Execute verification and reporting phase."""
+        if self.execution_start_time is None:
+            raise RuntimeError("Pipeline execution has not started")
+
         self.current_phase = PipelinePhase.VERIFICATION
         phase_start = time.time()
         self._log_operation("PHASE_START", "Verification")

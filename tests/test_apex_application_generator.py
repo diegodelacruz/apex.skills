@@ -53,6 +53,17 @@ class TestApplicationGenerationOrchestrator:
         assert orchestrator.current_phase == PipelinePhase.INITIALIZATION
 
     @pytest.mark.unit
+    def test_verification_requires_started_pipeline(self):
+        """Verification fails before mutating an unstarted pipeline."""
+        orchestrator = ApplicationGenerationOrchestrator("TEST_PROJECT", "https://apex.example.com", "SOURCE", "TARGET")
+
+        with pytest.raises(RuntimeError, match="Pipeline execution has not started"):
+            orchestrator._execute_verification({})
+
+        assert orchestrator.current_phase == PipelinePhase.INITIALIZATION
+        assert orchestrator.pipeline_log == []
+
+    @pytest.mark.unit
     def test_execute_full_generation(self):
         """Execute complete generation pipeline."""
         orchestrator = ApplicationGenerationOrchestrator("TEST_PROJECT", "https://apex.example.com", "SOURCE", "TARGET")

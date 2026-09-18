@@ -203,7 +203,12 @@ class DataValidator:
         Returns:
             Validation result dictionary
         """
-        result = {"total_rows": len(data), "valid_rows": 0, "invalid_rows": 0, "violations": []}
+        result: Dict[str, Any] = {
+            "total_rows": len(data),
+            "valid_rows": 0,
+            "invalid_rows": 0,
+            "violations": [],
+        }
 
         for idx, row in enumerate(data):
             row_violations = []

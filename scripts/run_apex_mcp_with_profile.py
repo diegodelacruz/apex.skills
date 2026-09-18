@@ -45,6 +45,7 @@ def main() -> None:
     raw_profile = keyring.get_password(SERVICE, args.environment)
     if not raw_profile:
         exit_with_error(f"Missing secure profile: {args.environment}. Import or set it first.")
+        return
     try:
         profile = json.loads(raw_profile)
     except json.JSONDecodeError:
