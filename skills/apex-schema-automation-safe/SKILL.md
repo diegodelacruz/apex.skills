@@ -3,10 +3,14 @@ name: apex-schema-automation-safe
 category: "Apex Database & Schema"
 order: 20
 tags: ["database", "schema", "ddl", "automation", "full-stack", "approval-gated"]
-description: "Create, modify, and drop Oracle database objects (tables, views, indexes, procedures, functions, packages) with full control and governance."
+description: "Create, modify, and drop Oracle database objects via SQLcl with governance and authorization checks."
 ---
 
 # Safe Oracle Schema Automation
+
+> **Ruta de ejecución:** genera archivos SQL versionables y los ejecuta mediante
+> `scripts/Execute-OracleSql.ps1` (SQLcl). La conexión se configura con
+> `scripts/Initialize-OracleConnection.ps1`. Para PL/SQL usa `-ShowErrors`.
 
 Activate this workflow when the user requests to create, modify, or drop Oracle database objects: tables, views, indexes, sequences, procedures, functions, or packages—in TEST or Production, with permission-aware execution.
 
@@ -58,13 +62,18 @@ Require:
 
 ### Creation / Modification / Deletion
 
-1. Connect to Oracle database via oracledb (credentials from keyring, never hardcoded).
-2. Execute DDL in order:
-   - **Create objects**: Tables → Indexes → Views → Sequences → Procedures → Functions → Packages (dependency order).
+1. Load Oracle connection: `. scripts/Initialize-OracleConnection.ps1`.
+2. Generate SQL files in dependency order:
+   - **Create objects**: Tables → Indexes → Views → Sequences → Procedures → Functions → Packages.
    - **Modify objects**: ALTER TABLE (add/drop columns), ALTER CONSTRAINT, etc.; preserve existing data unless explicitly dropping.
    - **Drop objects**: Sequences → Packages → Functions → Procedures → Views → Indexes → Tables (reverse order, handle FK dependencies).
-3. Capture audit trail: timestamp, user, object names, DDL executed, row counts affected.
-4. Verify execution: query data dictionary (ALL_TABLES, ALL_VIEWS, ALL_PROCEDURES, etc.) to confirm objects exist.
+3. Execute each SQL file via SQLcl:
+   ```powershell
+   .\scripts\Execute-OracleSql.ps1 -SqlFile "ddl\001_create_table_employees.sql"
+   .\scripts\Execute-OracleSql.ps1 -SqlFile "ddl\002_create_pkg_body.sql" -ShowErrors
+   ```
+4. Capture audit trail: timestamp, user, object names, DDL executed.
+5. Verify execution: query data dictionary via SQLcl to confirm objects exist and are VALID.
 
 ### Validation and rollback
 
@@ -174,9 +183,10 @@ Claude validates schema → Shows parsed DDL → User approves → Objects creat
 
 ## Upstream references
 
-- `scripts/apex_schema_generator.py` — Builder classes and DDL generation
-- `scripts/run_apex_mcp_with_profile.py` — Keyring-managed credential loading
-- `.upstreams/managed/apex-mcp/` — Oracle APEX MCP (Model Context Protocol)
+- `scripts/apex_schema_generator.py` — Builder classes and DDL generation (in-memory spec)
+- `scripts/Initialize-OracleConnection.ps1` — Oracle connection setup (SQLcl + .env)
+- `scripts/Execute-OracleSql.ps1` — SQL/DDL/PL-SQL execution via SQLcl
+- `scripts/controlled_capabilities.py` — Authorization, preflight, and DDL execution checks
 - Oracle 19c+ Data Dictionary views: `ALL_TABLES`, `ALL_VIEWS`, `ALL_INDEXES`, `ALL_PROCEDURES`, `ALL_FUNCTIONS`, `ALL_OBJECTS`
 
 ## Related skills

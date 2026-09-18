@@ -6,7 +6,7 @@
 
 **apex.skills** is a canonical framework for Oracle APEX application development and deployment. It provides:
 
-- **30 skills** (26 technical + 4 orchestrators) for design, engineering, QA, governance, lifecycle management, project methodology, and workflow coordination
+- **30 skills** (24 technical + 6 orchestrators) for design, engineering, QA, governance, lifecycle management, project methodology, and workflow coordination
 - **Security-hardened pre-commit hooks** for code quality, secrets detection, and exception validation
 - **Comprehensive audit trail system** (Git-based, zero-token automatic capture)
 - **Governance templates** for page ranges, DATA changes, and environment alignment
@@ -99,12 +99,12 @@ apex.skills/
 
 ## Skills Organization
 
-All 30 skills (26 technical + 4 orchestrators) are organized with:
-- **"Apex" prefix** (no emojis) for clear branding (+ 1 Zaimella Methodology skill, + 5 orchestrators)
+All 30 skills (24 technical + 6 orchestrators) are organized with:
+- **"Apex" prefix** (no emojis) for clear branding
 - **Alphabetical ordering** in menus
 - **Unique order numbers** for display sequencing
 - **Comprehensive tags** for filtering by workflow, access level, cost
-- **3-level orchestration hierarchy:** 1 Maestro (apex) → 4 Coordinators → 26 Technical Skills
+- **3-level orchestration hierarchy:** 1 Maestro (apex) → 5 Coordinators → 24 Technical Skills
 
 ### Skill Categories
 
@@ -113,12 +113,12 @@ All 30 skills (26 technical + 4 orchestrators) are organized with:
 |----------|--------|-------|
 | Maestro (Entry Point) | apex | 14 |
 | Delivery Orchestration | apex-delivery-lifecycle-zaimella | 3.5 |
-| Application Generation Orchestrator | apex-application-generator-complete | 5 |
+| Application Generation Orchestrator | apex-application-generator-complete | 23 |
 | Design Review Orchestrator | apex-design-review-orchestrator | 11.5 |
 | QA Orchestrator | apex-qa-orchestrator-safe | 6.5 |
 | Data Orchestrator | apex-data-orchestrator-safe | 13.5 |
 
-#### Technical Skills (26)
+#### Technical Skills (24)
 | Category | Skills | Order |
 |----------|--------|-------|
 | Apex Audit & Decisions | apex-audit-decisions-log | 0 |
@@ -138,6 +138,10 @@ All 30 skills (26 technical + 4 orchestrators) are organized with:
 | Zaimella Methodology | apex-zaimella-gestion-proyectos | 18 |
 | Apex Page Automation | apex-page-automation-safe | 19 |
 | Apex Database & Schema | apex-schema-automation-safe | 20 |
+| Apex Testing | apex-automated-testing-safe | 21 |
+| Apex API & Integration | apex-api-client-safe | 22 |
+| Apex Code Generation | apex-code-generation-safe | 24 |
+| Apex Data Migration | apex-data-migration-safe | 25 |
 
 ---
 

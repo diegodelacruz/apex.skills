@@ -24,26 +24,27 @@ verificada, o un artefacto nativo exportado por APEX e importado mediante el
 mecanismo oficial compatible con APEX 24.1.3. El preflight exige release 24.1.3,
 acceso verificado a App Builder, workspace, aplicación y páginas autorizadas.
 
-No se permite DML sobre `APEX_240100.WWV_FLOW_*`, `WWV_FLOW_IMP*` ni paquetes
-internos. `scripts/apex_page_generator.py` es únicamente un constructor en
-memoria. `scripts/apex_rest_client.py` se conserva para compatibilidad de
-importación, pero su transporte era simulado y ahora responde
-`ADAPTER_INCOMPATIBLE` para toda operación.
+No se permite DML directo sobre `APEX_240100.WWV_FLOW_*` ni paquetes internos.
+La ruta admisible para crear o modificar páginas es generar un export SQL nativo
+(formato `wwv_flow_imp`) y desplegarlo mediante `scripts/Deploy-ApexPage.ps1`,
+que invoca SQLcl con la conexión configurada por
+`scripts/Initialize-OracleConnection.ps1`. `scripts/apex_page_generator.py` es
+un constructor en memoria para generar especificaciones.
 
 ## Oracle
 
-`scripts/controlled_capabilities.py` separa el preflight de la ejecución. Antes
-de DDL observa `session_user` y `current_schema` con la misma conexión y exige
-que el objeto y esquema coincidan con la autorización verificada. En su primer
-contrato soporta una sola sentencia `CREATE TABLE`, `ALTER TABLE` o `DROP TABLE`
-sobre el objeto explícitamente autorizado. No ofrece grants y no presupone
-privilegios.
+`scripts/controlled_capabilities.py` ejecuta DDL después de pasar preflight y
+validación. Observa `session_user` y `current_schema` con la misma conexión,
+exige que el objeto y esquema coincidan con la autorización verificada, valida
+la gramática DDL y ejecuta la sentencia. Después verifica existencia y estado
+en `ALL_OBJECTS`. Soporta `CREATE TABLE`, `ALTER TABLE` y `DROP TABLE` sobre
+el objeto autorizado.
 
-Antes de invocar una ejecución real, la integración debe registrar el DDL actual,
-existencia, dependencias, privilegio efectivo, cuota cuando aplique y plan de
-reversión compensatoria. Oracle confirma DDL implícitamente: no se promete un
-rollback transaccional. Después debe comprobarse existencia y, para PL/SQL, los
-errores de compilación.
+Para DDL general (vistas, índices, procedimientos, paquetes) o ejecución de
+múltiples sentencias, la ruta principal es `scripts/Execute-OracleSql.ps1`
+que invoca SQLcl directamente. Oracle confirma DDL implícitamente: no se
+promete un rollback transaccional. Después debe comprobarse existencia y,
+para PL/SQL, los errores de compilación (`SHOW ERRORS`).
 
 ## Clasificación de errores
 
@@ -56,10 +57,9 @@ errores de compilación.
 | `EXECUTION_ERROR` | Oracle/APEX devuelve otro error; se conserva su código y mensaje. |
 | `EXTERNAL_DEPENDENCY_BLOCKED` | Falta verificador de identidad, cuenta, aprobación o componente requerido. |
 
-## Prueba TEST pendiente
+## Requisitos para ejecución
 
-La aceptación exige una autorización escrita que identifique: ambiente TEST,
-cuenta/identidad, workspace, aplicación y página temporal, objeto temporal y
-operaciones permitidas. Sólo entonces se podrá ejecutar una mutación mínima,
-prueba negativa, validación posterior y limpieza compensatoria. Producción no
-forma parte de esa autorización.
+1. Ejecutar `scripts/Initialize-OracleConnection.ps1` con el ambiente deseado.
+2. Para DDL/DML general: `scripts/Execute-OracleSql.ps1 -SqlFile <archivo.sql>`.
+3. Para páginas APEX: `scripts/Deploy-ApexPage.ps1 -PageFile <export.sql> -ApplicationId <id> -Page <num>`.
+4. Producción requiere `-Environment production` y aprobación explícita.

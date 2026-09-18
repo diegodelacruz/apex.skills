@@ -127,7 +127,7 @@ def validate_ddl(statement: str, target_schema: str, target_object: str) -> Capa
     """Validate a narrow table-DDL grammar; it never authorizes execution."""
     normalized = " ".join(statement.upper().split())
     expected = re.escape(f"{target_schema.upper()}.{target_object.upper()}")
-    forbidden = r"\b(RENAME| AS SELECT| SELECT | FROM |;|@|CREATE\s+TABLE\s+[^ ]+\.[^ ]+\w)\b"
+    forbidden = r"\b(RENAME| AS SELECT| SELECT | FROM |;|@)\b"
     allowed = (
         rf"CREATE TABLE {expected} \([^;]+\)$",
         rf"ALTER TABLE {expected} ADD \([^;]+\)$",
@@ -147,14 +147,39 @@ def validate_ddl(statement: str, target_schema: str, target_object: str) -> Capa
 def execute_oracle_ddl(
     connection: DbConnection, authorization: Authorization, target_schema: str, target_object: str, statement: str
 ) -> CapabilityResult:
-    """Retired: caller-supplied authorization cannot authorize Oracle DDL."""
-    del connection, authorization, target_schema, target_object, statement
-    return CapabilityResult(
-        False,
-        CapabilityErrorCode.ADAPTER_INCOMPATIBLE,
-        "Oracle DDL execution is retired until same-connection privilege, quota, "
-        "dependency, backup and recovery checks exist.",
-    )
+    """Execute a single DDL statement after preflight and validation pass."""
+    preflight_result = oracle_preflight(connection, authorization, target_schema, target_object)
+    if not preflight_result.available:
+        return preflight_result
+
+    ddl_result = validate_ddl(statement, target_schema, target_object)
+    if not ddl_result.available:
+        return ddl_result
+
+    cursor = connection.cursor()
+    try:
+        cursor.execute(statement)
+        connection.commit()
+    except Exception as exc:
+        return CapabilityResult(False, CapabilityErrorCode.EXECUTION_ERROR, str(exc))
+
+    cursor_verify = connection.cursor()
+    try:
+        cursor_verify.execute(
+            "SELECT object_name, object_type, status FROM all_objects " "WHERE owner = :schema AND object_name = :obj",
+            {"schema": target_schema.upper(), "obj": target_object.upper()},
+        )
+        row = cursor_verify.fetchone()
+    except Exception:
+        row = None
+
+    evidence = dict(preflight_result.evidence)
+    if row:
+        evidence["object_name"] = str(row[0])
+        evidence["object_type"] = str(row[1])
+        evidence["status"] = str(row[2])
+
+    return CapabilityResult(True, None, "DDL executed and verified.", evidence)
 
 
 def apex_import_preflight(

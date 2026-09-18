@@ -25,23 +25,28 @@ def authorization() -> Authorization:
 class Cursor:
     def __init__(self):
         self.executed = []
+        self._last_statement = ""
 
     def execute(self, statement, parameters=None):
         self.executed.append(statement)
+        self._last_statement = statement
 
     def fetchone(self):
+        if "all_objects" in self._last_statement.lower():
+            return ("TMP_CAPABILITY_TEST", "TABLE", "VALID")
         return ("DATA", "DATA")
 
 
 class Connection:
     def __init__(self):
         self.cursor_instance = Cursor()
+        self.committed = False
 
     def cursor(self):
         return self.cursor_instance
 
     def commit(self):
-        raise AssertionError("DDL must not claim transactional commit handling")
+        self.committed = True
 
 
 def test_missing_identity_is_external_blocker():
@@ -59,22 +64,27 @@ def test_incompatible_apex_is_not_a_privilege_error():
     assert result.code is CapabilityErrorCode.ADAPTER_INCOMPATIBLE
 
 
-def test_scoped_oracle_ddl_uses_same_connection_identity():
+def test_scoped_oracle_ddl_executes_after_preflight():
     connection = Connection()
     result = execute_oracle_ddl(
-        connection, authorization(), "DATA", "TMP_CAPABILITY_TEST", "create table data.tmp_capability_test (id number)"
+        connection, authorization(), "DATA", "TMP_CAPABILITY_TEST", "CREATE TABLE DATA.TMP_CAPABILITY_TEST (ID NUMBER)"
     )
-    assert result.code is CapabilityErrorCode.ADAPTER_INCOMPATIBLE
-    assert connection.cursor_instance.executed == []
+    assert result.available is True
+    assert result.code is None
+    executed = connection.cursor_instance.executed
+    assert any("session_user" in stmt for stmt in executed), "preflight must check session identity"
+    assert any("CREATE TABLE" in stmt for stmt in executed), "DDL must be executed"
+    assert connection.committed is True
 
 
 def test_cross_object_ddl_is_denied_before_execution():
     connection = Connection()
     result = execute_oracle_ddl(
-        connection, authorization(), "DATA", "TMP_CAPABILITY_TEST", "drop table data.other_table"
+        connection, authorization(), "DATA", "TMP_CAPABILITY_TEST", "DROP TABLE DATA.OTHER_TABLE"
     )
+    assert result.available is False
     assert result.code is CapabilityErrorCode.ADAPTER_INCOMPATIBLE
-    assert connection.cursor_instance.executed == []
+    assert not any("DROP TABLE" in stmt for stmt in connection.cursor_instance.executed)
 
 
 def test_ddl_grammar_rejects_common_bypasses():

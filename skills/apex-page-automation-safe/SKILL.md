@@ -3,15 +3,15 @@ name: apex-page-automation-safe
 category: "Apex Engineering & Design"
 order: 19
 tags: ["page-creation", "automation", "design", "full-stack", "approval-gated"]
-description: "Retired internal-table page automation; not approved for APEX CRUD."
+description: "Create, modify, and deploy APEX pages via native export/import through SQLcl."
 ---
 
 # Safe APEX Page Automation
 
-> **No operativo para CRUD.** Este flujo histórico usa `WWV_FLOW_*` y no debe
-> invocarse para crear, modificar ni eliminar páginas. Use exclusivamente App
-> Builder autenticado o export/import nativo, con el contrato vigente en
-> `docs/CAPACIDADES-CONTROLADAS-ORACLE-APEX.md`.
+> **Ruta de ejecución:** genera el export SQL nativo de la página APEX y lo
+> despliega mediante `scripts/Deploy-ApexPage.ps1` (SQLcl). No escribe
+> directamente en tablas `WWV_FLOW_*`. Requiere conexión Oracle configurada
+> con `scripts/Initialize-OracleConnection.ps1`.
 
 Activate this workflow when the user requests to create, modify, or delete one or more APEX pages with specific components, items, buttons, processes, validations, or dynamic actions.
 
@@ -62,16 +62,22 @@ Require:
 
 ### Creation / Modification / Deletion
 
-1. Connect to APEX via apex-mcp with user-provided credentials (never hardcode).
-2. Open the target application:
-   - **New app:** `apex_create_app(app_id, app_name)` — creates a new application.
-   - **Existing app:** `apex_open_app(app_id)` — opens the existing app for modification. Existing pages are registered in the session to prevent collisions.
-3. Execute specification:
-   - **Create page**: Insert into `wwv_flow_steps` (page) + `wwv_flow_page_plugs` (regions) + `wwv_flow_step_items` (items) + `wwv_flow_step_buttons` (buttons) + processes/validations/actions.
-   - **Modify page**: Update existing page structure, add/remove regions, items, buttons; preserve existing components unless explicitly overridden.
-   - **Delete page**: Remove page and all dependent objects (regions, items, buttons, processes, validations); confirm deletion intent.
-3. Capture audit trail: timestamp, user, page ID, changes made.
-4. Verify creation: query page definition back and compare to specification.
+1. Load Oracle connection: `. scripts/Initialize-OracleConnection.ps1`.
+2. Generate the APEX page export SQL file using the native `wwv_flow_imp` format:
+   - `wwv_flow_imp.import_begin(...)` with `p_default_application_id`.
+   - `wwv_flow_imp_page.create_page(...)` with all regions, items, buttons, processes, validations, dynamic actions.
+   - `wwv_flow_imp.import_end(...)`.
+3. Save as `f{app_id}_page_{page_number}.sql` in the project apex directory.
+4. Deploy via SQLcl:
+   ```powershell
+   .\scripts\Deploy-ApexPage.ps1 -PageFile "apex\f109_page_291.sql" -ApplicationId 109 -Page 291
+   ```
+   Or for inline SQL and DDL:
+   ```powershell
+   .\scripts\Execute-OracleSql.ps1 -SqlFile "ddl\create_table.sql"
+   ```
+5. Capture audit trail: timestamp, user, page ID, changes made.
+6. Verify deployment: confirm exit code 0 and test the page in the browser.
 
 ### Validation and rollback
 
@@ -154,10 +160,11 @@ Claude validates schema → Shows parsed spec → User approves → Page created
 
 ## Upstream references
 
-- `scripts/apex_page_generator.py` — Builder classes and schema definitions
-- `scripts/run_apex_mcp_with_profile.py` — Keyring-managed credential loading
-- `.upstreams/managed/apex-mcp/` — Oracle APEX MCP (Model Context Protocol)
-- `APEX_PAGE_EXPORT` PL/SQL package (APEX native) — Used for verification
+- `scripts/apex_page_generator.py` — Builder classes and schema definitions (in-memory spec generation)
+- `scripts/Initialize-OracleConnection.ps1` — Oracle connection setup (SQLcl + .env)
+- `scripts/Deploy-ApexPage.ps1` — APEX page deployment via SQLcl import
+- `scripts/Execute-OracleSql.ps1` — General SQL/DDL/PL-SQL execution via SQLcl
+- `scripts/controlled_capabilities.py` — Authorization and preflight checks
 
 ## Related skills
 

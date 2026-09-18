@@ -2,7 +2,7 @@
 name: apex-code-generation-safe
 description: Generate APEX components automatically from schema and metadata
 category: Apex Engineering & Design
-order: 21
+order: 24
 tags:
   - code-generation
   - apex
