@@ -14,7 +14,7 @@ import os
 import subprocess
 import sys
 
-from cli_utils import CLIParser, exit_with_error
+from scripts.cli_utils import CLIParser, exit_with_error
 
 SERVICE = "apex-skills"
 REQUIRED_MAPPING = {

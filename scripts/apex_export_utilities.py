@@ -5,7 +5,7 @@ import zipfile
 from pathlib import Path
 from typing import List, Optional, Tuple, Union
 
-from apex_metadata import ApexMetadata
+from scripts.apex_metadata import ApexMetadata
 
 
 def extract_apex_export_metadata(zip_path: Union[str, Path]) -> Tuple[str, str]:
