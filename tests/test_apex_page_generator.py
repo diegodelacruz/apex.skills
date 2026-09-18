@@ -42,7 +42,7 @@ class TestApexPageSpec:
     def test_add_item_to_region(self):
         """Test adding an item (form field) to a region."""
         page = ApexPageSpec(app_id=100, page_number=2, page_name="User Form")
-        region = page.add_region(region_name="Main Region")
+        page.add_region(region_name="Main Region")
         item = page.add_item(
             region_name="Main Region",
             item_name="USERNAME",
@@ -57,16 +57,16 @@ class TestApexPageSpec:
     def test_add_multiple_items(self):
         """Test adding multiple items to different regions."""
         page = ApexPageSpec(app_id=100, page_number=3, page_name="Login")
-        region = page.add_region(region_name="Login Region")
+        page.add_region(region_name="Login Region")
 
-        email = page.add_item(
+        page.add_item(
             region_name="Login Region",
             item_name="EMAIL",
             item_type="TEXT_FIELD",
             label="Email",
             display_sequence=10,
         )
-        password = page.add_item(
+        page.add_item(
             region_name="Login Region",
             item_name="PASSWORD",
             item_type="PASSWORD",
@@ -142,7 +142,7 @@ class TestApexPageSpec:
         )
 
         # Add form region
-        form_region = page.add_region(
+        page.add_region(
             region_name="Employee Form",
             region_type="FORM",
             template="Standard",
@@ -195,7 +195,9 @@ class TestApexPageSpec:
             process_name="SAVE_EMPLOYEE",
             process_type="PLSQL",
             point="AFTER_SUBMIT",
-            pl_sql_code="INSERT INTO employees (name, email, dept) VALUES (:P100_EMP_NAME, :P100_EMP_EMAIL, :P100_EMP_DEPT);",
+            pl_sql_code=(
+                "INSERT INTO employees (name, email, dept) " "VALUES (:P100_EMP_NAME, :P100_EMP_EMAIL, :P100_EMP_DEPT);"
+            ),
             when_button_pressed="SAVE",
         )
 
@@ -273,7 +275,7 @@ class TestApexPageSpec:
     def test_nested_regions(self):
         """Test region hierarchy (parent-child regions)."""
         page = ApexPageSpec(app_id=100, page_number=1, page_name="Nested")
-        parent = page.add_region(region_name="Parent Region")
+        page.add_region(region_name="Parent Region")
         child = page.add_region(
             region_name="Child Region",
             parent_region="Parent Region",

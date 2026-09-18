@@ -8,8 +8,8 @@ import pytest
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "scripts"))
 
-from apex_application_generator import ApplicationGenerationOrchestrator
-from apex_data_migration import ETLPipeline
+from apex_application_generator import ApplicationGenerationOrchestrator  # noqa: E402
+from apex_data_migration import ETLPipeline  # noqa: E402
 
 
 class TestOrchestratorHierarchy:

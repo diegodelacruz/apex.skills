@@ -79,7 +79,10 @@ class Constraint:
         elif self.constraint_type == "CHECK":
             return f"CONSTRAINT {self.name} CHECK ({self.expression})"
         elif self.constraint_type == "FOREIGN KEY":
-            fk = f"CONSTRAINT {self.name} FOREIGN KEY ({', '.join(self.columns)}) REFERENCES {self.references_table}({self.references_column})"
+            fk = (
+                f"CONSTRAINT {self.name} FOREIGN KEY ({', '.join(self.columns)}) "
+                f"REFERENCES {self.references_table}({self.references_column})"
+            )
             if self.on_delete:
                 fk += f" ON DELETE {self.on_delete}"
             return fk
@@ -497,7 +500,10 @@ class IndexSpec:
     def to_sql(self) -> str:
         """Generate CREATE INDEX DDL."""
         unique_clause = "UNIQUE " if self.unique else ""
-        sql = f"CREATE {unique_clause}INDEX {self.owner}.{self.index_name} ON {self.owner}.{self.table_name} ({', '.join(self.columns)})"
+        sql = (
+            f"CREATE {unique_clause}INDEX {self.owner}.{self.index_name} "
+            f"ON {self.owner}.{self.table_name} ({', '.join(self.columns)})"
+        )
 
         if self.tablespace:
             sql += f" TABLESPACE {self.tablespace}"
@@ -575,7 +581,10 @@ class ProcedureSpec:
 
         param_clause = "(\n" + ",\n".join(param_defs) + "\n)" if param_defs else ""
 
-        sql = f"CREATE PROCEDURE {self.owner}.{self.procedure_name} {param_clause}\nAS\nBEGIN\n{self.pl_sql_code}\nEND {self.procedure_name};"
+        sql = (
+            f"CREATE PROCEDURE {self.owner}.{self.procedure_name} {param_clause}\n"
+            f"AS\nBEGIN\n{self.pl_sql_code}\nEND {self.procedure_name};"
+        )
 
         if self.comment:
             sql += f"\nCOMMENT ON PROCEDURE {self.owner}.{self.procedure_name} IS '{self.comment}';"
@@ -610,7 +619,10 @@ class FunctionSpec:
 
         param_clause = "(\n" + ",\n".join(param_defs) + "\n)" if param_defs else ""
 
-        sql = f"CREATE FUNCTION {self.owner}.{self.function_name} {param_clause}\nRETURN {self.return_type}\nAS\nBEGIN\n{self.pl_sql_code}\nEND {self.function_name};"
+        sql = (
+            f"CREATE FUNCTION {self.owner}.{self.function_name} {param_clause}\n"
+            f"RETURN {self.return_type}\nAS\nBEGIN\n{self.pl_sql_code}\nEND {self.function_name};"
+        )
 
         if self.comment:
             sql += f"\nCOMMENT ON FUNCTION {self.owner}.{self.function_name} IS '{self.comment}';"
@@ -642,7 +654,10 @@ class PackageSpec:
         sql = f"CREATE PACKAGE {self.owner}.{self.package_name} AS\n{self.package_spec}\nEND {self.package_name};"
 
         if self.package_body:
-            sql += f"\n\nCREATE PACKAGE BODY {self.owner}.{self.package_name} AS\n{self.package_body}\nEND {self.package_name};"
+            sql += (
+                f"\n\nCREATE PACKAGE BODY {self.owner}.{self.package_name} AS\n"
+                f"{self.package_body}\nEND {self.package_name};"
+            )
 
         if self.comment:
             sql += f"\nCOMMENT ON PACKAGE {self.owner}.{self.package_name} IS '{self.comment}';"

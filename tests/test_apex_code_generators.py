@@ -8,7 +8,7 @@ import pytest
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "scripts"))
 
-from apex_code_generators import (
+from apex_code_generators import (  # noqa: E402
     ApexCodeGeneratorFactory,
     ApexFormGenerator,
     ApexJavaScriptGenerator,
