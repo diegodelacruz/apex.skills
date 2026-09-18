@@ -11,6 +11,10 @@ description: "Create, modify, and drop Oracle database objects via SQLcl with go
 > **Ruta de ejecución:** genera archivos SQL versionables y los ejecuta mediante
 > `scripts/Execute-OracleSql.ps1` (SQLcl). La conexión se configura con
 > `scripts/Initialize-OracleConnection.ps1`. Para PL/SQL usa `-ShowErrors`.
+>
+> **Ambiente por defecto: TEST.** Si el usuario no especifica ambiente, usar
+> `--environment test`. Solo usar production cuando el usuario lo solicite
+> explícitamente.
 
 Activate this workflow when the user requests to create, modify, or drop Oracle database objects: tables, views, indexes, sequences, procedures, functions, or packages—in TEST or Production, with permission-aware execution.
 

@@ -6,6 +6,7 @@ import importlib
 import json
 import re
 import sys
+import time
 from pathlib import Path
 from typing import Any, Dict, Optional
 
@@ -179,6 +180,28 @@ def connection_kwargs(profile: Dict[str, Any]) -> Dict[str, Any]:
     return kwargs
 
 
+def connect_with_retry(oracledb: Any, profile: Dict[str, Any], retries: int = 1, delay: float = 3.0) -> Any:
+    """Connect to Oracle with a single retry on transient network errors."""
+    kwargs = connection_kwargs(profile)
+    last_error: Exception = RuntimeError("no attempt")
+    for attempt in range(1 + retries):
+        try:
+            return oracledb.connect(**kwargs)
+        except Exception as exc:
+            last_error = exc
+            if attempt < retries and _is_transient(exc):
+                time.sleep(delay)
+            else:
+                raise
+    raise last_error
+
+
+def _is_transient(exc: BaseException) -> bool:
+    """True for DNS/network errors worth retrying once."""
+    msg = str(exc).lower()
+    return "getaddrinfo" in msg or "timed out" in msg or "temporarily unavailable" in msg
+
+
 def discover_apex_metadata(profile: Dict[str, Any]) -> Dict[str, Any]:
     """Discover APEX metadata from database connection.
 
@@ -193,7 +216,7 @@ def discover_apex_metadata(profile: Dict[str, Any]) -> Dict[str, Any]:
     """
     oracledb = import_module_safe("oracledb")
 
-    with oracledb.connect(**connection_kwargs(profile)) as connection:
+    with connect_with_retry(oracledb, profile) as connection:
         with connection.cursor() as cursor:
             cursor.execute(
                 "select workspace_id from apex_workspace_schemas "
@@ -311,7 +334,7 @@ def validate(keyring: Any, environment: str) -> int:
 
     oracledb = import_module_safe("oracledb")
     try:
-        with oracledb.connect(**connection_kwargs(profile)) as connection:
+        with connect_with_retry(oracledb, profile) as connection:
             with connection.cursor() as cursor:
                 cursor.execute("select sys_context('userenv', 'current_schema') from dual")
                 cursor.fetchone()
@@ -363,7 +386,7 @@ def probe(keyring: Any, environment: str) -> int:
         return 1
     try:
         oracledb = import_module_safe("oracledb")
-        connection = oracledb.connect(**connection_kwargs(profile))
+        connection = connect_with_retry(oracledb, profile)
     except Exception as error:
         _print_probe_error(classify_connection_error(error), environment, error)
         return 1
@@ -382,12 +405,28 @@ def probe(keyring: Any, environment: str) -> int:
     return 0
 
 
+def sqlcl_conn(keyring: Any, environment: str) -> int:
+    """Emit the SQLcl connection string for use by execution scripts."""
+    profile, profile_state = read_profile(keyring, SERVICE, environment)
+    if profile_state != "ready" or not profile:
+        print(f"SQLCL_CONN_FAIL environment={environment} reason=profile_{profile_state or 'missing'}")
+        return 1
+    user = profile.get("db_user", "")
+    password = profile.get("db_pass", "")
+    dsn = profile.get("dsn", "")
+    if not user or not password or not dsn:
+        print(f"SQLCL_CONN_FAIL environment={environment} reason=incomplete_credentials")
+        return 1
+    print(f"{user}/{password}@{dsn}")
+    return 0
+
+
 def main() -> int:
     """Main entry point."""
     parser = CLIParser("Manage secure APEX environment profiles")
     parser.add_argument(
         "action",
-        choices=("set", "set-apex", "import-env", "status", "apex-status", "validate", "probe"),
+        choices=("set", "set-apex", "import-env", "status", "apex-status", "validate", "probe", "sqlcl-conn"),
         help="Action to perform",
     )
     parser.add_environment_arg()
@@ -416,6 +455,8 @@ def main() -> int:
         return apex_status(keyring, args.environment)
     elif args.action == "probe":
         return probe(keyring, args.environment)
+    elif args.action == "sqlcl-conn":
+        return sqlcl_conn(keyring, args.environment)
     else:
         return validate(keyring, args.environment)
 

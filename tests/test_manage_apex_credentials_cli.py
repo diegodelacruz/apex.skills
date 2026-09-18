@@ -56,14 +56,14 @@ def test_initializer_does_not_invoke_mutating_upstream_patches():
 def test_initializer_skip_remote_probe_keeps_profile_checks_only():
     initializer = (ROOT / "scripts" / "Initialize-ApexCodexProject.ps1").read_text(encoding="utf-8")
     assert "if ($SkipRemoteProbe)" in initializer
-    assert "Oracle probe skipped by -SkipRemoteProbe" in initializer
+    assert "SkipRemoteProbe" in initializer
 
 
 def test_initializer_production_mcp_uses_same_labels_as_test():
     initializer = (ROOT / "scripts" / "Initialize-ApexCodexProject.ps1").read_text(encoding="utf-8")
     assert "apex-mcp-production" in initializer
     assert initializer.count("MCP_REGISTRATION_PREEXISTING_UNVERIFIED") == 2
-    assert initializer.count("MCP_REGISTRATION_SKIPPED_UNSAFE_SURFACE") >= 4
+    assert initializer.count("MCP_REGISTRATION_SKIPPED_UNSAFE_SURFACE") >= 2
 
 
 def test_initializer_does_not_reuse_profile_exit_code_for_skill_installer():

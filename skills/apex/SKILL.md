@@ -10,6 +10,21 @@ description: "Route Oracle and APEX requests to the smallest safe specialist wor
 
 Before modifying this repository, follow `../../docs/POLITICA-EVOLUCION-ECOSISTEMA.md`.
 
+## Environment Policy
+
+**Default environment: TEST.** All connections, deployments, and executions target the
+test/testing environment unless the user explicitly requests production. This rule applies
+to every skill, script, and orchestrator in the ecosystem.
+
+- During bootstrap (`Initialize-ApexCodexProject.ps1`): validate every environment that
+  has configured credentials. Report missing environments but do not block.
+- During execution: if the user does not specify an environment, use `--environment test`.
+- If the user explicitly requests production (e.g. "deploy to production",
+  "connect to production", "run this in production"), respect the decision immediately.
+  No extra confirmation is needed beyond what the governance rules already require.
+- Never silently switch from test to production. Never default to production.
+- Scripts that accept `-Environment` or `--environment` must default to `testing`/`test`.
+
 ## Workflow
 
 1. Infer the Oracle/APEX context from the user objective; never require the user to write `usa apex` or name a skill. For an isolated ambiguous typo with no database context, ask one concise clarification rather than routing incorrectly.

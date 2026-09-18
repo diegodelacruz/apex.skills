@@ -12,6 +12,10 @@ description: "Create, modify, and deploy APEX pages via native export/import thr
 > despliega mediante `scripts/Deploy-ApexPage.ps1` (SQLcl). No escribe
 > directamente en tablas `WWV_FLOW_*`. Requiere conexión Oracle configurada
 > con `scripts/Initialize-OracleConnection.ps1`.
+>
+> **Ambiente por defecto: TEST.** Si el usuario no especifica ambiente, usar
+> `--environment test`. Solo usar production cuando el usuario lo solicite
+> explícitamente.
 
 Activate this workflow when the user requests to create, modify, or delete one or more APEX pages with specific components, items, buttons, processes, validations, or dynamic actions.
 
