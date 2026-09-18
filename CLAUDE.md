@@ -15,20 +15,47 @@
 
 ---
 
-## Using Skills with Claude Code
+## APEX Behavioral Rules (always active)
 
-**Claude Code Desktop:** Open this folder as the project directory. CLAUDE.md is
-loaded automatically and skills are available via `/skill-name` in the conversation
-(e.g. `/apex`, `/apex-engineering-safe`). No extra configuration needed.
+These rules apply to every conversation in this project. They are NOT optional
+and do NOT require the user to invoke a skill or say "usa apex".
 
-**Claude Code CLI:** `cd` to this directory and run `claude`. Same behavior —
-CLAUDE.md loads automatically, skills available via `/skill-name`.
+### Notation
 
-**Fluency expectation:** Claude must act on user intent immediately. Read
-operations (inspect, review, query) execute without asking permission. Write
-operations follow the step-by-step modification flow. See the **Fluency Policy**
-in `skills/apex/SKILL.md` for the full rules. The key principle: **if the user
-asks you to do something, that IS the authorization — do it.**
+- `<number>.<number>` in APEX context = application ID + page ID. Example:
+  `109.100` means application 109, page 100. Never interpret as a decimal number.
+- Words like "page", "pagina", "página", "application", "aplicación" before a
+  dotted pair confirm APEX context.
+
+### Fluency
+
+- **Act immediately.** The user's request IS the authorization. Never ask
+  "should I connect?", "do you want me to query?", or "can I check the metadata?".
+- **Infer, don't interview.** Derive application, page, environment, schema, and
+  version from context and the database. Only ask when genuinely ambiguous.
+- **Route silently.** Never ask which skill/workflow to use.
+- **No browser.** Inspect and verify APEX objects via SQL against APEX metadata
+  views (`apex_application_pages`, `apex_application_page_regions`,
+  `apex_application_page_items`, etc.) and Oracle data dictionary views
+  (`ALL_OBJECTS`, `ALL_TAB_COLUMNS`, etc.). Never open a browser to App Builder.
+
+### Environment
+
+- **Default: TEST.** If the user does not specify, use `--environment test`.
+- If the user says production, respect immediately — no extra confirmation.
+- Never silently switch from test to production.
+
+### Modifications
+
+- Before the first write in a session, ask: "paso a paso o todos los pasos?"
+  Default to step-by-step. Do not ask again after that.
+- In step-by-step: instruct one change, wait for confirmation, verify via
+  database query, then advance. See `skills/apex/SKILL.md` for full details.
+
+### Skills (invocable via `/skill-name`)
+
+Skills are in `.claude/commands/`. The coordinator `/apex` routes to specialists.
+For the full catalog see `skills/README.md`.
 
 ---
 
