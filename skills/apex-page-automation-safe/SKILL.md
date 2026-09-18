@@ -2,7 +2,7 @@
 name: apex-page-automation-safe
 category: "Apex Engineering & Design"
 order: 19
-tags: ["page-creation", "automation", "design", "full-stack", "approval-gated"]
+tags: ["page-creation", "automation", "design", "full-stack"]
 description: "Create, modify, and deploy APEX pages via native export/import through SQLcl."
 ---
 
@@ -19,50 +19,56 @@ description: "Create, modify, and deploy APEX pages via native export/import thr
 
 Activate this workflow when the user requests to create, modify, or delete one or more APEX pages with specific components, items, buttons, processes, validations, or dynamic actions.
 
+## Modification Flow
+
+Follow the **Modification Mode Policy** and **Fluency Policy** from the APEX
+Coordinator (`skills/apex/SKILL.md`).
+
+- In step-by-step: for each change, indicate the exact navigation path in App Builder
+  (e.g. "Page Designer > Region X > Column Y > Property Z"), the value to set, and
+  wait for the user to confirm before moving on.
+- After each confirmed step, verify via APEX metadata query
+  (`apex_application_page_regions`, `apex_application_page_items`, etc.).
+- If the user reports an error, request a screenshot or error text, diagnose, and
+  guide the correction before advancing.
+
 ## Modes
 
 Choose the smallest mode that fits the request:
 
-- **Assistant Mode**: User describes the page in natural language (e.g., "a login form with email and password"). Claude generates the JSON specification and shows it for approval before creation.
-- **Expert Mode**: User provides a JSON specification or Python `ApexPageSpec` object with exact control over all properties, sequences, templates, and behaviors.
-- **Hybrid Mode**: User sketches the design in natural language; Claude generates a draft specification; user refines it; approval gates creation.
+- **Assistant Mode**: User describes the page in natural language. Generate the
+  specification and show it, then proceed unless the user objects.
+- **Expert Mode**: User provides a JSON specification or Python `ApexPageSpec`
+  object with exact control.
+- **Hybrid Mode**: User sketches the design; generate a draft; user refines.
 
-## Required inputs
+## Context inference
 
-Require:
-- Target APEX version (confirm **24.1.3** only)
-- Application ID and environment (TEST or Production)
-- Page number(s) and type(s) (BLANK, FORM, REPORT, DASHBOARD, etc.)
-- Regions, items, buttons, processes, validations, dynamic actions (by mode)
-- User roles and permissions affected
-- Acceptance criteria and test plan
-- Explicit approval before creation, modification, or deletion
+Infer these from the conversation and the database — do not interview the user:
+- APEX version (default: 24.1.3)
+- Application ID and environment (default: TEST)
+- Page number and type
+- Regions, items, buttons, processes, validations, dynamic actions
 
 ## Workflow
 
 ### Pre-flight validation
 
-1. Confirm APEX version: 24.1.3+ with apex-mcp configured.
-2. Verify application exists and page number is available (not already in use).
-3. Validate credentials: database connection, workspace access, schema authorization.
-4. List existing pages to prevent collisions.
-5. If modifying or deleting an existing page, capture current state for rollback.
-6. **For existing applications:** call `apex_open_app(app_id)` instead of `apex_create_app()`. This starts an import session targeting the existing app without recreating it, so `apex_add_page()` and all component tools work against it.
+1. Verify application exists and page number is available (not already in use).
+2. If modifying or deleting an existing page, capture current state for rollback.
+3. **For existing applications:** call `apex_open_app(app_id)` instead of `apex_create_app()`.
 
 ### Specification generation (Assistant Mode)
 
-1. Interview: page purpose, users, task flow, data, role constraints, visibility conditions.
-2. Infer: regions (layout), items (data entry), buttons (actions), processes (server-side logic), validations (data quality), dynamic actions (UX flow).
-3. Generate JSON specification using `ApexPageSpec` builder classes.
-4. Show specification to user: page structure, item types, buttons, processes in detail.
-5. Pause for approval or refinement.
+1. Infer from context: regions, items, buttons, processes, validations, dynamic actions.
+2. Generate JSON specification using `ApexPageSpec` builder classes.
+3. Show specification to user and proceed unless the user objects.
 
 ### Expert Mode
 
 1. User provides JSON spec (or Python dict matching `ApexPageSpec` schema).
-2. Validate schema: required fields, data types, cross-references (regions exist before items reference them).
-3. Show parsed specification to user.
-4. Pause for approval or correction.
+2. Validate schema: required fields, data types, cross-references.
+3. Show parsed specification to user and proceed.
 
 ### Creation / Modification / Deletion
 
@@ -81,17 +87,20 @@ Require:
    .\scripts\Execute-OracleSql.ps1 -SqlFile "ddl\create_table.sql"
    ```
 5. Capture audit trail: timestamp, user, page ID, changes made.
-6. Verify deployment: confirm exit code 0 and test the page in the browser.
+6. Verify deployment: confirm exit code 0 and verify via database metadata query.
 
 ### Validation and rollback
 
-1. Post-creation: run `APEX_PAGE_EXPORT` or query `wwv_flow_steps` to confirm page exists with correct name, type, and component count.
+1. Post-creation: query APEX metadata views (`apex_application_pages`,
+   `apex_application_page_regions`, `apex_application_page_items`) to confirm
+   page exists with correct name, type, and component count. Never open a
+   browser for verification.
 2. If creation fails: provide error details, suggest fixes, offer rollback.
 3. If user requests rollback: restore from pre-operation snapshot (database-level or application export).
 
 ## Non-negotiable safeguards
 
-1. **No production without explicit approval.** Changes to Production require separate, documented approval step. TEST changes require less friction; Production changes require confirmation of environment before executing.
+1. **Production requires environment confirmation.** Confirm the target is production once before executing. TEST changes proceed without extra friction.
 2. **Preserve existing data.** Modification mode never deletes items/regions/buttons/processes unless the user explicitly requests it. Show diff before applying.
 3. **No hardcoded credentials.** All APEX connections use keyring-managed profiles (via `run_apex_mcp_with_profile.py`). Never embed passwords in specifications, logs, or scripts.
 4. **Validate cross-references.** Items must reference existing regions; buttons must reference valid actions; processes must reference valid items or buttons; dynamic actions must reference existing items.
@@ -104,9 +113,7 @@ Return:
 - Confirmation of page created/modified/deleted with ID and name.
 - JSON specification (for audit and version control).
 - Audit trail entry (auto-captured by pre-commit hook).
-- Test plan: pages accessible? items functional? buttons work? processes execute? validations trigger? dynamic actions respond?
 - Rollback instructions if creation failed.
-- Acceptance checklist for user approval.
 
 ## Specifications and examples
 
@@ -172,7 +179,7 @@ Claude validates schema → Shows parsed spec → User approves → Page created
 
 ## Related skills
 
-- **apex-blueprint-design-safe** — Design page structure before automation (approval gate).
+- **apex-blueprint-design-safe** — Design page structure before automation.
 - **apex-export-qa-safe** — QA and export page definitions after creation.
 - **apex-engineering-safe** — Inspect existing applications and exports.
 - **oracle-data-change-governance-final** — Govern data changes if processes interact with user tables.

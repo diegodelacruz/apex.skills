@@ -15,6 +15,23 @@
 
 ---
 
+## Using Skills with Claude Code
+
+**Claude Code Desktop:** Open this folder as the project directory. CLAUDE.md is
+loaded automatically and skills are available via `/skill-name` in the conversation
+(e.g. `/apex`, `/apex-engineering-safe`). No extra configuration needed.
+
+**Claude Code CLI:** `cd` to this directory and run `claude`. Same behavior —
+CLAUDE.md loads automatically, skills available via `/skill-name`.
+
+**Fluency expectation:** Claude must act on user intent immediately. Read
+operations (inspect, review, query) execute without asking permission. Write
+operations follow the step-by-step modification flow. See the **Fluency Policy**
+in `skills/apex/SKILL.md` for the full rules. The key principle: **if the user
+asks you to do something, that IS the authorization — do it.**
+
+---
+
 ## Repository Structure
 
 ```

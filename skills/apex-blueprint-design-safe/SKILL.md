@@ -2,7 +2,7 @@
 name: apex-blueprint-design-safe
 category: "Apex Engineering & Design"
 order: 15
-tags: ["blueprint", "design", "scaffolding", "read-only", "approval"]
+tags: ["blueprint", "design", "scaffolding", "read-only"]
 description: "Create reviewable APEX blueprints from approved requirements and metadata."
 ---
 
@@ -12,11 +12,10 @@ Use this workflow to turn approved functional requirements and read-only schema 
 reviewable APEX Application Blueprint. It designs a scaffold; it does not directly modify an APEX
 application, import a blueprint, or change database objects.
 
-## Required inputs
+## Context inference
 
-Require the target APEX version, business objective, users and roles, acceptance criteria,
-environment, existing application impact, and read-only schema metadata. Metadata must include
-tables, columns, relationships, constraints, comments, display labels, and known data ownership.
+Infer the target APEX version, business objective, users and roles, environment, and
+schema metadata from the conversation and the database. Only ask when genuinely ambiguous.
 When using Oracle's official APEX upstream, record the branch and commit SHA in the design package.
 
 ## Workflow
@@ -38,5 +37,4 @@ When using Oracle's official APEX upstream, record the branch and commit SHA in 
 
 Deliver: source evidence; APEX version; assumptions; page and navigation map; role/authorization
 model; data contract; pattern decisions; Blueprint artifact; acceptance criteria; static and
-runtime test plan; import prerequisites; rollback approach; and explicit approval required for
-import.
+runtime test plan; import prerequisites; and rollback approach.

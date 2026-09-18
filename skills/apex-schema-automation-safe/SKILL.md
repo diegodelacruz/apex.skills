@@ -2,7 +2,7 @@
 name: apex-schema-automation-safe
 category: "Apex Database & Schema"
 order: 20
-tags: ["database", "schema", "ddl", "automation", "full-stack", "approval-gated"]
+tags: ["database", "schema", "ddl", "automation", "full-stack"]
 description: "Create, modify, and drop Oracle database objects via SQLcl with governance and authorization checks."
 ---
 
@@ -16,53 +16,56 @@ description: "Create, modify, and drop Oracle database objects via SQLcl with go
 > `--environment test`. Solo usar production cuando el usuario lo solicite
 > explícitamente.
 
-Activate this workflow when the user requests to create, modify, or drop Oracle database objects: tables, views, indexes, sequences, procedures, functions, or packages—in TEST or Production, with permission-aware execution.
+Activate this workflow when the user requests to create, modify, or drop Oracle database objects: tables, views, indexes, sequences, procedures, functions, or packages.
+
+## Modification Flow
+
+Follow the **Modification Mode Policy** and **Fluency Policy** from the APEX
+Coordinator (`skills/apex/SKILL.md`).
+
+- In step-by-step: for each DDL change, provide the exact SQL statement, explain
+  what it does, and wait for the user to confirm execution.
+- After each confirmed step, verify via database query
+  (`ALL_OBJECTS`, `ALL_TAB_COLUMNS`, `ALL_CONSTRAINTS`, `ALL_ERRORS`).
+- If the user reports an error (ORA-*, PLS-*), request the full error text,
+  diagnose, and guide the correction before advancing.
 
 ## Modes
 
 Choose the smallest mode that fits the request:
 
-- **Assistant Mode**: User describes the schema in natural language (e.g., "create an employees table with id, name, salary, and hire date"). Claude generates the DDL specification and shows it for approval before execution.
-- **Expert Mode**: User provides a JSON specification or Python `ApexSchemaSpec` object with exact control over all column properties, constraints, data types, and behaviors.
-- **Hybrid Mode**: User sketches the schema; Claude generates a draft DDL; user refines it; approval gates execution.
+- **Assistant Mode**: User describes the schema in natural language. Generate the
+  DDL specification, show it, and proceed unless the user objects.
+- **Expert Mode**: User provides a JSON specification or Python `ApexSchemaSpec`
+  object with exact control.
+- **Hybrid Mode**: User sketches the schema; generate a draft DDL; user refines.
 
-## Required inputs
+## Context inference
 
-Require:
-- Target Oracle database version (19c, 21c, 23c+)
-- Environment (TEST or Production) — **Production requires separate approval**
-- Schema owner (user running the DDL, default: SCOTT)
-- Object type(s): tables, views, indexes, sequences, procedures, functions, packages
-- Columns, constraints, data types, column defaults (by mode)
-- User roles and permissions (schema owner must have CREATE/ALTER/DROP privileges)
-- Acceptance criteria and test plan
-- Explicit approval before execution, modification, or deletion
+Infer these from the conversation and the database — do not interview the user:
+- Oracle database version (default: 19c+)
+- Environment (default: TEST)
+- Schema owner (default: connected user)
+- Object types, columns, constraints, data types
 
 ## Workflow
 
 ### Pre-flight validation
 
-1. Confirm Oracle version: 19c+ with oracledb driver configured.
-2. Verify credentials and connection to target database.
-3. Validate schema owner has required privileges (CREATE TABLE, CREATE VIEW, CREATE PROCEDURE, CREATE SEQUENCE, CREATE INDEX).
-4. Check if target objects already exist (for CREATE, must not exist; for ALTER/DROP, must exist).
-5. For Production: confirm separate authorization (not just TEST approval).
-6. List existing objects in schema to prevent naming collisions.
+1. Check if target objects already exist (for CREATE, must not exist; for ALTER/DROP, must exist).
+2. List existing objects in schema to prevent naming collisions.
 
 ### Specification generation (Assistant Mode)
 
-1. Interview: business purpose, data structure, relationships, constraints, performance requirements, retention policy.
-2. Infer: columns, data types, constraints (PK, FK, CHECK, UNIQUE, NOT NULL), indexes, views for common queries, procedures for frequent operations.
-3. Generate DDL specification using `ApexSchemaSpec` builder classes.
-4. Show DDL to user: table structure, indexes, views, procedures with estimated size and complexity.
-5. Pause for approval or refinement.
+1. Infer from context: columns, data types, constraints, indexes, views, procedures.
+2. Generate DDL specification using `ApexSchemaSpec` builder classes.
+3. Show DDL to user and proceed unless the user objects.
 
 ### Expert Mode
 
 1. User provides JSON spec (or Python dict matching `ApexSchemaSpec` schema).
-2. Validate schema: required fields, data types, constraints exist, column references, foreign key targets.
-3. Show parsed DDL to user.
-4. Pause for approval or correction.
+2. Validate schema: required fields, data types, constraints, foreign key targets.
+3. Show parsed DDL to user and proceed.
 
 ### Creation / Modification / Deletion
 
@@ -87,10 +90,10 @@ Require:
 
 ## Non-negotiable safeguards
 
-1. **No Production without explicit approval.** Changes to Production require separate, documented approval step outside this workflow. TEST changes require less friction; Production changes require confirmation of environment AND separate authorization before executing.
+1. **Production requires environment confirmation.** Confirm the target is production once before executing. TEST changes proceed without extra friction.
 2. **Preserve existing data.** Modification mode never drops columns/indexes/views unless the user explicitly requests it. Show diff before applying.
 3. **No hardcoded credentials.** All database connections use keyring-managed profiles (via `run_apex_mcp_with_profile.py`). Never embed passwords in DDL, logs, or scripts.
-4. **Validate permissions.** Check that schema owner has CREATE/ALTER/DROP on target objects. If permission denied, show clear error and do NOT attempt workarounds.
+4. **Validate permissions.** If permission denied, show clear error and do NOT attempt workarounds.
 5. **Handle constraints and dependencies.** Tables with FK must create parent table first; dropping a table with FK requires CASCADE or explicit FK removal first. Procedures/functions must reference existing tables; views must reference existing tables/views.
 6. **Rollback on error.** If any DDL statement fails, roll back the entire transaction (wrapped in COMMIT/ROLLBACK). Provide rollback instructions to user.
 7. **Audit trail.** Every DDL execution is recorded in `.bitacora.json` with timestamp, user, schema, object names, DDL statements, success/failure status, and user roles.
@@ -102,9 +105,7 @@ Return:
 - DDL statements executed (for audit and version control).
 - Data dictionary verification (e.g., "Table EMPLOYEES created with 10 columns, 2 indexes, 1 FK constraint").
 - Audit trail entry (auto-captured by pre-commit hook).
-- Test plan: objects accessible? constraints enforced? procedures/functions callable? indexes present? indexes used by optimizer?
 - Rollback instructions if execution failed.
-- Acceptance checklist for user approval.
 
 ## Specifications and examples
 
@@ -183,7 +184,7 @@ Claude validates schema → Shows parsed DDL → User approves → Objects creat
 - **No unauthorized privilege grants.** Users cannot grant CONNECT/RESOURCE/DBA to others; only schema-level operations.
 - **Credentials never logged.** Database password and connection strings are never printed or logged.
 - **Audit trail immutable.** `.bitacora.json` is append-only and captured at commit time; cannot be edited after creation.
-- **Row limits on large operations.** Very large tables (>100M rows) must be approved separately; TRUNCATE/DROP on large tables requires extra confirmation.
+- **Row limits on large operations.** Very large tables (>100M rows): warn about impact before TRUNCATE/DROP.
 
 ## Upstream references
 
