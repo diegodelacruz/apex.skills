@@ -5,8 +5,13 @@ Punto de entrada único para la auditoría independiente del repositorio
 apex.skills. Ejecuta los tres niveles automatizables en secuencia y
 produce un veredicto consolidado.
 
-Desacoplado: no importa ni invoca skills, orquestadores ni scripts internos.
+ALCANCE: estrictamente el repositorio apex.skills y sus skills.
+No audita proyectos del usuario ni aplicaciones APEX externas.
+
+DESACOPLAMIENTO: no importa ni invoca skills, orquestadores ni scripts
+internos del framework (cli_utils, apex_metadata, etc.).
 Solo usa stdlib + subprocess para orquestar los auditores de cada nivel.
+El repositorio no es juez y parte.
 
 Invocación:
     python scripts/audit_desacoplada.py              # Todos los niveles

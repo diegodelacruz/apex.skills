@@ -12,6 +12,21 @@ el repositorio `apex.skills`. Complementa la
 y la [Matriz de cierre](../../docs/ACTUALIZACION-ECOSISTEMA.md) sin
 reemplazarlas.
 
+## Alcance estricto
+
+Esta auditoría aplica **exclusivamente** al repositorio `apex.skills` y las
+habilidades (skills) que contiene. Queda explícitamente fuera de alcance:
+
+- **Proyectos del usuario:** ningún proyecto APEX, base de datos, aplicación
+  o artefacto en el que el usuario esté trabajando.
+- **Agentes y skills del repositorio:** los scripts de auditoría (L1, L2, L3)
+  son independientes y desacoplados. No importan ni invocan skills,
+  orquestadores ni scripts internos del framework (`scripts/cli_utils.py`,
+  `scripts/apex_metadata.py`, etc.). Solo usan stdlib + yaml.
+- **Juez y parte:** el repositorio no se audita a sí mismo con sus propias
+  herramientas internas. Los auditores son scripts aislados que examinan
+  el repositorio desde fuera de su cadena de dependencias.
+
 ## Principio rector
 
 **El producto no puede auditarse a sí mismo.** Los validadores automatizados

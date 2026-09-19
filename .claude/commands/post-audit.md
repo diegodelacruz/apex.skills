@@ -1,6 +1,8 @@
 Auditoría desacoplada independiente del ecosistema apex.skills.
 
-Este auditor es DESACOPLADO: no usa skills, orquestadores ni scripts internos del framework.
+ALCANCE: exclusivamente el repositorio apex.skills y sus skills. NUNCA audites proyectos del usuario ni aplicaciones APEX externas.
+
+Este auditor es DESACOPLADO: no usa skills, orquestadores ni scripts internos del framework. El repositorio no es juez y parte.
 Ejecuta tres niveles de auditoría (L1 estructura, L2 seguridad, L3 semántica) en un solo comando.
 
 Ejecuta:
