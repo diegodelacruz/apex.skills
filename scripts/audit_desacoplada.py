@@ -45,7 +45,7 @@ LEVELS = {
 	"L3": {
 		"script": "scripts/audit_semantic_checks.py",
 		"name": "Semántica",
-		"description": "Ejemplos, tags, routing, categorías, references, scripts referenciados, descripciones",
+		"description": "Ejemplos, tags, routing, categorías, references, scripts, descripciones, huérfanos, frescura, consistencia README",
 	},
 }
 

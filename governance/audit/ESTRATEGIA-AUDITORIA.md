@@ -128,6 +128,9 @@ coincide con el comportamiento real.
 | L3-05 | references/ declaradas en SKILL.md existen y son legibles |
 | L3-06 | Scripts referenciados en skills son sintácticamente válidos |
 | L3-07 | Descripciones de skills son precisas (no prometen más de lo que hacen) |
+| L3-08 | Archivos en scripts/ y docs/ huérfanos (no referenciados por ningún otro archivo) |
+| L3-09 | Documentación clave con fecha "Last Updated" vigente (máximo 180 días) |
+| L3-10 | Conteos de skills en CLAUDE.md y skills/README.md coinciden con la realidad |
 
 **Herramienta:** `python scripts/audit_semantic_checks.py --report`
 **Gate:** L3 PASS requerido antes de primera adopción por equipo externo.

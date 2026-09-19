@@ -25,7 +25,7 @@ Interpreta el reporte:
 Niveles:
 - L1 (P01-P10): Sintaxis, tests, skills, frontmatter, enlaces, config, imports, archivos, secrets, git
 - L2 (S01-S10): Secrets, Oracle creds, MCP, env vars, SQL injection, CVE, threat model, hooks
-- L3 (SM01-SM07): Ejemplos, tags, routing, categorías, references, scripts, descripciones
+- L3 (SM01-SM10): Ejemplos, tags, routing, categorías, references, scripts, descripciones, huérfanos, frescura, consistencia README
 - L4: Manual — usar plantilla governance/audit/plantillas/reporte-L4.md
 
 User request: $ARGUMENTS

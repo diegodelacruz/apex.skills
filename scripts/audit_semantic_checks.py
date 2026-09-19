@@ -2,6 +2,12 @@
 """Auditor semántico L3 independiente.
 
 Valida que la documentación de skills corresponda con la realidad del repositorio.
+10 checks (SM01-SM10): ejemplos, tags, routing, categorías, references,
+scripts, descripciones, archivos huérfanos, frescura, consistencia README.
+
+ALCANCE: estrictamente el repositorio apex.skills y sus skills.
+No audita proyectos del usuario ni aplicaciones APEX externas.
+
 Desacoplado: no importa ni invoca skills, orquestadores ni scripts internos.
 Solo usa stdlib + yaml (única dependencia externa).
 
@@ -244,6 +250,139 @@ def check_description_accuracy(root: Path) -> SemanticResult:
 	return r
 
 
+def check_orphan_files(root: Path) -> SemanticResult:
+	"""SM08: Files in scripts/ and docs/ that no other file references."""
+	r = SemanticResult("SM08", "Archivos huérfanos")
+
+	all_files = (
+		list(root.rglob("*.md"))
+		+ list(root.rglob("*.py"))
+		+ list(root.rglob("*.yml"))
+		+ list(root.rglob("*.yaml"))
+	)
+	corpus = {}
+	for f in all_files:
+		try:
+			corpus[f] = f.read_text(encoding="utf-8", errors="replace")
+		except (OSError, UnicodeDecodeError):
+			pass
+
+	scripts_dir = root / "scripts"
+	if scripts_dir.exists():
+		skip_prefixes = ("__init__", "conftest", "test_")
+		for py_file in sorted(scripts_dir.glob("*.py")):
+			if any(py_file.name.startswith(p) for p in skip_prefixes):
+				continue
+			basename = py_file.name
+			stem = py_file.stem
+			found = False
+			for corpus_file, content in corpus.items():
+				if corpus_file == py_file:
+					continue
+				if basename in content:
+					found = True
+					break
+				if corpus_file.suffix == ".py" and stem in content:
+					found = True
+					break
+			if not found:
+				r.fail(f"scripts/{basename}: no referenciado desde ningún .md, .py ni .yml")
+
+	docs_dir = root / "docs"
+	if docs_dir.exists():
+		for md_file in sorted(docs_dir.glob("*.md")):
+			basename = md_file.name
+			found = False
+			for corpus_file, content in corpus.items():
+				if corpus_file == md_file:
+					continue
+				if basename in content:
+					found = True
+					break
+			if not found:
+				r.fail(f"docs/{basename}: no referenciado desde ningún otro archivo")
+
+	return r
+
+
+def check_doc_freshness(root: Path) -> SemanticResult:
+	"""SM09: Key documentation has recent Last Updated dates."""
+	r = SemanticResult("SM09", "Frescura de documentación")
+	max_days = 180
+	date_pattern = re.compile(
+		r"(?:last\s+updated|fecha|date|actualizado|updated)\s*[:\|]*\s*(\d{4}-\d{2}-\d{2})",
+		re.IGNORECASE,
+	)
+
+	key_docs = [root / "CLAUDE.md", root / "README.md", root / "skills" / "README.md"]
+	docs_dir = root / "docs"
+	if docs_dir.exists():
+		key_docs.extend(sorted(docs_dir.glob("*.md")))
+	gov_dir = root / "governance"
+	if gov_dir.exists():
+		key_docs.extend(sorted(gov_dir.rglob("*.md")))
+	key_docs = list(dict.fromkeys(key_docs))
+
+	checked = 0
+	for doc in key_docs:
+		if not doc.exists():
+			continue
+		text = doc.read_text(encoding="utf-8", errors="replace")
+		matches = date_pattern.findall(text)
+		if not matches:
+			continue
+		checked += 1
+		latest_date = None
+		for date_str in matches:
+			try:
+				d = datetime.strptime(date_str, "%Y-%m-%d").replace(tzinfo=timezone.utc)
+				if latest_date is None or d > latest_date:
+					latest_date = d
+			except ValueError:
+				continue
+		if latest_date:
+			days_old = (datetime.now(timezone.utc) - latest_date).days
+			rel_path = doc.relative_to(root)
+			if days_old > max_days:
+				r.fail(f"{rel_path}: última actualización hace {days_old} días (máximo {max_days})")
+			else:
+				r.info(f"{rel_path}: actualizado hace {days_old} días")
+
+	if checked == 0:
+		r.info("ningún documento con fecha de actualización encontrado")
+	return r
+
+
+def check_readme_consistency(root: Path) -> SemanticResult:
+	"""SM10: README.md and CLAUDE.md skill counts match reality."""
+	r = SemanticResult("SM10", "Consistencia de README")
+	actual_skills = [d.name for d in _skill_dirs(root)]
+	actual_count = len(actual_skills)
+
+	claude_md = root / "CLAUDE.md"
+	if claude_md.exists():
+		text = claude_md.read_text(encoding="utf-8", errors="replace")
+		match = re.search(r"(\d+)\s+skills?\s*\(", text)
+		if match:
+			claimed = int(match.group(1))
+			if claimed != actual_count:
+				r.fail(f"CLAUDE.md dice {claimed} skills pero hay {actual_count} directorios con SKILL.md")
+
+	skills_readme = root / "skills" / "README.md"
+	if skills_readme.exists():
+		text = skills_readme.read_text(encoding="utf-8", errors="replace")
+		match = re.search(r"(\d+)\s+skills?\s*\(", text)
+		if match:
+			claimed = int(match.group(1))
+			if claimed != actual_count:
+				r.fail(f"skills/README.md dice {claimed} skills pero hay {actual_count} directorios con SKILL.md")
+		for skill_name in actual_skills:
+			if skill_name not in text:
+				r.fail(f"{skill_name}: directorio existe pero no aparece en skills/README.md")
+
+	return r
+
+
 def run_semantic_audit(root: Path) -> List[SemanticResult]:
 	checks = [
 		check_usage_examples,
@@ -253,6 +392,9 @@ def run_semantic_audit(root: Path) -> List[SemanticResult]:
 		check_references_exist,
 		check_referenced_scripts,
 		check_description_accuracy,
+		check_orphan_files,
+		check_doc_freshness,
+		check_readme_consistency,
 	]
 	return [fn(root) for fn in checks]
 
