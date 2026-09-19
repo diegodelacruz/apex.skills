@@ -26,6 +26,9 @@ habilidades (skills) que contiene. Queda explícitamente fuera de alcance:
 - **Juez y parte:** el repositorio no se audita a sí mismo con sus propias
   herramientas internas. Los auditores son scripts aislados que examinan
   el repositorio desde fuera de su cadena de dependencias.
+- **Solo diagnosticar, nunca corregir:** la auditoría reporta hallazgos.
+  No modifica, corrige ni elimina archivos como resultado de la ejecución.
+  El usuario decide qué se corrige, cuándo y cómo.
 
 ## Principio rector
 

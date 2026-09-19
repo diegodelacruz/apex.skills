@@ -21,6 +21,7 @@ Interpreta el reporte:
 - AUDIT_PASS = todo correcto, AUDIT_FAIL = hay hallazgos
 - Si hay fallos, indica al usuario qué corregir y en qué archivo
 - NO invoques ninguna skill del repositorio para diagnosticar o corregir
+- NUNCA corrijas ni modifiques archivos como resultado de la auditoría. Solo reporta. El usuario decide qué se corrige, cuándo y cómo
 
 Niveles:
 - L1 (P01-P10): Sintaxis, tests, skills, frontmatter, enlaces, config, imports, archivos, secrets, git
