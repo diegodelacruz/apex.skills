@@ -89,7 +89,7 @@ apex.skills/
 │   └── [other utility scripts]
 │
 ├── skills/
-│   ├── README.md              # Master navigation guide (30 skills: 26 technical + 4 orchestrators)
+│   ├── README.md              # Master navigation guide (30 skills: 24 technical + 6 orchestrators)
 │   ├── SKILLS-QUICK-REFERENCE.md  # Quick lookup tables
 │   ├── apex/                  # Maestro coordinator (routes requests)
 │   ├── apex-application-generator-complete/  # Orchestrator for end-to-end APEX app generation
@@ -120,13 +120,12 @@ apex.skills/
 │
 ├── tests/
 │   ├── fixtures/
-│   │   ├── apex-exports/      # APEX export ZIP files (f109.zip, f130.zip)
-│   │   └── sql-examples/      # SQL/PL-SQL test cases
+│   │   └── apex-exports/      # APEX export ZIP files (f109.zip, f130.zip)
 │   ├── test_cli_utils.py
 │   ├── test_apex_metadata.py
 │   ├── test_path_setup.py
 │   ├── test_apex_export_utilities.py
-│   └── test_apex_mcp_manager.py
+│   └── [23 test files total]
 │
 ├── control-proyecto/
 │   └── .bitacora.json        # Audit trail (auto-generated, added to .gitignore)
@@ -167,25 +166,21 @@ All 30 skills (24 technical + 6 orchestrators) are organized with:
 |----------|--------|-------|
 | Apex Audit & Decisions | apex-audit-decisions-log | 0 |
 | Apex Database & Diagnostics | apex-database-diagnostics | 1 |
-| Apex Delivery & Lifecycle | apex-delivery-lifecycle-complete, apex-delivery-lifecycle-safe | 2-3 |
-| Apex Engineering & Design | apex-engineering-safe, apex-solution-design | 4, 11 |
+| Apex Delivery & Lifecycle | apex-delivery-lifecycle-complete, apex-delivery-lifecycle-safe | 2, 3 |
+| Apex Engineering & Design | apex-engineering-safe, apex-solution-design, apex-blueprint-design-safe, apex-page-automation-safe, apex-code-generation-safe | 4, 11, 15, 19, 24 |
 | Apex Environment & Alignment | apex-environment-alignment-complete | 5 |
 | Apex Export & QA | apex-export-qa-safe | 6 |
 | Apex Page Range Governance | apex-page-range-governance | 7 |
 | Apex Pattern Mining | apex-pattern-mining-safe | 8 |
-| Apex Project Management | apex-project-bootstrap-final, apex-project-workspace | 9-10 |
+| Apex Project Management | apex-project-bootstrap-final, apex-project-workspace | 9, 10 |
 | Apex Documentation | apex-user-manual | 12 |
 | Oracle Data Governance | oracle-data-change-governance-final | 13 |
-| Apex Blueprint Design | apex-blueprint-design-safe | 15 |
-| Apex Integration | apex-rest-source-catalogs-safe | 16 |
-| Apex UX | apex-ui-craft-safe | 17 |
+| Apex Integration | apex-rest-source-catalogs-safe, apex-api-client-safe (retired) | 16, 22 |
+| Apex UX Craft | apex-ui-craft-safe | 17 |
 | Zaimella Methodology | apex-zaimella-gestion-proyectos | 18 |
-| Apex Page Automation | apex-page-automation-safe | 19 |
 | Apex Database & Schema | apex-schema-automation-safe | 20 |
-| Apex Testing | apex-automated-testing-safe | 21 |
-| Apex API & Integration | apex-api-client-safe | 22 |
-| Apex Code Generation | apex-code-generation-safe | 24 |
-| Apex Data Migration | apex-data-migration-safe | 25 |
+| Apex Testing & QA | apex-automated-testing-safe | 21 |
+| Apex Data Integration | apex-data-migration-safe | 25 |
 
 ---
 
@@ -332,8 +327,8 @@ scripts_dir = get_script_dir()  # /home/user/apex.skills/scripts
 
 ## Testing & Coverage
 
-- **122 unit tests** (100% pass rate)
-- **Target coverage:** 80%
+- **453 unit tests** (451 pass, 2 skipped by environment)
+- **Target coverage:** 80% (current: ~59%)
 - **Test markers:** unit, integration, slow, requires_oracle
 - **Frameworks:** pytest (main), pytest-cov (coverage)
 
@@ -414,6 +409,6 @@ python3 scripts/manage_apex_credentials.py probe --environment test
 
 ---
 
-**Last Updated:** 2026-08-21
-**Version:** 1.0 (Phase 4+5 Complete)
-**Status:** Production Ready (with noted code quality improvements)
+**Last Updated:** 2026-09-18
+**Version:** 1.1 (Audit + SQLcl execution channel)
+**Status:** Production Ready

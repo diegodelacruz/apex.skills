@@ -33,7 +33,7 @@ if (-not $EnvFile) {
 # SQLcl path — prefer VS Code extension (latest), fallback to standalone
 $sqlclCandidates = @(
     (Get-ChildItem "$env:USERPROFILE\.vscode\extensions\oracle.sql-developer-*\dbtools\sqlcl\bin\sql.exe" -ErrorAction SilentlyContinue | Sort-Object FullName -Descending | Select-Object -First 1),
-    (Get-Item "D:\Users\ddelacruz\Downloads\sqldeveloper_17_4\SQL Developer\sqldeveloper\bin\sql.exe" -ErrorAction SilentlyContinue)
+    $(if ($env:APEX_SQLCL_PATH) { Get-Item $env:APEX_SQLCL_PATH -ErrorAction SilentlyContinue } else { $null })
 )
 $sqlclPath = ($sqlclCandidates | Where-Object { $_ -ne $null } | Select-Object -First 1).FullName
 

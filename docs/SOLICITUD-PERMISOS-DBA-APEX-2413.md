@@ -206,5 +206,5 @@ y la próxima fecha de revisión.
 ## Referencias relacionadas
 
 - [Compatibilidad global APEX 24.1.3](mcp-compatibilidad-apex-2413.md)
-- [Habilitar escritura APEX desde Codex](habilitar-escritura-apex.md)
+
 - [Auditoría integral del repositorio](AUDITORIA-INTEGRAL-2026-09-01.md)

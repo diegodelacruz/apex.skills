@@ -365,4 +365,4 @@ if ($realItems.Count -gt 0) {
 	Write-Host ''
 }
 
-Write-Host 'Initialized and verified by Diego de la Cruz Sandoval' -ForegroundColor Cyan
+Write-Host 'APEX Codex project initialized successfully.' -ForegroundColor Cyan

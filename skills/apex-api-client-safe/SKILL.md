@@ -12,7 +12,7 @@ tags:
 access_level: read
 cost: low
 created: 2026-09-17
-status: development
+status: retired
 ---
 
 # apex-api-client-safe

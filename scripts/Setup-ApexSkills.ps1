@@ -33,9 +33,9 @@ if ($PSCmdlet.ShouldProcess($root, 'install project dependencies')) {
     & $python -m pip install --disable-pip-version-check --quiet --upgrade pip
     if ($LASTEXITCODE -ne 0) { throw 'Could not upgrade pip.' }
     & $python -m pip install --disable-pip-version-check --quiet -r (Join-Path $root 'requirements.txt')
-    & $python -m pip install --disable-pip-version-check --quiet -e (Join-Path $root '.upstreams/managed/apex-mcp')
-    if ($LASTEXITCODE -ne 0) { throw 'Could not install the local apex-mcp runtime. Confirm upstream access and rerun; base tests do not require this optional runtime.' }
     if ($LASTEXITCODE -ne 0) { throw 'Could not install requirements.txt.' }
+    & $python -m pip install --disable-pip-version-check --quiet -e (Join-Path $root '.upstreams/managed/apex-mcp')
+    if ($LASTEXITCODE -ne 0) { Write-Warning 'Could not install the local apex-mcp runtime. Confirm upstream access and rerun; base tests do not require this optional runtime.' }
 }
 
 Write-Host '[3/3] Installing skills for Codex...'
