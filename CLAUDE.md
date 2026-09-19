@@ -179,6 +179,7 @@ All 30 skills (24 technical + 6 orchestrators) are organized with:
 | Apex UX Craft | apex-ui-craft-safe | 17 |
 | Zaimella Methodology | apex-zaimella-gestion-proyectos | 18 |
 | Apex Database & Schema | apex-schema-automation-safe | 20 |
+| Apex Testing & QA | apex-automated-testing-safe | 21 |
 | Apex Data Integration | apex-data-migration-safe | 25 |
 
 ---
