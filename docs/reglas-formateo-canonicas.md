@@ -394,10 +394,12 @@ Estas 116 reglas definen el estándar de formateo para SQL, PL/SQL, Python, Powe
 ## INTEGRACIÓN CON HERRAMIENTAS DE AUTOMATIZACIÓN
 
 **Importante**: Estas reglas prevalecen sobre cualquier configuración de formatters automáticos:
-- ❌ Black formatter (convierte TABS → ESPACIOS, viola Reglas 3-5)
-- ✅ isort (respetar manualmente, sin Black)
-- ✅ flake8 (configurar para permitir TABS)
+- ✅ Black formatter — **excepción aceptada solo para Python** (convierte TABS a 4 espacios; viola Reglas 3-5 pero se acepta porque Black no soporta tabs y es estándar de la industria para Python)
+- ✅ isort (compatible con Black)
+- ✅ flake8 (configurar para permitir TABS en lenguajes no-Python)
 - ✅ Custom validators (crear si es necesario)
+
+**Excepción Python/Black**: Los archivos `.py` usan 4 espacios (impuesto por Black) en lugar de tabs. Esta es la unica excepcion a las Reglas 3-5. Todos los demas lenguajes (SQL, PL/SQL, PowerShell, Markdown, YAML) mantienen tabs obligatorios.
 
 **Pre-commit hooks**: Deben validar conformidad, no formatear automáticamente.
 
@@ -409,7 +411,7 @@ Estas 116 reglas definen el estándar de formateo para SQL, PL/SQL, Python, Powe
 |----------|-------------------|-------|
 | SQL | 1-110 | Todas aplican completo |
 | PL/SQL | 1-110 | Todas aplican completo |
-| Python | 1-5, 28-29, 41-45 | Indentación + comentarios |
+| Python | 1-2, 28-29, 41-45 | Reglas 3-5 exceptuadas: Black impone 4 espacios |
 | PowerShell | 1-5, 28-29, 41-45 | Indentación + comentarios |
 | Markdown | 1-5 (parcial) | Código dentro de bloques |
 | YAML/JSON | 1-5 (parcial) | Respetando sintaxis |
