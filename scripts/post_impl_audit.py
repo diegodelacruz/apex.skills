@@ -16,7 +16,7 @@ import subprocess
 import sys
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Dict, List, Tuple
+from typing import List
 
 ROOT = Path(__file__).resolve().parent.parent
 LINK_RE = re.compile(r"\[[^\]]+\]\(([^)#][^)]*)\)")
@@ -102,7 +102,7 @@ def check_tests(root: Path) -> AuditResult:
             timeout=120,
             cwd=str(root),
         )
-        last_line = [l for l in proc.stdout.strip().split("\n") if l.strip()][-1] if proc.stdout.strip() else ""
+        last_line = [ln for ln in proc.stdout.strip().split("\n") if ln.strip()][-1] if proc.stdout.strip() else ""
         r.info(last_line)
         if proc.returncode != 0:
             failed = re.findall(r"FAILED (tests/\S+)", proc.stdout)
@@ -202,7 +202,8 @@ def check_config_consistency(root: Path) -> AuditResult:
         if toml_report_threshold is not None and ini_threshold is not None:
             if toml_report_threshold != ini_threshold:
                 r.fail(
-                    f"coverage threshold: pyproject.toml [coverage.report]={toml_report_threshold} vs pytest.ini={ini_threshold}"
+                    f"coverage threshold: pyproject.toml [coverage.report]="
+                    f"{toml_report_threshold} vs pytest.ini={ini_threshold}"
                 )
 
     if ini_threshold is not None and toml_threshold is not None:
@@ -300,7 +301,7 @@ def check_git_status(root: Path) -> AuditResult:
             text=True,
             cwd=str(root),
         )
-        uncommitted = [l for l in proc.stdout.strip().split("\n") if l.strip()]
+        uncommitted = [ln for ln in proc.stdout.strip().split("\n") if ln.strip()]
         if uncommitted:
             r.info(f"{len(uncommitted)} archivo(s) sin commit")
             for f in uncommitted[:5]:
@@ -342,7 +343,6 @@ def print_report(results: List[AuditResult], as_json: bool = False):
         icon = "OK" if r.passed else "!!"
         print(f"  [{icon}] {r.check_id} {r.name}")
         for f in r.findings:
-            prefix = "     FAIL:" if not r.passed and f in [x for x in r.findings if r.findings] else "     info:"
             if f.startswith("  "):
                 print(f"          {f}")
             elif r.passed:
@@ -487,7 +487,7 @@ def generate_l1_report(results: List[AuditResult], root: Path) -> Path:
             "",
             "## Evidencia",
             "",
-            f"- Comando ejecutado: `python scripts/post_impl_audit.py --report`",
+            "- Comando ejecutado: `python scripts/post_impl_audit.py --report`",
             f"- Hora de ejecución: {now.isoformat()}",
             f"- Revisión: {revision}",
             "",

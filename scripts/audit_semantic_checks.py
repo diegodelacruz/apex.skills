@@ -174,6 +174,8 @@ def check_tags_validity(root: Path) -> SemanticResult:
             normalized = tag.lower().strip()
             if not normalized:
                 r.fail(f"{d.name}: tag vacío")
+            elif normalized not in valid_tags:
+                r.fail(f"{d.name}: tag desconocido: {normalized}")
     return r
 
 
@@ -539,7 +541,7 @@ def generate_l3_report(results: List[SemanticResult], root: Path) -> Path:
             "",
             "## Evidencia",
             "",
-            f"- Comando: `python scripts/audit_semantic_checks.py --report`",
+            "- Comando: `python scripts/audit_semantic_checks.py --report`",
             f"- Hora: {now.isoformat()}",
             f"- Revisión: {revision}",
             "",

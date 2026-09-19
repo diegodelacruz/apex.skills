@@ -426,7 +426,7 @@ def generate_l2_report(results: List[SecurityResult], root: Path) -> Path:
             "",
             "## Evidencia",
             "",
-            f"- Comando: `python scripts/audit_security_checklist.py --report`",
+            "- Comando: `python scripts/audit_security_checklist.py --report`",
             f"- Hora: {now.isoformat()}",
             f"- Revisión: {revision}",
             "",

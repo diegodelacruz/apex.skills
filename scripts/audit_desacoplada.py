@@ -45,7 +45,10 @@ LEVELS = {
     "L3": {
         "script": "scripts/audit_semantic_checks.py",
         "name": "Semántica",
-        "description": "Ejemplos, tags, routing, categorías, references, scripts, descripciones, huérfanos, frescura, consistencia README",
+        "description": (
+            "Ejemplos, tags, routing, categorías, references, scripts, "
+            "descripciones, huérfanos, frescura, consistencia README"
+        ),
     },
 }
 
@@ -135,7 +138,7 @@ def main():
         icon = "OK" if r["status"] == "PASS" else "!!"
         print(f"\n  [{icon}] {r['level']} — {r['name']}")
 
-        output_lines = [l for l in r["output"].strip().split("\n") if l.strip()]
+        output_lines = [ln for ln in r["output"].strip().split("\n") if ln.strip()]
         for line in output_lines:
             if line.startswith("=") or not line.strip():
                 continue
