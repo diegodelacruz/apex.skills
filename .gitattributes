@@ -1,0 +1,2 @@
+# Patch context lines begin with a space by format; do not flag that marker as trailing whitespace.
+vendor/upstreams/*.patch text eol=lf whitespace=-blank-at-eol

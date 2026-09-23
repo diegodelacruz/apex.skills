@@ -18,6 +18,16 @@ status: development
 
 # apex-code-generation-safe
 
+## Estándar de código generado
+
+Para SQL, PL/SQL y artefactos APEX generados, aplicar
+`docs/reglas-formateo-canonicas.md`: minúsculas fuera de literales, comentarios
+y nombres entre comillas, y tabuladores físicos con ancho visual de cuatro para
+la sangría. Nunca usar espacios iniciales. Antes de entregar un archivo SQL,
+validarlo con `skills/oracle-data-change-governance-final/scripts/validate_sql_style.py`;
+`STYLE_FAIL` obliga a corregirlo. El código Python es la única excepción y usa
+cuatro espacios por Black.
+
 Generate Oracle APEX applications components automatically: Forms, Reports, validations, and JavaScript interactions from database schema and metadata.
 
 ## Overview

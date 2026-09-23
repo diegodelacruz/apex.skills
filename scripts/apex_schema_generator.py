@@ -11,6 +11,11 @@ from enum import Enum
 from typing import Any, Dict, List, Optional, Tuple
 
 
+def sql_identifier(value: str) -> str:
+    """Normalize an unquoted Oracle identifier without changing quoted names."""
+    return value if '"' in value else value.lower()
+
+
 class DataType(str, Enum):
     """Common Oracle data types."""
 
@@ -40,7 +45,7 @@ class Column:
 
     def to_sql(self) -> str:
         """Generate SQL for column definition."""
-        sql = f"{self.name} {self.data_type}"
+        sql = f"{sql_identifier(self.name)} {self.data_type.lower()}"
 
         if self.length:
             sql += f"({self.length})"
@@ -50,10 +55,10 @@ class Column:
             sql += f"({self.precision})"
 
         if not self.nullable:
-            sql += " NOT NULL"
+            sql += " not null"
 
         if self.default_value:
-            sql += f" DEFAULT {self.default_value}"
+            sql += f" default {self.default_value}"
 
         return sql
 
@@ -72,19 +77,23 @@ class Constraint:
 
     def to_sql(self) -> str:
         """Generate SQL for constraint."""
-        if self.constraint_type == "PRIMARY KEY":
-            return f"CONSTRAINT {self.name} PRIMARY KEY ({', '.join(self.columns)})"
-        elif self.constraint_type == "UNIQUE":
-            return f"CONSTRAINT {self.name} UNIQUE ({', '.join(self.columns)})"
-        elif self.constraint_type == "CHECK":
-            return f"CONSTRAINT {self.name} CHECK ({self.expression})"
-        elif self.constraint_type == "FOREIGN KEY":
+        constraint_type = self.constraint_type.upper()
+        if constraint_type == "PRIMARY KEY":
+            return (
+                f"constraint {sql_identifier(self.name)} primary key ({', '.join(map(sql_identifier, self.columns))})"
+            )
+        elif constraint_type == "UNIQUE":
+            return f"constraint {sql_identifier(self.name)} unique ({', '.join(map(sql_identifier, self.columns))})"
+        elif constraint_type == "CHECK":
+            return f"constraint {sql_identifier(self.name)} check ({self.expression})"
+        elif constraint_type == "FOREIGN KEY":
             fk = (
-                f"CONSTRAINT {self.name} FOREIGN KEY ({', '.join(self.columns)}) "
-                f"REFERENCES {self.references_table}({self.references_column})"
+                f"constraint {sql_identifier(self.name)} foreign key ({', '.join(map(sql_identifier, self.columns))}) "
+                f"references {sql_identifier(self.references_table or '')}"
+                f"({sql_identifier(self.references_column or '')})"
             )
             if self.on_delete:
-                fk += f" ON DELETE {self.on_delete}"
+                fk += f" on delete {self.on_delete.lower()}"
             return fk
         return ""
 
@@ -432,15 +441,22 @@ class TableSpec:
         constraint_defs = [con.to_sql() for con in self.constraints]
 
         all_defs = col_defs + constraint_defs
-        sql = f"CREATE TABLE {self.owner}.{self.table_name} (\n  " + ",\n  ".join(all_defs) + "\n)"
+        sql = (
+            f"create table {sql_identifier(self.owner)}.{sql_identifier(self.table_name)} (\n\t"
+            + ",\n\t".join(all_defs)
+            + "\n)"
+        )
 
         if self.tablespace:
-            sql += f" TABLESPACE {self.tablespace}"
+            sql += f" tablespace {sql_identifier(self.tablespace)}"
 
         sql += ";"
 
         if self.comment:
-            sql += f"\nCOMMENT ON TABLE {self.owner}.{self.table_name} IS '{self.comment}';"
+            sql += (
+                f"\ncomment on table {sql_identifier(self.owner)}.{sql_identifier(self.table_name)} "
+                f"is '{self.comment}';"
+            )
 
         return sql
 
@@ -467,11 +483,16 @@ class ViewSpec:
 
     def to_sql(self) -> str:
         """Generate CREATE VIEW DDL."""
-        force_clause = "FORCE " if self.force else ""
-        sql = f"CREATE {force_clause}VIEW {self.owner}.{self.view_name} AS\n{self.select_query};"
+        force_clause = "force " if self.force else ""
+        sql = (
+            f"create {force_clause}view {sql_identifier(self.owner)}.{sql_identifier(self.view_name)} "
+            f"as\n{self.select_query};"
+        )
 
         if self.comment:
-            sql += f"\nCOMMENT ON VIEW {self.owner}.{self.view_name} IS '{self.comment}';"
+            sql += (
+                f"\ncomment on view {sql_identifier(self.owner)}.{sql_identifier(self.view_name)} is '{self.comment}';"
+            )
 
         return sql
 
@@ -499,19 +520,23 @@ class IndexSpec:
 
     def to_sql(self) -> str:
         """Generate CREATE INDEX DDL."""
-        unique_clause = "UNIQUE " if self.unique else ""
+        unique_clause = "unique " if self.unique else ""
         sql = (
-            f"CREATE {unique_clause}INDEX {self.owner}.{self.index_name} "
-            f"ON {self.owner}.{self.table_name} ({', '.join(self.columns)})"
+            f"create {unique_clause}index {sql_identifier(self.owner)}.{sql_identifier(self.index_name)} "
+            f"on {sql_identifier(self.owner)}.{sql_identifier(self.table_name)} "
+            f"({', '.join(map(sql_identifier, self.columns))})"
         )
 
         if self.tablespace:
-            sql += f" TABLESPACE {self.tablespace}"
+            sql += f" tablespace {sql_identifier(self.tablespace)}"
 
         sql += ";"
 
         if self.comment:
-            sql += f"\nCOMMENT ON INDEX {self.owner}.{self.index_name} IS '{self.comment}';"
+            sql += (
+                f"\ncomment on index {sql_identifier(self.owner)}.{sql_identifier(self.index_name)} "
+                f"is '{self.comment}';"
+            )
 
         return sql
 
@@ -539,17 +564,20 @@ class SequenceSpec:
 
     def to_sql(self) -> str:
         """Generate CREATE SEQUENCE DDL."""
-        sql = f"CREATE SEQUENCE {self.owner}.{self.sequence_name}"
-        sql += f"\n  START WITH {self.start_with}"
-        sql += f"\n  INCREMENT BY {self.increment_by}"
+        sql = f"create sequence {sql_identifier(self.owner)}.{sql_identifier(self.sequence_name)}"
+        sql += f"\n\tstart with {self.start_with}"
+        sql += f"\n\tincrement by {self.increment_by}"
 
         if self.max_value:
-            sql += f"\n  MAXVALUE {self.max_value}"
+            sql += f"\n\tmaxvalue {self.max_value}"
 
-        sql += f"\n  CACHE {self.cache};"
+        sql += f"\n\tcache {self.cache};"
 
         if self.comment:
-            sql += f"\nCOMMENT ON SEQUENCE {self.owner}.{self.sequence_name} IS '{self.comment}';"
+            sql += (
+                f"\ncomment on sequence {sql_identifier(self.owner)}.{sql_identifier(self.sequence_name)} "
+                f"is '{self.comment}';"
+            )
 
         return sql
 
@@ -577,17 +605,20 @@ class ProcedureSpec:
         """Generate CREATE PROCEDURE DDL."""
         param_defs = []
         for param_name, param_mode, param_type in self.params:
-            param_defs.append(f"  {param_name} {param_mode} {param_type}")
+            param_defs.append(f"\t{sql_identifier(param_name)} {param_mode.lower()} {param_type.lower()}")
 
         param_clause = "(\n" + ",\n".join(param_defs) + "\n)" if param_defs else ""
 
         sql = (
-            f"CREATE PROCEDURE {self.owner}.{self.procedure_name} {param_clause}\n"
-            f"AS\nBEGIN\n{self.pl_sql_code}\nEND {self.procedure_name};"
+            f"create procedure {sql_identifier(self.owner)}.{sql_identifier(self.procedure_name)} {param_clause}\n"
+            f"as\nbegin\n{self.pl_sql_code}\nend {sql_identifier(self.procedure_name)};"
         )
 
         if self.comment:
-            sql += f"\nCOMMENT ON PROCEDURE {self.owner}.{self.procedure_name} IS '{self.comment}';"
+            sql += (
+                f"\ncomment on procedure {sql_identifier(self.owner)}.{sql_identifier(self.procedure_name)} "
+                f"is '{self.comment}';"
+            )
 
         return sql
 
@@ -615,17 +646,21 @@ class FunctionSpec:
         """Generate CREATE FUNCTION DDL."""
         param_defs = []
         for param_name, param_mode, param_type in self.params:
-            param_defs.append(f"  {param_name} {param_mode} {param_type}")
+            param_defs.append(f"\t{sql_identifier(param_name)} {param_mode.lower()} {param_type.lower()}")
 
         param_clause = "(\n" + ",\n".join(param_defs) + "\n)" if param_defs else ""
 
         sql = (
-            f"CREATE FUNCTION {self.owner}.{self.function_name} {param_clause}\n"
-            f"RETURN {self.return_type}\nAS\nBEGIN\n{self.pl_sql_code}\nEND {self.function_name};"
+            f"create function {sql_identifier(self.owner)}.{sql_identifier(self.function_name)} {param_clause}\n"
+            f"return {self.return_type.lower()}\nas\nbegin\n{self.pl_sql_code}\n"
+            f"end {sql_identifier(self.function_name)};"
         )
 
         if self.comment:
-            sql += f"\nCOMMENT ON FUNCTION {self.owner}.{self.function_name} IS '{self.comment}';"
+            sql += (
+                f"\ncomment on function {sql_identifier(self.owner)}.{sql_identifier(self.function_name)} "
+                f"is '{self.comment}';"
+            )
 
         return sql
 
@@ -651,16 +686,22 @@ class PackageSpec:
 
     def to_sql(self) -> str:
         """Generate CREATE PACKAGE DDL."""
-        sql = f"CREATE PACKAGE {self.owner}.{self.package_name} AS\n{self.package_spec}\nEND {self.package_name};"
+        sql = (
+            f"create package {sql_identifier(self.owner)}.{sql_identifier(self.package_name)} as\n"
+            f"{self.package_spec}\nend {sql_identifier(self.package_name)};"
+        )
 
         if self.package_body:
             sql += (
-                f"\n\nCREATE PACKAGE BODY {self.owner}.{self.package_name} AS\n"
-                f"{self.package_body}\nEND {self.package_name};"
+                f"\n\ncreate package body {sql_identifier(self.owner)}.{sql_identifier(self.package_name)} as\n"
+                f"{self.package_body}\nend {sql_identifier(self.package_name)};"
             )
 
         if self.comment:
-            sql += f"\nCOMMENT ON PACKAGE {self.owner}.{self.package_name} IS '{self.comment}';"
+            sql += (
+                f"\ncomment on package {sql_identifier(self.owner)}.{sql_identifier(self.package_name)} "
+                f"is '{self.comment}';"
+            )
 
         return sql
 

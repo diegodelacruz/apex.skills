@@ -16,8 +16,12 @@
 Las referencias opcionales `oracle-apex` y `emilkowalski-skills` viven en
 `.upstreams/references/` y sirven únicamente para consulta o adaptación.
 
-Use `scripts/Initialize-ApexSkillUpstreams-V2.ps1` para preparar una copia nueva y `scripts/Update-ApexSkillUpstreams-V2.ps1` para toda actualización manual, con backup y rollback.
+`scripts/Sync-ApexSkillUpstreams.ps1` prepara snapshots incluidos, revisa los remotos y actualiza las copias administradas con backup y rollback. `Setup-ApexSkills.ps1` lo ejecuta al instalar; `Initialize-ApexCodexProject.ps1` ejecuta el setup automáticamente antes del diagnóstico. Tras revisar un upstream actualizado, regenere los snapshots y sus commits fijados con `scripts/Export-ApexSkillUpstreamSnapshots.ps1`.
 
 ## Runtime
 
 La opción inicial es un único `.venv` en el repositorio de skills. Los proyectos nuevos solo crean `.venv` propio si tienen dependencias propias, CI aislado o instrucción explícita. La decisión debe constar en `control-proyecto/decisiones/decisiones-globales.md`.
+
+Para Codex, `apex-controlled-mcp` usa esa `.venv` y un runtime per-user de
+Java/SQLcl bajo `%LOCALAPPDATA%\ApexSkills\runtimes`. No usa ni registra el
+upstream `apex-mcp` completo.

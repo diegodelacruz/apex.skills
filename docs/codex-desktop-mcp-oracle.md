@@ -23,3 +23,11 @@ independiente de un perfil de keyring y de una sonda Oracle.
 TEST requiere autorización explícita para conexión. Producción requiere una
 autorización separada y permanece sin registro ni handshake desde este
 bootstrap.
+
+## Fachada aprobada: `apex-controlled-mcp`
+
+El repositorio incluye una fachada STDIO distinta del upstream bloqueado. Se
+instala con `Setup-ApexControlledMcp.ps1`, valida Java/SQLcl mediante `doctor`
+y se registra manualmente con `Register-ApexControlledMcp.ps1`. Sus operaciones
+usan archivos SQL del repositorio y exports APEX nativos; no exponen las
+herramientas internas del upstream.

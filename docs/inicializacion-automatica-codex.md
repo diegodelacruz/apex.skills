@@ -2,7 +2,7 @@
 
 > **BOOTSTRAP LOCAL CORREGIDO; VALIDACIÓN REMOTA TEST PENDIENTE**
 
-El inicializador prepara recursos locales y presenta una matriz de TEST y Producción. No importa credenciales, no aplica parches al upstream, no realiza handshake y no registra ni elimina MCP.
+El inicializador prepara snapshots/upstreams, Python y skills en la misma ejecución y presenta una matriz de TEST y Producción. Un remoto inaccesible usa la copia incluida o conserva la copia previa. No importa credenciales, no realiza handshake y no registra ni elimina MCP.
 
 ```powershell
 .\scripts\Initialize-ApexCodexProject.ps1 -ProjectPath "<RUTA_PROYECTO_APEX>"

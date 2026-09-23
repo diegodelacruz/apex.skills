@@ -53,6 +53,6 @@
     }
   },
   "update_policy": "preflight all selected repositories, verified backup, fast-forward only, validate final commits, automatic rollback on failure",
-  "managed_update_command": ".\\scripts\\Update-ApexSkillUpstreams-V2.ps1",
+  "managed_update_command": ".\\scripts\\Sync-ApexSkillUpstreams.ps1",
   "reference_init_command": ".\\scripts\\Initialize-ApexSkillUpstreams-V2.ps1 -IncludeReferences"
 }

@@ -29,6 +29,9 @@ htmlcov/
 .upstreams/
 .upstream-backups/
 
+# Per-user, verified Java and SQLcl runtime installed by the controlled MCP
+.apex-runtime/
+
 # Generated QA/manual artifacts that can contain sensitive screenshots or traces
 control-proyecto/**/traces/
 control-proyecto/**/screenshots/

@@ -75,14 +75,16 @@ Toda actualización debe:
 
 1. revisar el estado Git, la URL, la rama y el commit esperado;
 2. ejecutar preflight de disponibilidad remota y consistencia local en lectura;
-3. detenerse si hay cambios locales no registrados o configuración incorrecta;
-4. crear y verificar un backup antes de modificar cualquier checkout;
-5. actualizar únicamente mediante fast-forward;
-6. validar los commits finales y el registro actualizado;
-7. restaurar automáticamente todos los checkouts desde el backup si falla uno;
-8. conservar evidencia del backup, actualización, validación y rollback.
+3. conservar una copia base verificable dentro de `vendor/upstreams` para cada upstream administrado;
+4. preservar copias locales con cambios desconocidos y no sustituirlas automáticamente;
+5. preparar cada avance remoto en staging y aceptar únicamente un fast-forward de la rama registrada;
+6. crear y verificar el backup del checkout afectado antes de reemplazarlo;
+7. validar el commit, el overlay local y la compilación aplicable antes de activar la copia nueva;
+8. usar la copia activa anterior o el snapshot incluido cuando un remoto no responda o la actualización falle;
+9. restaurar automáticamente los checkouts ya reemplazados ante un fallo interno del proceso;
+10. conservar evidencia del backup, actualización, fallback, validación y rollback.
 
-No se deben actualizar upstreams manualmente fuera de los scripts canónicos.
+No se deben actualizar upstreams manualmente fuera de `Sync-ApexSkillUpstreams.ps1`.
 
 ## 7. Auditoría y publicación
 

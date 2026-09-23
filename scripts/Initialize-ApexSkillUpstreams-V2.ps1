@@ -6,10 +6,15 @@ param(
 $ErrorActionPreference = 'Stop'
 $root = Split-Path -Parent $PSScriptRoot
 $lockPath = Join-Path $root 'upstreams.lock.json'
+$syncPath = Join-Path $root 'scripts/Sync-ApexSkillUpstreams.ps1'
+
+& $syncPath -WhatIf:$WhatIfPreference
+if (-not $?) { throw 'Managed upstream synchronization failed; available copies were preserved.' }
+if (-not $IncludeReferences) { return }
 
 if (-not (Test-Path -LiteralPath $lockPath)) { throw "Upstream lock file not found: $lockPath" }
 $lock = Get-Content -Raw -LiteralPath $lockPath | ConvertFrom-Json
-$entries = @($lock.repositories.psobject.Properties | ForEach-Object { $_.Value } | Where-Object { $IncludeReferences -or $_.kind -eq 'managed' })
+$entries = @($lock.repositories.psobject.Properties | ForEach-Object { $_.Value } | Where-Object { $_.kind -eq 'reference' })
 
 foreach ($entry in $entries) {
 	$target = Join-Path $root $entry.path

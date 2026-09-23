@@ -5,7 +5,22 @@ $ErrorActionPreference = 'Stop'
 $root = Split-Path -Parent $PSScriptRoot
 $sources = Join-Path $root '.upstreams'
 $lockPath = Join-Path $root 'upstreams.lock.json'
+$syncPath = Join-Path $root 'scripts/Sync-ApexSkillUpstreams.ps1'
+$restorePath = Join-Path $root 'scripts/Restore-ApexSkillUpstreamBackup.ps1'
 $backup = if ($BackupPath) { $BackupPath } else { Join-Path $root ('.upstream-backups\\' + (Get-Date -Format 'yyyyMMdd-HHmmss')) }
+
+if ($Rollback -and -not $BackupPath) { throw 'Rollback requires an existing -BackupPath.' }
+if ($Rollback) {
+	& $restorePath -BackupPath $BackupPath -WhatIf:$WhatIfPreference
+	if (-not $?) { throw 'Managed upstream rollback failed.' }
+	if (-not $IncludeReferences) { return }
+}
+
+if (-not $Rollback) {
+	& $syncPath -WhatIf:$WhatIfPreference
+	if (-not $?) { throw 'Managed upstream synchronization failed; current copies were preserved.' }
+	if (-not $IncludeReferences) { return }
+}
 
 function Invoke-Git {
 	param([string]$Path, [string[]]$Arguments)
@@ -34,7 +49,7 @@ function Restore-Backup {
 
 if (-not (Test-Path -LiteralPath $lockPath)) { throw "Upstream lock file not found: $lockPath" }
 $lock = Get-Content -Raw -LiteralPath $lockPath | ConvertFrom-Json
-$selected = @($lock.repositories.psobject.Properties | ForEach-Object { $_.Value } | Where-Object { $IncludeReferences -or $_.kind -eq 'managed' })
+$selected = @($lock.repositories.psobject.Properties | ForEach-Object { $_.Value } | Where-Object { $_.kind -eq 'reference' })
 
 if ($Rollback) {
 	if (-not $BackupPath -or -not (Test-Path -LiteralPath $BackupPath)) { throw 'Rollback requires an existing -BackupPath.' }

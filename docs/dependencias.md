@@ -2,11 +2,11 @@
 
 ## Python
 
-Para una clonación nueva, ejecute primero:
+Para una clonación nueva, ejecute un único comando:
 
 .\scripts\Setup-ApexSkills.ps1
 
-El script descarga los upstreams, crea .venv, instala requirements.txt e instala el runtime MCP local desde .upstreams/managed/apex-mcp. CI y Dependabot usan solo las dependencias base y no requieren acceso a upstreams privados. Si necesita repetir la instalación base, ejecute python -m pip install -r requirements.txt.
+El script prepara snapshots administrados, intenta actualizar cada remoto, crea `.venv`, instala `requirements.txt`, valida la compilación del runtime y luego instala las skills. Los snapshots versionados de `vendor/upstreams/` permiten continuar sin acceso remoto; cada copia previa se respalda antes de reemplazarla. Si un remoto falla, se conserva la copia activa o se usa el snapshot incluido. `Initialize-ApexCodexProject.ps1 -ProjectPath <RUTA>` también ejecuta este setup automáticamente antes de validar el proyecto.
 
 ```powershell
 python -m pip install -r requirements.txt
@@ -14,9 +14,13 @@ python -m pip install -r requirements.txt
 
 requirements.txt instala las dependencias base. El runtime apex-mcp es opcional para CI/Dependabot y se instala localmente por Setup-ApexSkills.ps1 desde .upstreams/managed/apex-mcp.
 
+`fastmcp` es una dependencia directa para `apex-controlled-mcp`; no depende de
+`apex-mcp`. El setup autónomo `Setup-ApexControlledMcp.ps1` instala Python,
+Java y SQLcl por usuario sin usar VS Code ni clonar upstreams.
+
 ## Upstreams administrados
 
-El inicializador administra localmente los tres upstreams canónicos bajo `.upstreams/managed/`. No deben clonarse manualmente dentro de cada proyecto:
+El registro administra los tres upstreams canónicos bajo `.upstreams/managed/`; sus snapshots de recuperación están versionados bajo `vendor/upstreams/`. No deben clonarse manualmente dentro de cada proyecto:
 
 | Repositorio | Uso |
 | --- | --- |
@@ -24,7 +28,9 @@ El inicializador administra localmente los tres upstreams canónicos bajo `.upst
 | `https://github.com/jefersonKel/zaimella-skill` | Estándares, QA, Playwright y manuales. |
 | `https://github.com/zaimella/zaimella-apex-oracle` | Fuente complementaria APEX/Oracle administrada como upstream local. |
 
-Actualice los tres mediante `Update-ApexSkillUpstreams-V2.ps1`; use `-IncludeReferences` para incluir las referencias. El inicializador reaplica el patch canónico de conexión directa de `apex-mcp`.
+Los snapshots actuales de `zaimella-skill` y `zaimella-apex-oracle` no contienen un archivo de licencia; el registro conserva `not-declared`. El responsable del repositorio confirmó el 2026-09-23 que autoriza redistribuir ambos snapshots en el repositorio GitHub `diegodelacruz/apex.skills`; esa autorización de publicación no cambia la licencia declarada de los upstreams.
+
+La instalación y actualización normal usa `scripts/Sync-ApexSkillUpstreams.ps1`. El script actualiza cada upstream por separado, verifica fast-forward y overlay, respalda antes del reemplazo y conserva la copia anterior cuando no puede validar una actualización. El snapshot de `apex-mcp` separa el commit MIT del overlay local existente. Las referencias continúan siendo opcionales y no se incluyen en el setup normal.
 
 ## Referencias opcionales
 

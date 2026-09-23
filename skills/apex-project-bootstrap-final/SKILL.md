@@ -11,7 +11,7 @@ description: "Initialize an APEX project with workspace and governance foundatio
 ## Workflow
 
 1. Create the visible `control-proyecto/` workspace and global decision/master-plan files.
-2. Clone all three canonical upstreams for every new project through `Initialize-ApexSkillUpstreams-V2.ps1`: `apex-mcp`, `zaimella-skill`, and `zaimella-apex-oracle`. Record revisions in the global decision record.
+2. Run `Setup-ApexSkills.ps1` once for the workstation. It prepares the three managed upstreams from bundled snapshots, checks remotes, backs up before updating, and preserves a usable local copy when a remote is unavailable. Record the selected revisions in the global decision record.
 3. Run `Initialize-ApexCodexProject.ps1 -ProjectPath <project-root>` only to prepare local resources and observe the separate Oracle/APEX profile states. The bootstrap does not register MCP, run a handshake, or alter the managed upstream. Use `-SkipRemoteProbe` when no Oracle connection is authorized; otherwise a ready profile may receive only the read-only `dual` probe.
 4. Use the shared `<skills-repository>/.venv` by default. Create a project `.venv` only for project-specific dependencies, isolated CI, or explicit user instruction.
 5. Present relevant canonical decisions before implementation. A documented explicit project decision overrides a canonical default only for that project.

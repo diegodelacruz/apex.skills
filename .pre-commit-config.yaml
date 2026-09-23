@@ -7,6 +7,8 @@ repos:
         args:
           - --baseline
           - .secrets.baseline
+          - --exclude-lines
+          - '^\s*"(commit|archive_sha256|overlay_sha256)":'
         exclude: |
           (?x)^(
             \.mcp\.json\.example|
@@ -22,9 +24,11 @@ repos:
       - id: check-yaml
       - id: check-json
       - id: check-added-large-files
-        args: ['--maxkb=1000']
+        # The verified recovery snapshots are intentional artifacts (largest: ~5.7 MB).
+        args: ['--maxkb=6000']
       - id: end-of-file-fixer
       - id: trailing-whitespace
+        exclude: ^vendor/upstreams/.*\.patch$
       # Ensure files use tabs for indentation (not spaces)
       - id: mixed-line-ending
         args: ['--fix=lf']

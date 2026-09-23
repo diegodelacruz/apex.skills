@@ -1,0 +1,50 @@
+{
+  "format_version": 1,
+  "snapshot_date": "2026-09-23",
+  "repositories": {
+    "apex-mcp": {
+      "path": ".upstreams/managed/apex-mcp",
+      "url": "https://github.com/TechFernandesLTDA/apex-mcp.git",
+      "branch": "master",
+      "commit": "878196a71ba757257434e789a414c6f0c2e2d00d",
+      "kind": "managed",
+      "purpose": "MCP integration runtime and Oracle/APEX inspection reference",
+      "license": "MIT",
+      "archive": "apex-mcp.zip",
+      "archive_sha256": "7ea23e91a66fb1d6fb4e679ec78fe2b49f83a610a5e0eafe1a495093cc9d59cd",
+      "overlay": "apex-mcp-local-overlay.patch",
+      "overlay_sha256": "746186259b4ce653da2795c6230c3e87f42f199d211b4221aecf6795749b14ba",
+      "overlay_files": [
+        "apex_mcp/config.py",
+        "apex_mcp/db.py",
+        "apex_mcp/server.py",
+        "apex_mcp/tools/app_tools.py",
+        "apex_mcp/tools/inspect_tools.py",
+        "apex_mcp/tools/setup_tools.py",
+        "apex_mcp/tools/sql_tools.py"
+      ]
+    },
+    "zaimella-skill": {
+      "path": ".upstreams/managed/zaimella-skill",
+      "url": "https://github.com/jefersonKel/zaimella-skill.git",
+      "branch": "main",
+      "commit": "314685289071097c5233d5277e17f02e1c26bcd8",
+      "kind": "managed",
+      "purpose": "APEX standards, QA, Playwright, and manuals",
+      "license": "not-declared",
+      "archive": "zaimella-skill.zip",
+      "archive_sha256": "035782dc63994516573e0502bd66a845e2b1c540de5d7e3a844ad396bdec531f"
+    },
+    "zaimella-apex-oracle": {
+      "path": ".upstreams/managed/zaimella-apex-oracle",
+      "url": "https://github.com/zaimella/zaimella-apex-oracle.git",
+      "branch": "main",
+      "commit": "c07fea2793106a78d62b5020eaf46eab3e6de40f",
+      "kind": "managed",
+      "purpose": "Versioned APEX and Oracle source reference",
+      "license": "not-declared",
+      "archive": "zaimella-apex-oracle.zip",
+      "archive_sha256": "ecd1a46e1b81ff9c05657df85f448c6559849f825171314468a2ae7645d423af"
+    }
+  }
+}

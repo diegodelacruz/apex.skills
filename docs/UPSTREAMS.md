@@ -40,10 +40,22 @@ evaluated independently from the versioned APEX branches.
 4. Keep managed clones under `.upstreams/managed/` and optional reference clones under `.upstreams/references/`; both are intentionally ignored by tooling.
 
 The canonical registry is `upstreams.lock.json`. Managed sources support runtime,
-QA, or integration workflows. Reference sources are optional and are used only
-for consultation or adaptation. Initialize references with
+QA, or integration workflows. Their recoverable snapshots are stored in
+`vendor/upstreams/` and verified by `manifest.json`. Install or update them with
+`scripts/Sync-ApexSkillUpstreams.ps1`; this preserves a working copy when a
+remote is unavailable and creates a verified backup before replacing a copy.
+`Setup-ApexSkills.ps1` and `Initialize-ApexCodexProject.ps1` run this step for
+the user. Reference sources remain optional and are used only for consultation
+or adaptation. Initialize references with
 `Initialize-ApexSkillUpstreams-V2.ps1 -IncludeReferences` and update them with
 `Update-ApexSkillUpstreams-V2.ps1 -IncludeReferences`.
+
+To refresh the bundled fallback itself, first review the upstream diff,
+compatibility, security and redistribution rights. Then run
+`scripts/Export-ApexSkillUpstreamSnapshots.ps1`. The exporter backs up the
+previous bundle and lock before replacing the snapshots and pinned commits. If
+the `apex-mcp` overlay changed, review it and pass
+`-AcceptCurrentApexMcpOverlay` explicitly.
 
 
 ## emilkowalski/skills design reference

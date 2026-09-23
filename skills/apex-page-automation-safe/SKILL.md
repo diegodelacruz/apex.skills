@@ -8,6 +8,15 @@ description: "Create, modify, and deploy APEX pages via native export/import thr
 
 # Safe APEX Page Automation
 
+## Estándar de artefactos SQL y PL/SQL
+
+Todo SQL o PL/SQL creado para una página APEX debe seguir
+`docs/reglas-formateo-canonicas.md`: minúsculas fuera de literales, comentarios
+y nombres entre comillas, y tabuladores físicos de ancho visual cuatro para la
+sangría. No se permiten espacios iniciales. Validar cada archivo con
+`skills/oracle-data-change-governance-final/scripts/validate_sql_style.py`;
+un `STYLE_FAIL` bloquea el despliegue.
+
 > **Ruta de ejecución:** genera el export SQL nativo de la página APEX y lo
 > despliega mediante `scripts/Deploy-ApexPage.ps1` (SQLcl). No escribe
 > directamente en tablas `WWV_FLOW_*`. Requiere conexión Oracle configurada

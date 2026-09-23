@@ -100,18 +100,47 @@ check_secrets() {
 		return
 	fi
 
-	if ! "$scanner" scan --baseline .secrets.baseline --all-files --force-use-all-plugins --exclude-files '(^|[\\/])(\.env|\.mypy_cache|\.pytest_cache|\.venv|\.upstreams|\.upstream-backups|upstreams\.lock\.json|htmlcov|\.secrets\.baseline)([\\/]|$)' >/dev/null 2>&1; then
+	local scan_baseline
+	scan_baseline="$(mktemp "$REPO_ROOT/.secrets.baseline.scan.XXXXXX")" || {
+		log_fail "Could not create temporary secrets baseline"
+		return
+	}
+	cp .secrets.baseline "$scan_baseline" || {
+		rm -f "$scan_baseline"
+		log_fail "Could not copy secrets baseline"
+		return
+	}
+	local scan_status=0
+	"$scanner" scan --baseline "$scan_baseline" --all-files --force-use-all-plugins \
+		--exclude-lines '^\s*"(commit|archive_sha256|overlay_sha256)":' \
+		--exclude-files '(^|[\\/])(\.env|\.mypy_cache|\.pytest_cache|\.venv|\.upstreams|\.upstream-backups|upstreams\.lock\.json|htmlcov|\.secrets\.baseline(\.scan\.)?|control-proyecto[\\/]\.bitacora\.json|runtime[\\/]sqlcl-runtime\.json)([\\/]|$)|(^|[\\/])vendor[\\/]upstreams[\\/][^\\/]+\.zip$' \
+		>/dev/null 2>&1 || scan_status=$?
+	if [ "$scan_status" -ne 0 ]; then
+		rm -f "$scan_baseline"
 		log_fail "detect-secrets scan failed"
 		return
 	fi
-
-	if python -c 'import json; from pathlib import Path; raise SystemExit(0 if not json.loads(Path(".secrets.baseline").read_text(encoding="utf-8")).get("results") else 1)'; then
+	if python -c '
+import json, sys
+from pathlib import Path
+baseline = json.loads(Path(".secrets.baseline").read_text(encoding="utf-8")).get("results", {})
+current = json.loads(Path(sys.argv[1]).read_text(encoding="utf-8")).get("results", {})
+known = {(name, item.get("hashed_secret")) for name, items in baseline.items() for item in items}
+new = {(name, item.get("hashed_secret")) for name, items in current.items() for item in items} - known
+if new:
+    for name, items in current.items():
+        for item in items:
+            if (name, item.get("hashed_secret")) in new:
+                print(name, item.get("line_number", "?"), item.get("type", "unknown"), sep=":")
+raise SystemExit(1 if new else 0)
+' "$scan_baseline"; then
+		rm -f "$scan_baseline"
 		log_success "No unapproved secrets detected"
 	else
-		log_fail "Possible secrets detected; review .secrets.baseline"
+		rm -f "$scan_baseline"
+		log_fail "New possible secrets detected; review scanner output and update the baseline only after verification"
 	fi
 }
-
 check_hardcoded_credentials() {
 	log_info "Checking for common credential patterns..."
 

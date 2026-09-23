@@ -1,0 +1,11 @@
+{
+  "component": "Oracle SQLcl",
+  "version": "26.2.2.233.1901",
+  "platform": "windows-x64",
+  "archive_url": "https://download.oracle.com/otn_software/java/sqldeveloper/sqlcl-26.2.2.233.1901.zip",
+  "checksum_algorithm": "SHA1",
+  "checksum": "a58830ea64d412ca7488a0bf014c8f01904b0414",
+  "license": "Oracle Free Use License",
+  "purpose": "Local SQLcl runtime for apex-controlled-mcp",
+  "published_at": "2026-08-31"
+}

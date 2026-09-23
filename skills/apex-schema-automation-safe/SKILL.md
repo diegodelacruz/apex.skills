@@ -18,6 +18,15 @@ description: "Create, modify, and drop Oracle database objects via SQLcl with go
 
 Activate this workflow when the user requests to create, modify, or drop Oracle database objects: tables, views, indexes, sequences, procedures, functions, or packages.
 
+## Estándar de artefactos SQL
+
+Antes de ejecutar o entregar cada archivo SQL/PLSQL, aplicar
+`docs/reglas-formateo-canonicas.md`: código no literal en minúsculas y
+tabuladores físicos (ancho visual cuatro) para toda sangría; nunca espacios al
+inicio. Conservar literalmente comentarios, literales y nombres entre comillas.
+Ejecutar `skills/oracle-data-change-governance-final/scripts/validate_sql_style.py`
+sobre el archivo: `STYLE_FAIL` bloquea la ejecución y la entrega.
+
 ## Modification Flow
 
 Follow the **Modification Mode Policy** and **Fluency Policy** from the APEX

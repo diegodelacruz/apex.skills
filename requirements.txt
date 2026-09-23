@@ -6,6 +6,10 @@
 # Secure per-user TEST/production credential profiles
 keyring>=25.0.0
 
+# Controlled local MCP.  This is a direct dependency: it must not depend on
+# the managed apex-mcp upstream, whose complete tool surface is not exposed.
+fastmcp>=3.4.7,<4.0.0
+
 # Word manual generation and embedded-image audit
 python-docx>=1.1.0
 Pillow>=10.0.0

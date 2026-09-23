@@ -11,14 +11,9 @@ $python = Join-Path $skillsRoot '.venv\Scripts\python.exe'
 $credentials = Join-Path $skillsRoot 'scripts\manage_apex_credentials.py'
 $adapterValidator = Join-Path $skillsRoot 'scripts\validate_apex_mcp_adapter.py'
 $skillInstaller = Join-Path $skillsRoot 'scripts\Install-ApexSkillsForCodex.ps1'
+$setupScript = Join-Path $skillsRoot 'scripts\Setup-ApexSkills.ps1'
 $project = (Resolve-Path -LiteralPath $ProjectPath).Path
 $script:actionItems = [System.Collections.Generic.List[string]]::new()
-
-function Invoke-QuietPython {
-	param([string[]]$Arguments)
-	& $python @Arguments | Out-Null
-	if ($LASTEXITCODE -ne 0) { throw "Python command failed: $($Arguments -join ' ')" }
-}
 
 function Find-Sqlcl {
 	$vscodePaths = @(
@@ -216,42 +211,17 @@ if (-not (Test-Path -LiteralPath $adapterValidator) -or -not (Test-Path -Literal
 	throw 'Required local bootstrap scripts are missing.'
 }
 
+Write-Host '[0/6] Preparing bundled upstreams, Python dependencies, and skills...'
+if ($InstallSharedDependencies) {
+	Write-Host '      -InstallSharedDependencies is retained for compatibility; dependency setup now runs automatically.' -ForegroundColor Gray
+}
+& $setupScript -SkipSkillInstall -WhatIf:$WhatIfPreference
+if (-not $?) { throw 'Local skills setup failed. Review the step output above; upstream fallbacks preserve the available copy.' }
+
 # [1/6] Python
 Write-Host '[1/6] Python environment...'
-if ($InstallSharedDependencies) {
-	if (-not (Test-Path -LiteralPath $python)) {
-		if ($PSCmdlet.ShouldProcess((Join-Path $skillsRoot '.venv'), 'create shared Python environment')) {
-			py -3 -m venv (Join-Path $skillsRoot '.venv')
-		}
-	}
-	if ($PSCmdlet.ShouldProcess($skillsRoot, 'install shared skills dependencies')) {
-		Invoke-QuietPython @('-m', 'pip', 'install', '--disable-pip-version-check', '--quiet', '--upgrade', 'pip')
-		Invoke-QuietPython @('-m', 'pip', 'install', '--disable-pip-version-check', '--quiet', '-r', (Join-Path $skillsRoot 'requirements.txt'))
-	}
-	Write-Host '      [OK] Dependencias instaladas.' -ForegroundColor Green
-} elseif (-not (Test-Path -LiteralPath $python)) {
-	throw @"
-Entorno Python no encontrado.
-
-Ejecute de nuevo con -InstallSharedDependencies:
-  .\scripts\Initialize-ApexCodexProject.ps1 -InstallSharedDependencies
-"@
-} else {
-	Write-Host '      [OK] Disponible.' -ForegroundColor Green
-}
-
-# Upstream check
-$apexMcpPath = Join-Path $skillsRoot '.upstreams\managed\apex-mcp\apex_mcp'
-if (-not (Test-Path -LiteralPath $apexMcpPath)) {
-	throw @"
-Upstream 'apex-mcp' no encontrado.
-
-Ejecute primero:
-  .\scripts\Initialize-ApexSkillUpstreams-V2.ps1
-
-Luego ejecute este script de nuevo.
-"@
-}
+if (-not (Test-Path -LiteralPath $python)) { throw 'Setup completed without creating .venv; review the setup output above.' }
+Write-Host '      [OK] Python dependencies ready.' -ForegroundColor Green
 
 # [2/6] MCP adapter
 Write-Host '[2/6] Upstream MCP adapter...'
@@ -262,7 +232,7 @@ if ($adapterOutput -match 'MCP_ADAPTER_READY') {
 } else {
 	Write-Host '      [!!] Adapter no disponible.' -ForegroundColor Red
 	$script:actionItems.Add("  [General] MCP adapter no encontrado.")
-	$script:actionItems.Add("           Ejecutar: .\scripts\Initialize-ApexSkillUpstreams-V2.ps1")
+	$script:actionItems.Add("           Revisar la salida de Sync-ApexSkillUpstreams.ps1 y Setup-ApexSkills.ps1.")
 	$script:actionItems.Add("")
 }
 if ($adapterOutput -match 'MCP_SURFACE_UNSAFE') {
@@ -306,7 +276,7 @@ Collect-Remediations 'Production' $oracleProduction $oracleProductionConnection 
 
 # [4/6] Skills
 Write-Host '[4/6] Installing agent skills...'
-& $skillInstaller
+& $skillInstaller -WhatIf:$WhatIfPreference
 $skillInstallerSucceeded = $?
 if (-not $skillInstallerSucceeded) {
 	throw @"
@@ -316,7 +286,7 @@ Verifique que el directorio skills/ contiene las carpetas de cada skill
 y que el instalador tiene permisos de ejecucion.
 "@
 }
-Write-Host '      [OK] Coordinator and specialist skills available.' -ForegroundColor Green
+Write-Host '      [OK] Coordinator and specialist skills installed.' -ForegroundColor Green
 
 # [5/6] MCP registration
 Write-Host '[5/6] MCP registration...'
