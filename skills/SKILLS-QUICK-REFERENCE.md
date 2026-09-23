@@ -29,6 +29,7 @@ One-line descriptions for rapid lookup.
 | **apex-qa-orchestrator-safe** (NEW) | Orchestrator for static QA → automated testing → environment validation |
 | **apex-design-review-orchestrator** (NEW) | Orchestrator for design review with approval gates |
 | **apex-delivery-lifecycle-zaimella** (NEW) | Orchestrator integrating GPZ (Zaimella) with APEX delivery |
+| **apex-external-context-learn** (NEW) | Learn from external repositories without cloning; create persistent references |
 | **apex-code-generation-safe** | Generate APEX components automatically from schema and metadata |
 | **apex-api-client-safe** | REST API client for Oracle APEX deployment and environment management |
 | **apex-automated-testing-safe** | Selenium test generation, performance testing, and regression validation |

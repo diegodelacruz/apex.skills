@@ -6,7 +6,7 @@
 
 **apex.skills** is a canonical framework for Oracle APEX application development and deployment. It provides:
 
-- **30 skills** (24 technical + 6 orchestrators) for design, engineering, QA, governance, lifecycle management, project methodology, and workflow coordination
+- **31 skills** (25 technical + 6 orchestrators) for design, engineering, QA, governance, lifecycle management, project methodology, and workflow coordination
 - **Security-hardened pre-commit hooks** for code quality, secrets detection, and exception validation
 - **Comprehensive audit trail system** (Git-based, zero-token automatic capture)
 - **Governance templates** for page ranges, DATA changes, and environment alignment
