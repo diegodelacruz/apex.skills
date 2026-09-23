@@ -162,12 +162,13 @@ All 30 skills (24 technical + 6 orchestrators) are organized with:
 | QA Orchestrator | apex-qa-orchestrator-safe | 6.5 |
 | Data Orchestrator | apex-data-orchestrator-safe | 13.5 |
 
-#### Technical Skills (24)
+#### Technical Skills (25)
 | Category | Skills | Order |
 |----------|--------|-------|
 | Apex Audit & Decisions | apex-audit-decisions-log | 0 |
 | Apex Database & Diagnostics | apex-database-diagnostics | 1 |
 | Apex Delivery & Lifecycle | apex-delivery-lifecycle-complete, apex-delivery-lifecycle-safe | 2-3 |
+| Apex External Context & Learning | apex-external-context-learn | 3.5 |
 | Apex Engineering & Design | apex-engineering-safe, apex-solution-design | 4, 11 |
 | Apex Environment & Alignment | apex-environment-alignment-complete | 5 |
 | Apex Export & QA | apex-export-qa-safe | 6 |

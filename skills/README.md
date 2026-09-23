@@ -31,6 +31,10 @@ Use `/skills` in Codex/Claude to see the complete list with descriptions and tag
 - **[apex-delivery-lifecycle-zaimella](./apex-delivery-lifecycle-zaimella)** (NEW) - Integrate GPZ (Zaimella) methodology with APEX delivery lifecycle
   - *Tags: lifecycle, orchestration, methodology, gpz, zaimella*
 
+### Apex External Context & Learning
+- **[apex-external-context-learn](./apex-external-context-learn)** (NEW) - Learn from external repositories without cloning; create persistent references for APEX workflows
+  - *Tags: external-context, learning, no-clone, reference, read-only, discovery*
+
 ### Apex Code Generation
 - **[apex-code-generation-safe](./apex-code-generation-safe)** - Generate APEX components automatically from schema and metadata
   - *Tags: code-generation, apex, forms, reports, validations*
@@ -127,6 +131,7 @@ Use `/skills` in Codex/Claude to see the complete list with descriptions and tag
 | **Governance & Audit** | apex-page-range-governance, oracle-data-change-governance-final, apex-audit-decisions-log |
 | **Project Management** | apex-project-bootstrap-final, apex-project-workspace |
 | **Project Methodology** | apex-zaimella-gestion-proyectos |
+| **External Context & Learning** | apex-external-context-learn |
 | **Documentation** | apex-user-manual |
 | **Diagnostics** | apex-database-diagnostics |
 | **Integration** | apex-rest-source-catalogs-safe |
@@ -165,20 +170,21 @@ Use `/skills` in Codex/Claude to see the complete list with descriptions and tag
 14. apex-design-review-orchestrator (Orchestrator)
 15. apex-engineering-safe
 16. apex-environment-alignment-complete
-17. apex-export-qa-safe
-18. apex-page-automation-safe
-19. apex-page-range-governance
-20. apex-pattern-mining-safe
-21. apex-project-bootstrap-final
-22. apex-project-workspace
-23. apex-qa-orchestrator-safe (Orchestrator)
-24. apex-rest-source-catalogs-safe
-25. apex-schema-automation-safe
-26. apex-solution-design
-27. apex-ui-craft-safe
-28. apex-user-manual
-29. apex-zaimella-gestion-proyectos
-30. oracle-data-change-governance-final
+17. apex-external-context-learn (NEW)
+18. apex-export-qa-safe
+19. apex-page-automation-safe
+20. apex-page-range-governance
+21. apex-pattern-mining-safe
+22. apex-project-bootstrap-final
+23. apex-project-workspace
+24. apex-qa-orchestrator-safe (Orchestrator)
+25. apex-rest-source-catalogs-safe
+26. apex-schema-automation-safe
+27. apex-solution-design
+28. apex-ui-craft-safe
+29. apex-user-manual
+30. apex-zaimella-gestion-proyectos
+31. oracle-data-change-governance-final
 
 ---
 
