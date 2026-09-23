@@ -4,6 +4,7 @@ Handles CRUD operations on external-repos JSON files and maintains central index
 """
 
 import json
+import tempfile
 from datetime import datetime
 from pathlib import Path
 from typing import Dict, List, Optional
@@ -46,9 +47,20 @@ class ExternalRepoIndexer:
 			return {}
 
 	def _write_index(self, index: Dict) -> None:
-		"""Write central index file."""
-		with open(self.index_file, "w", encoding="utf-8") as f:
-			json.dump(index, f, indent=2)
+		"""Write central index file atomically."""
+		# Use temporary file to ensure atomic write
+		with tempfile.NamedTemporaryFile(
+			mode="w",
+			encoding="utf-8",
+			dir=self.repos_dir,
+			delete=False,
+			suffix=".tmp"
+		) as tmp_file:
+			json.dump(index, tmp_file, indent=2)
+			tmp_path = Path(tmp_file.name)
+
+		# Atomically replace the original file
+		tmp_path.replace(self.index_file)
 
 	def save_learned_repo(self, repo_metadata: Dict, analysis_summary: Dict) -> str:
 		"""

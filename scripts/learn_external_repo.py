@@ -20,7 +20,7 @@ from scripts.external_repo_scanner import ExternalRepoScanner
 
 def main():
 	"""Main entry point."""
-	parser = CLIParser()
+	parser = CLIParser("Learn from external repositories")
 	parser.add_argument("action", choices=["learn", "list", "delete", "show"], default="learn", nargs="?")
 	parser.add_argument("--source", help="Repository URL or local path")
 	parser.add_argument("--extract", help="What to extract/analyze from the repository")
@@ -29,12 +29,6 @@ def main():
 	parser.add_argument("--force", action="store_true", help="Force re-analysis of existing repo")
 
 	args = parser.parse_args()
-
-	# Handle legacy positional arguments (for user-friendly CLI)
-	if len(sys.argv) > 1 and sys.argv[1] not in ["learn", "list", "delete", "show", "--help"]:
-		args.action = "learn"
-		args.source = sys.argv[1]
-		args.extract = sys.argv[2] if len(sys.argv) > 2 else "Analyze structure and content"
 
 	try:
 		if args.action == "learn":
