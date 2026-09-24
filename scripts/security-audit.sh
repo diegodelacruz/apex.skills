@@ -112,7 +112,7 @@ check_secrets() {
 	}
 	local scan_status=0
 	"$scanner" scan --baseline "$scan_baseline" --all-files --force-use-all-plugins \
-		--exclude-files '(^|[\\/])(\.env|\.mypy_cache|\.pytest_cache|\.venv|\.upstreams|\.upstream-backups|htmlcov|\.secrets\.baseline(\.scan\.[^\\/]+)?|control-proyecto[\\/]\.bitacora\.json|runtime[\\/]sqlcl-runtime\.json)([\\/]|$)|(^|[\\/])vendor[\\/]upstreams[\\/][^\\/]+\.zip$' \
+		--exclude-files '(^|[\\/])(\.git|\.env|\.mypy_cache|\.pytest_cache|\.venv|\.upstreams|\.upstream-backups|htmlcov|\.secrets\.baseline(\.scan\.[^\\/]+)?|control-proyecto[\\/]\.bitacora\.json|runtime[\\/]sqlcl-runtime\.json)([\\/]|$)|(^|[\\/])vendor[\\/]upstreams[\\/][^\\/]+\.zip$' \
 		>/dev/null 2>&1 || scan_status=$?
 	if [ "$scan_status" -ne 0 ]; then
 		rm -f "$scan_baseline"
@@ -124,12 +124,13 @@ import json, sys
 from pathlib import Path
 baseline = json.loads(Path(".secrets.baseline").read_text(encoding="utf-8")).get("results", {})
 current = json.loads(Path(sys.argv[1]).read_text(encoding="utf-8")).get("results", {})
-known = {(name, item.get("hashed_secret")) for name, items in baseline.items() for item in items}
-new = {(name, item.get("hashed_secret")) for name, items in current.items() for item in items} - known
+normalize = lambda name: name.replace("\\", "/")
+known = {(normalize(name), item.get("hashed_secret")) for name, items in baseline.items() for item in items}
+new = {(normalize(name), item.get("hashed_secret")) for name, items in current.items() for item in items} - known
 if new:
     for name, items in current.items():
         for item in items:
-            if (name, item.get("hashed_secret")) in new:
+            if (normalize(name), item.get("hashed_secret")) in new:
                 print(name, item.get("line_number", "?"), item.get("type", "unknown"), sep=":")
 raise SystemExit(1 if new else 0)
 ' "$scan_baseline"; then

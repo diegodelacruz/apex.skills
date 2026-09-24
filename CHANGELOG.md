@@ -32,6 +32,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ### Fixed
 
+- Fixed cross-platform secret-baseline matching and excluded Git internals from full repository scans; replaced a credential-shaped documentation example that triggered GitHub CI.
 - Fixed local CI failures in formatting, lint, and type checks for external-repository context tooling.
 - Fixed test expectation from 21 → 30 skills in `test_quality_audit.py`.
 - Fixed stale reference in `docs/setup-claude-code.md` pointing to removed file.
@@ -154,4 +155,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ---
 
-**Last Updated**: 2026-09-17
+**Last Updated**: 2026-09-24

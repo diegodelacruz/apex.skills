@@ -262,7 +262,7 @@ SELECT * FROM customers WHERE name = ''' || user_input || '''';
 ### Scenario A: Developer Accidentally Commits Database Password
 
 **Sequence:**
-1. Developer hardcodes: `password = "prod_password_123"`
+1. Developer hardcodes a real database credential in source code
 2. Commits to feature branch
 3. Creates PR
 

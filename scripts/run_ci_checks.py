@@ -74,7 +74,7 @@ def run_secret_scan() -> int:
     original = json.loads(baseline_path.read_text(encoding="utf-8"))
     temp_path: Path | None = None
     exclude_files = (
-        r"(^|[\\/])(\.env|\.mypy_cache|\.pytest_cache|\.venv|\.upstreams|\.upstream-backups|"
+        r"(^|[\\/])(\.git|\.env|\.mypy_cache|\.pytest_cache|\.venv|\.upstreams|\.upstream-backups|"
         r"htmlcov|\.secrets\.baseline(\.scan\.[^\\/]+)?|"
         r"control-proyecto[\\/]\.bitacora\.json|runtime[\\/]sqlcl-runtime\.json)([\\/]|$)|"
         r"(^|[\\/])vendor[\\/]upstreams[\\/][^\\/]+\.zip$"
@@ -110,11 +110,19 @@ def run_secret_scan() -> int:
             return result.returncode
 
         scanned = json.loads(temp_path.read_text(encoding="utf-8"))
+
+        def normalize_path(name: str) -> str:
+            return name.replace("\\", "/")
+
         known = {
-            (name, item.get("hashed_secret")) for name, items in original.get("results", {}).items() for item in items
+            (normalize_path(name), item.get("hashed_secret"))
+            for name, items in original.get("results", {}).items()
+            for item in items
         }
         new = {
-            (name, item.get("hashed_secret")) for name, items in scanned.get("results", {}).items() for item in items
+            (normalize_path(name), item.get("hashed_secret"))
+            for name, items in scanned.get("results", {}).items()
+            for item in items
         } - known
         if new:
             print("New possible secrets detected; review before updating the baseline:", file=sys.stderr)
@@ -122,7 +130,7 @@ def run_secret_scan() -> int:
                 (name, item.get("line_number", "?"), item.get("type", "unknown"))
                 for name, items in scanned.get("results", {}).items()
                 for item in items
-                if (name, item.get("hashed_secret")) in new
+                if (normalize_path(name), item.get("hashed_secret")) in new
             ):
                 print(f"{name}:{line}: {secret_type}", file=sys.stderr)
             return 1
