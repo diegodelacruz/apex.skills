@@ -7,14 +7,6 @@ repos:
         args:
           - --baseline
           - .secrets.baseline
-          - --exclude-lines
-          - '^\s*"(commit|archive_sha256|overlay_sha256)":'
-        exclude: |
-          (?x)^(
-            \.mcp\.json\.example|
-            upstreams\.lock\.json|
-            tests/fixtures/
-          )$
 
   # General file checks
   - repo: https://github.com/pre-commit/pre-commit-hooks
@@ -35,10 +27,10 @@ repos:
 
   # Python code formatting with Black
   - repo: https://github.com/psf/black
-    rev: 23.12.1
+    rev: 24.10.0
     hooks:
       - id: black
-        language_version: python3
+        language_version: python3.13
         args: ['--line-length=120']
 
   # Import sorting with isort

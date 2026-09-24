@@ -1,7 +1,7 @@
 # 📚 APEX Skills Catalog
 
-Complete directory of **30 skills** (24 technical + 6 orchestrators) organized by purpose and workflow:
-- **24 Technical Skills:** Code generation, testing, data integration, design, QA, governance, project management
+Complete directory of **31 skills** (25 technical + 6 orchestrators) organized by purpose and workflow:
+- **25 Technical Skills:** Code generation, testing, data integration, design, QA, governance, project management, external context
 - **5 Orchestrators:** Coordinate entire workflows with approval gates
 - **1 Maestro:** Central routing coordinator (apex)
 

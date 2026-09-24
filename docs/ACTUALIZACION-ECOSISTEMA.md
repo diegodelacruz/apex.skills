@@ -11,7 +11,7 @@ seguridad, pruebas y documentación Oracle/APEX.
 
 Una actualización no está terminada hasta revisar el repositorio completo, no
 sólo los archivos modificados. El inventario real de skills es la fuente de
-verdad operativa; al momento de esta revisión contiene **30 skills** (26 técnicas + 4 orquestadores).
+verdad operativa; actualmente contiene **31 skills** (25 técnicas + 6 orquestadores).
 
 Para crear una skill nueva desde el inicio, aplica la [guía canónica de
 creación](GUIA-CREAR-NUEVA-SKILL.md). Esta guía operacionaliza el contrato

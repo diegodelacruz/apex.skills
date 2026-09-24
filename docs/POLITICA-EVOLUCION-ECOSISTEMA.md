@@ -65,6 +65,11 @@ Los formateadores automáticos no pueden sustituir ni contradecir los estándare
 canónicos. Cualquier modificación de estos estándares requiere una decisión
 documentada y revisión independiente.
 
+La versión base del repositorio es Python 3.13. El archivo `.python-version`,
+el entorno `.venv`, Black, la matriz de CI y las guías deben mantenerse
+alineados. Se permiten actualizaciones de parche dentro de 3.13; cambiar la
+versión menor requiere decisión documentada y revisión de compatibilidad.
+
 ## 6. Upstreams y backups
 
 Los upstreams `managed` son necesarios para funcionamiento y QA. Los upstreams
@@ -97,6 +102,26 @@ Todo `FAIL` bloquea la publicación. Todo `N/A` debe incluir una justificación
 concreta. No se puede declarar una validación completa si una prueba obligatoria
 no pudo ejecutarse.
 
+El changelog es parte obligatoria de cada modificación. Antes de cerrar un
+cambio, actualizar `CHANGELOG.md` bajo `[Unreleased]`, clasificarlo como
+`Added`, `Changed`, `Fixed`, `Removed` o `Security`, y describir su efecto para
+quien usa o mantiene el ecosistema. Las correcciones de documentación y
+política también se registran cuando cambian el proceso o las capacidades.
+No asignar ni publicar una nueva versión SemVer por defecto: el número y la
+fecha se establecen al aprobar un release. Antes de publicar, verificar que el
+changelog cubra todos los cambios incluidos y que no declare como publicado lo
+que siga pendiente.
+
+Cada solicitud de subir cambios a GitHub activa la auditoría integral de esta
+sección sobre el conjunto que se pretende publicar. Se revisan el estado y el
+diff completos, el changelog, CI y las validaciones aplicables, y el estado del
+remoto. Si todos los controles pasan, se puede continuar con el commit y la
+subida autorizados por la solicitud. Si hay un `FAIL`, una validación
+obligatoria pendiente o una limitación material, no se sube: se entrega un
+informe con el hallazgo, las implicaciones concretas de publicar así y la
+corrección o decisión requerida. Se reanuda la publicación cuando el bloqueo
+se haya resuelto y la auditoría correspondiente pase.
+
 Como mínimo, antes de publicar deben ejecutarse:
 
 ```powershell
@@ -108,6 +133,23 @@ git status --short
 
 También se deben ejecutar los validadores de seguridad, formato, tipos,
 dependencias y SQL que correspondan al cambio.
+
+Antes de cada commit o pull request, ejecutar el mismo conjunto de controles
+que en GitHub Actions mediante:
+
+```powershell
+.\.venv\Scripts\python.exe scripts\run_ci_checks.py
+```
+
+El workflow de CI debe llamar ese mismo runner para evitar divergencias entre
+validación local y remota. Si el runner falla, se corrige la causa y se vuelve
+a ejecutar completo antes de integrar. La preparación del entorno y el alcance
+de los controles están en [CI local](CI-LOCAL.md).
+
+La cobertura mínima es un piso de regresión, no una medida de calidad total.
+`.coveragerc` es la fuente única del umbral, actualmente 55%; pytest y CI no
+deben duplicarlo en opciones de línea de comandos. La meta de 80% es gradual y
+sólo se eleva después de ampliar las pruebas.
 
 ## 8. Evidencia y trazabilidad
 

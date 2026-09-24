@@ -211,7 +211,7 @@ cp .mcp.json.example .mcp.json
 ### Black (Formatter)
 ```toml
 line-length = 120
-target-version = ['py38']
+target-version = ['py313']
 ```
 
 ### isort (Import Sorting)
@@ -233,11 +233,10 @@ markers = [
 ```
 
 ### Coverage (Test Coverage)
-```toml
-branch = true
-source = ["scripts"]
-target = 80
-```
+
+Coverage is configured in `.coveragerc`, not `pyproject.toml`. It measures
+branches across `scripts` and `skills`; its sole minimum threshold is 55%.
+Changes to that threshold belong in `.coveragerc` and the documented policy.
 
 ---
 
@@ -285,7 +284,7 @@ pytest>=8.0.0
 pytest-cov>=5.0.0
 
 # Code quality
-black>=23.12.1
+black==24.10.0
 isort>=5.13.2
 flake8>=6.1.0
 bandit>=1.7.5

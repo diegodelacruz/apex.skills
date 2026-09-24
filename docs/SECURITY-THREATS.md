@@ -244,7 +244,7 @@ SELECT * FROM customers WHERE name = ''' || user_input || '''';
 **Current Controls:**
 - ✅ Code review policy documented; enforcement awaits branch protection
 - ✅ Limited contributor access
-- ✅ Automated testing (122 tests)
+- ✅ Automated testing (485 tests; local and GitHub CI)
 - ✅ Security scanning (Bandit)
 
 **Residual Risk:** LOW (review + testing)

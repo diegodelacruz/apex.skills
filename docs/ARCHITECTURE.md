@@ -215,10 +215,10 @@ not covered by reproducible validation and rollback evidence.
 | Layer | Technology | Purpose |
 |-------|-----------|---------|
 | Skills | Claude + Python | Oracle APEX expertise + orchestration |
-| Utils | Python 3.8+ | Reusable components |
+| Utils | Python 3.13 | Reusable components |
 | Hooks | Bash + Python | Git integration, audit trail |
 | Credentials | system-keyring | Secure storage |
-| Testing | pytest + fixtures | 122 tests, 100% pass rate |
+| Testing | pytest + shared local/GitHub CI runner | 485 tests; 55% minimum combined coverage |
 | Documentation | Markdown | GitHub-friendly docs |
 | Version Control | Git + GitHub | History and collaboration |
 
@@ -243,7 +243,7 @@ GitHub
     │
     ├─ Push to feature branch
     ├─ Create PR
-    ├─ GitHub Actions runs CI (future)
+    ├─ GitHub Actions runs the shared CI checks
     ├─ Review and merge
     │
     ▼
@@ -258,12 +258,12 @@ Production Ready
 
 - **Audit Trail Capture**: <100ms per commit (pure bash/JSON)
 - **Pre-commit Hooks**: ~2-5 seconds total (Black, isort, Bandit)
-- **Test Suite**: ~200ms (122 tests)
+- **Test Suite**: 485 automated tests; runtime depends on the local environment
 - **Skill Execution**: Depends on task (typically 30s-5min)
 
 ## Future Enhancements
 
-1. GitHub Actions CI/CD pipeline (automated testing)
+1. Lock resolved dependency versions for repeatable CI/local installs
 2. Type hints completion (100% coverage)
 3. Integration tests for workflows
 4. API documentation and SDK

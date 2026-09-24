@@ -230,9 +230,11 @@ pip install pytest-cov
 
 ## Auditoría Windows
 
-La cobertura mínima efectiva del repositorio es 20%, definida de forma
-consistente en `pytest.ini` y `pyproject.toml`. En la auditoría del 2026-09-01
-se ejecutaron 122 pruebas, todas aprobadas, con 26.34% de cobertura.
+El umbral único de cobertura es 55%, definido en `.coveragerc`. La medición
+observada el 2026-09-24 fue 60.65% de líneas, 43.12% de ramas y 56.63%
+combinado con 485 pruebas aprobadas. El 80% es una meta gradual, no el umbral actual. Consulta
+[`CI-LOCAL.md`](CI-LOCAL.md) para ejecutar localmente los controles de GitHub
+Actions y entender cómo se interpreta la cobertura.
 
 En Windows, `flake8` debe ejecutarse con `--jobs=1` cuando el entorno impide
 crear procesos auxiliares. `detect-secrets` debe excluir los artefactos locales

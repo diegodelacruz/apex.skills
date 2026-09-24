@@ -9,7 +9,7 @@ Esta guía cubre la configuración de **apex.skills** para usarlo con **Claude C
 ## Requisitos Previos
 
 - Claude Code instalado (web, CLI, desktop, o extensión IDE)
-- Python 3.8+
+- Python 3.13
 - Acceso a Oracle APEX 24.1.3 y Oracle Database
 - Credenciales de base de datos (usuario/contraseña/DSN)
 

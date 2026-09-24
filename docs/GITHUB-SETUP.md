@@ -172,19 +172,17 @@ jobs:
   test:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-python@v4
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
         with:
-          python-version: '3.11'
-      - run: pip install -r requirements.txt
-      - run: pytest tests/ -v
-      - run: bash scripts/security-audit.sh
-      - run: python scripts/validate-oracle-documentation.py
+          python-version: '3.13'
+      - run: python -m pip install -r requirements.txt
+      - run: python scripts/run_ci_checks.py
 ```
 
 ### Checks Required
 
-- ✅ Tests passing (426/426)
+- ✅ Full test suite passes
 - ✅ Security audit passing
 - ✅ Type checking (mypy)
 - ✅ Linting (pylint, flake8)
@@ -270,9 +268,7 @@ Still requires a repository administrator in GitHub:
 - [ ] Require PR reviews (1 minimum)
 - [ ] Require status checks passing
 - [ ] Require branches up-to-date
-- [ ] Create first release tag (v1.0.0)
-- [ ] Setup CHANGELOG.md tracking
-- [ ] Configure GitHub Actions (future)
+- [ ] Create the first GitHub release tag (v1.2.0) when the release is approved
 - [ ] Enable commit signing (future)
 
 ---

@@ -114,6 +114,8 @@ def check_required_files() -> Check:
         ".github/workflows/ci.yml",
         ".pre-commit-config.yaml",
         "requirements.txt",
+        "scripts/run_ci_checks.py",
+        ".python-version",
         "upstreams.lock.json",
         "tests",
     ]
@@ -131,7 +133,18 @@ def check_required_files() -> Check:
 def check_policy_and_ci() -> Check:
     policy = (ROOT / "docs/POLITICA-EVOLUCION-ECOSISTEMA.md").read_text(encoding="utf-8")
     ci = (ROOT / ".github/workflows/ci.yml").read_text(encoding="utf-8")
-    ok = POLICY in policy and "audit_skill_ecosystem.py" in ci and "pytest" in ci and "git diff --check" in ci
+    runner = (ROOT / "scripts/run_ci_checks.py").read_text(encoding="utf-8")
+    ok = (
+        POLICY in policy
+        and "Python 3.13" in policy
+        and "run_ci_checks.py" in ci
+        and "audit_skill_ecosystem.py" in runner
+        and "pytest" in runner
+        and '"diff", "--check"' in runner
+        and '"diff", "--cached", "--check"' in runner
+        and '"ls-files", "--others", "--exclude-standard", "-z"' in runner
+        and 'shutil.which("git")' in runner
+    )
     return Check(
         "Q05",
         "Independent enforcement",

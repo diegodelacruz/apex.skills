@@ -1,6 +1,6 @@
 [tool.black]
 line-length = 120
-target-version = ['py38', 'py39', 'py310', 'py311']
+target-version = ['py313']
 include = '\.pyi?$'
 extend-exclude = '''
 /(
@@ -22,41 +22,3 @@ profile = "black"
 line_length = 120
 known_first_party = ["apex_export_utilities"]
 skip_gitignore = true
-
-[tool.pytest.ini_options]
-testpaths = ["tests"]
-python_files = "test_*.py"
-python_classes = "Test*"
-python_functions = "test_*"
-addopts = "-v -ra --strict-markers --tb=short --cov=scripts --cov=skills --cov-report=term-missing --cov-fail-under=85"
-markers = [
-    "unit: Unit tests (fast, isolated)",
-    "integration: Integration tests (may require Oracle connection)",
-    "e2e: End-to-end tests",
-    "slow: Slow running tests",
-    "requires_oracle: Tests that require Oracle APEX connection",
-]
-
-[tool.coverage.run]
-source = ["scripts", "skills"]
-omit = ["*/tests/*", "*/__pycache__/*", "*/site-packages/*"]
-branch = true
-
-[tool.coverage.report]
-exclude_lines = [
-    "pragma: no cover",
-    "def __repr__",
-    "raise AssertionError",
-    "raise NotImplementedError",
-    "if __name__ == .__main__.:",
-    "if TYPE_CHECKING:",
-    "@abstractmethod",
-    "@abc.abstractmethod",
-    "if sys.version_info",
-]
-precision = 2
-show_missing = true
-fail_under = 20
-
-[tool.coverage.html]
-directory = "htmlcov"

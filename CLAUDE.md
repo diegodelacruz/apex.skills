@@ -89,7 +89,7 @@ apex.skills/
 │   └── [other utility scripts]
 │
 ├── skills/
-│   ├── README.md              # Master navigation guide (30 skills: 26 technical + 4 orchestrators)
+│   ├── README.md              # Master navigation guide (31 skills: 25 technical + 6 orchestrators)
 │   ├── SKILLS-QUICK-REFERENCE.md  # Quick lookup tables
 │   ├── apex/                  # Maestro coordinator (routes requests)
 │   ├── apex-application-generator-complete/  # Orchestrator for end-to-end APEX app generation
@@ -143,12 +143,12 @@ apex.skills/
 
 ## Skills Organization
 
-All 30 skills (24 technical + 6 orchestrators) are organized with:
+All 31 skills (25 technical + 6 orchestrators) are organized with:
 - **"Apex" prefix** (no emojis) for clear branding
 - **Alphabetical ordering** in menus
 - **Unique order numbers** for display sequencing
 - **Comprehensive tags** for filtering by workflow, access level, cost
-- **3-level orchestration hierarchy:** 1 Maestro (apex) → 5 Coordinators → 24 Technical Skills
+- **3-level orchestration hierarchy:** 1 Maestro (apex) → 5 Coordinators → 25 Technical Skills
 
 ### Skill Categories
 
@@ -333,8 +333,8 @@ scripts_dir = get_script_dir()  # /home/user/apex.skills/scripts
 
 ## Testing & Coverage
 
-- **122 unit tests** (100% pass rate)
-- **Target coverage:** 80%
+- **485 tests** (latest complete suite: 100% pass rate)
+- **Coverage floor:** 55% (measured 56.63%); long-term target: 80%
 - **Test markers:** unit, integration, slow, requires_oracle
 - **Frameworks:** pytest (main), pytest-cov (coverage)
 
@@ -374,14 +374,14 @@ python3 scripts/manage_apex_credentials.py probe --environment test
 - `docs/MANUAL-DE-USO.md` - User manual and getting started guide
 - `docs/GUIA-CREAR-NUEVA-SKILL.md` - Normative procedure for creating skills
 - `docs/TESTING.md` - Testing procedures and coverage information
-- `skills/README.md` - Master catalog of all 30 skills
+- `skills/README.md` - Master catalog of all 31 skills
 - `skills/SKILLS-QUICK-REFERENCE.md` - Decision matrix and quick lookup
 
 ---
 
 ## Next Steps
 
-1. **Read skills/README.md** - Understand the 30 available skills
+1. **Read skills/README.md** - Understand the 31 available skills
 2. **Run `pytest tests/`** - Verify test suite passes
 3. **Review audit trail** - Run `/apex-audit-decisions-log` to see project history
 4. **Explore a skill** - Pick one skill and read its SKILL.md for detailed workflow

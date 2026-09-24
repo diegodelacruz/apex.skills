@@ -38,10 +38,10 @@
   },
   "settings": {
     "pythonPath": ".venv/bin/python3",
-    "pythonVersion": "3.8+",
+    "pythonVersion": "3.13",
     "requirementsFile": "requirements.txt",
     "testRunner": "pytest",
-    "testCoverageTarget": 80,
+    "testCoverageTarget": 55,
     "credentialStorage": "system-keyring",
     "defaultEnvironment": "test",
     "logLevel": "INFO"

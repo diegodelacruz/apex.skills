@@ -112,8 +112,7 @@ check_secrets() {
 	}
 	local scan_status=0
 	"$scanner" scan --baseline "$scan_baseline" --all-files --force-use-all-plugins \
-		--exclude-lines '^\s*"(commit|archive_sha256|overlay_sha256)":' \
-		--exclude-files '(^|[\\/])(\.env|\.mypy_cache|\.pytest_cache|\.venv|\.upstreams|\.upstream-backups|upstreams\.lock\.json|htmlcov|\.secrets\.baseline(\.scan\.)?|control-proyecto[\\/]\.bitacora\.json|runtime[\\/]sqlcl-runtime\.json)([\\/]|$)|(^|[\\/])vendor[\\/]upstreams[\\/][^\\/]+\.zip$' \
+		--exclude-files '(^|[\\/])(\.env|\.mypy_cache|\.pytest_cache|\.venv|\.upstreams|\.upstream-backups|htmlcov|\.secrets\.baseline(\.scan\.[^\\/]+)?|control-proyecto[\\/]\.bitacora\.json|runtime[\\/]sqlcl-runtime\.json)([\\/]|$)|(^|[\\/])vendor[\\/]upstreams[\\/][^\\/]+\.zip$' \
 		>/dev/null 2>&1 || scan_status=$?
 	if [ "$scan_status" -ne 0 ]; then
 		rm -f "$scan_baseline"

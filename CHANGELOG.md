@@ -11,6 +11,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ### Added
 
+- Added a shared local CI runner and aligned GitHub Actions with Python 3.13.
+- Added `.python-version` and documented the local CI workflow and Python baseline.
+- Added an initial 55% combined coverage gate, with 80% retained as a gradual target.
+- Added tests for whitespace detection in staged and untracked files.
 - Synchronized SKILLS-QUICK-REFERENCE.md with 4 missing skills (apex-code-generation-safe, apex-api-client-safe, apex-automated-testing-safe, apex-data-migration-safe).
 - Re-enabled `validate-exception-handling` pre-commit hook (Python-based, cross-platform).
 - Added 12 new tests for `manage_apex_credentials.py` (coverage 35% → 77%).
@@ -28,8 +32,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ### Fixed
 
+- Fixed local CI failures in formatting, lint, and type checks for external-repository context tooling.
 - Fixed test expectation from 21 → 30 skills in `test_quality_audit.py`.
 - Fixed stale reference in `docs/setup-claude-code.md` pointing to removed file.
+
+### Changed
+
+- Required the local CI runner before integration and clarified repository-wide audit requirements before GitHub publication.
+- Made changelog updates part of the required change and publication workflow.
+- Updated architecture, security, and GitHub setup documentation to reflect the current test suite, CI status, and changelog version.
+- Hardened the local secret scan to inspect upstream metadata and removed global line exclusions.
+- Added only verified public upstream commit and archive hashes to the secret-scanner baseline.
+- Removed secret-scan exclusions from pre-commit and the security audit script.
+- Corrected temporary baseline filtering and resolved Git executable lookup for security linting.
+- Aligned the quality auditor with the runner's resolved Git executable and whitespace checks.
 
 ---
 
