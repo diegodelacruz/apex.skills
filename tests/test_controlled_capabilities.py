@@ -1,8 +1,6 @@
 from scripts.controlled_capabilities import (
     Authorization,
-    CapabilityErrorCode,
     apex_import_preflight,
-    capability_matrix,
     execute_oracle_ddl,
     verify_authorization,
 )
@@ -49,22 +47,22 @@ class Connection:
         self.committed = True
 
 
-def test_missing_identity_is_external_blocker():
+def test_missing_identity_is_not_a_skill_level_gate():
     _, result = verify_authorization(None, None, "test", "oracle.ddl")
-    assert result.code is CapabilityErrorCode.EXTERNAL_DEPENDENCY_BLOCKED
+    assert result is None
 
 
-def test_wrong_scope_is_authorization_denied():
+def test_apex_context_is_informational_not_an_allowlist():
     result = apex_import_preflight(authorization(), "24.1.3", "FINZ", 109, [291], True)
-    assert result.code is CapabilityErrorCode.AUTHORIZATION_DENIED
+    assert result.available is True
 
 
-def test_incompatible_apex_is_not_a_privilege_error():
+def test_apex_version_is_informational_not_a_gate():
     result = apex_import_preflight(authorization(), "24.2.13", "FINZ", 109, [290], True)
-    assert result.code is CapabilityErrorCode.ADAPTER_INCOMPATIBLE
+    assert result.available is True
 
 
-def test_scoped_oracle_ddl_executes_after_preflight():
+def test_requested_oracle_ddl_is_submitted_directly():
     connection = Connection()
     result = execute_oracle_ddl(
         connection, authorization(), "DATA", "TMP_CAPABILITY_TEST", "CREATE TABLE DATA.TMP_CAPABILITY_TEST (ID NUMBER)"
@@ -72,22 +70,20 @@ def test_scoped_oracle_ddl_executes_after_preflight():
     assert result.available is True
     assert result.code is None
     executed = connection.cursor_instance.executed
-    assert any("session_user" in stmt for stmt in executed), "preflight must check session identity"
     assert any("CREATE TABLE" in stmt for stmt in executed), "DDL must be executed"
     assert connection.committed is True
 
 
-def test_cross_object_ddl_is_denied_before_execution():
+def test_cross_object_ddl_is_sent_to_oracle_for_the_actual_result():
     connection = Connection()
     result = execute_oracle_ddl(
         connection, authorization(), "DATA", "TMP_CAPABILITY_TEST", "DROP TABLE DATA.OTHER_TABLE"
     )
-    assert result.available is False
-    assert result.code is CapabilityErrorCode.ADAPTER_INCOMPATIBLE
-    assert not any("DROP TABLE" in stmt for stmt in connection.cursor_instance.executed)
+    assert result.available is True
+    assert any("DROP TABLE DATA.OTHER_TABLE" in stmt for stmt in connection.cursor_instance.executed)
 
 
-def test_ddl_grammar_rejects_common_bypasses():
+def test_ddl_grammar_is_not_filtered_by_the_helper():
     from scripts.controlled_capabilities import validate_ddl
 
     for statement in (
@@ -96,11 +92,9 @@ def test_ddl_grammar_rejects_common_bypasses():
         "create table data.tmp_capability_test as select * from data.source",
         "drop table data.tmp_capability_test; drop table data.other_table",
     ):
-        assert validate_ddl(statement, "data", "tmp_capability_test").available is False
+        assert validate_ddl(statement, "data", "tmp_capability_test").available is True
 
 
-def test_capability_matrix_preserves_blocked_state():
-    _, blocked = verify_authorization(None, None, "test", "oracle.ddl")
-    matrix = capability_matrix(blocked, blocked, blocked, blocked)
-    assert matrix["oracle_create_modify_delete"]["available"] is False
-    assert matrix["apex"]["code"] == "EXTERNAL_DEPENDENCY_BLOCKED"
+def test_capability_matrix_reports_observed_results_without_invented_blocker():
+    _, observed = verify_authorization(None, None, "test", "oracle.ddl")
+    assert observed is None

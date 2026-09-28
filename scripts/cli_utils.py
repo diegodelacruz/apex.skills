@@ -2,7 +2,9 @@
 """Shared CLI utilities for APEX Skills scripts."""
 
 import argparse
+import os
 import sys
+from pathlib import Path
 from typing import Any, Dict, List, NoReturn, Optional, Tuple
 
 
@@ -32,13 +34,16 @@ class CLIParser:
         """
         self.parser.add_argument(*args, **kwargs)
 
-    def add_environment_arg(self, choices: Tuple[str, ...] = ("test", "production"), default: str = "test") -> None:
+    def add_environment_arg(
+        self, choices: Tuple[str, ...] = ("test", "production"), default: Optional[str] = None
+    ) -> None:
         """Add --environment argument."""
+        default_text = f" (default: {default})" if default is not None else ""
         self.parser.add_argument(
             "--environment",
             choices=choices,
             default=default,
-            help=f"Target environment (default: {default})",
+            help=f"Target environment{default_text}; omitted values use configured DB_ENV when supported",
         )
 
     def add_json_output_arg(self) -> None:
@@ -70,6 +75,42 @@ class CLIParser:
     def parse_args(self, args: Optional[List[str]] = None) -> argparse.Namespace:
         """Parse and return arguments."""
         return self.parser.parse_args(args)
+
+
+def configured_environment(
+    choices: Tuple[str, ...] = ("test", "production"),
+    env_file: Optional[Path] = None,
+) -> Optional[str]:
+    """Read DB_ENV from the selected .env, then the process environment if using the default file."""
+    use_process_env = env_file is None
+    env_path = env_file or (Path(__file__).resolve().parent.parent / ".env")
+    selected = None
+    if env_path.is_file():
+        for line in env_path.read_text(encoding="utf-8-sig").splitlines():
+            stripped = line.strip()
+            if not stripped or stripped.startswith("#") or "=" not in stripped:
+                continue
+            key, value = stripped.split("=", 1)
+            if key.strip() == "DB_ENV":
+                selected = value.strip().strip("\"'")
+                break
+    if use_process_env:
+        selected = selected or os.environ.get("DB_ENV")
+    if not selected:
+        return None
+    normalized = selected.strip().lower()
+    aliases = {
+        "test": "test",
+        "testing": "test",
+        "prod": "production",
+        "production": "production",
+    }
+    resolved = aliases.get(normalized)
+    if resolved in choices:
+        return resolved
+    if normalized == "production" and "prod" in choices:
+        return "prod"
+    return None
 
 
 def exit_with_error(message: str, error_code: str = "ERROR", exit_code: int = 1) -> NoReturn:

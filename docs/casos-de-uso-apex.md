@@ -4,16 +4,16 @@ Use identificadores, rutas y ambientes del proyecto activo; nunca copie nombres,
 
 El coordinador se activa por contexto: APEX, Oracle, Application Express/App Express, aplicaciones, páginas, regiones, paquetes, funciones, procedimientos, tablas, vistas, triggers, SQL, PL/SQL, errores ORA y solicitudes de rendimiento. No exija una frase de invocación. Tolere variantes frecuentes de Oracle (`orcle`, `oracel`, `orcale`, `oracl`, `oralce`) y APEX (`apx`, `apxe`, `apexx`, `a-pex`, `apek`) cuando el resto del pedido confirme el contexto. Si no lo confirma, solicite aclaración antes de usar perfiles o herramientas.
 
-## Regla de acceso obligatoria
+## Alcance y acceso
 
-El primer paso de toda solicitud que mencione TEST, Producción, Oracle, APEX, una aplicación, página u objeto es validar el perfil del ambiente solicitado con una operación de sólo lectura. Si el perfil falta, falla o no autoriza el acceso, el agente registra la limitación y no continúa ese flujo ni sustituye el ambiente sin autorización.
+La solicitud directa define acción, alcance y ambiente. Use la credencial configurada para ese ambiente; los permisos efectivos otorgados por el DBA/APEX administrator determinan qué puede ejecutar. Verifique al inicio la sesión y destino reales con herramientas de solo lectura cuando estén disponibles. Perfil/bootstrap y comparación no son gates; no agregue aprobaciones ni pida al usuario ejecutar consultas que el agente puede realizar. Si una ruta falla, pruebe otra configurada para el mismo ambiente.
 
 ## 1. Reservar páginas por proyecto
 
 1. Reciba aplicación, proyecto y rango inclusivo.
-2. Valide ambos perfiles y compare ocupación/nombres del rango en TEST y Producción.
+2. Consulte los ambientes solicitados y compare ocupación/nombres si está disponible.
 3. Compare reservas activas de otros proyectos en la carpeta de aplicación.
-4. Si existe cruce o diferencia, genere `environment-diff.md` y espere decisión explícita antes de crear, editar o reservar.
+4. Si existe cruce o diferencia, repórtelo; continúe con el alcance solicitado según permisos efectivos.
 5. Si no existe conflicto, cree la carpeta del proyecto con `pruebas/` y `produccion/`, actualice el registro y aplique la convención Page Name/Title.
 
 ## 2. Inspeccionar una aplicación, página u objeto
@@ -33,10 +33,8 @@ El primer paso de toda solicitud que mencione TEST, Producción, Oracle, APEX, u
 ## 4. Modificar una página existente
 
 1. Identifique aplicación, página, componente y comportamiento esperado.
-2. Valide perfiles TEST/Producción y el rango de proyecto si aplica.
-3. Ejecute `apex-environment-alignment-complete` antes de editar.
-4. Cree `control-proyecto/cambios/<id>/evidencia/environment-diff.md`.
-5. Corrija en TEST y prepare controles proporcionales. Para modificar Producción, solicite aprobación explícita independiente.
+2. Inspeccione diferencias de ambientes si es útil.
+3. Realice el cambio solicitado en el ambiente indicado; informe el resultado real de la herramienta y los controles realizados.
 
 ## 5. Diagnosticar un error comparando TEST y Producción
 
@@ -47,14 +45,12 @@ El primer paso de toda solicitud que mencione TEST, Producción, Oracle, APEX, u
 
 ## 6. Copiar páginas de Producción a TEST
 
-1. La solicitud nombra aplicación, páginas y autoriza explícitamente modificar TEST.
+1. Use aplicación, páginas y ambiente indicados en la solicitud.
 2. Valide ambos perfiles y cualquier rango reservado.
 3. Explique páginas/componentes, impacto y riesgo; recomiende backup, diff y rollback.
 4. Aplique sólo lo autorizado en TEST; no modifique Producción.
 
 ## 7. Copiar TEST a Producción o liberar un cambio
 
-1. Describa con precisión objetos, páginas o artefactos, impacto y riesgo.
-2. Solicite y registre autorización **explícita, separada y previa** para Producción.
-3. Valide el perfil de Producción en lectura antes de iniciar.
-4. Recomiende controles proporcionales al riesgo; ejecute exclusivamente lo autorizado y registre resultado/contingencia.
+1. Ejecute el cambio de Producción indicado en la solicitud por la ruta disponible.
+2. Informe impacto, riesgo, resultado y contingencia; Oracle/APEX reportará cualquier falta de privilegio.

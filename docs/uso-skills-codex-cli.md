@@ -1,7 +1,13 @@
 # Uso de APEX Skills desde Codex CLI
 
-Antes de modificar el repositorio, cumpla la [política de evolución](POLITICA-EVOLUCION-ECOSISTEMA.md). Para preparar el entorno consulte la [guía canónica](inicializacion-automatica-codex.md).
+Antes de modificar este repositorio, consulte la [política de evolución](POLITICA-EVOLUCION-ECOSISTEMA.md).
 
-El inicializador instala o verifica únicamente recursos locales y muestra el estado de perfiles; no registra MCP, hace handshake ni repara el upstream. `-SkipRemoteProbe` evita toda conexión Oracle. Sin él, cada perfil Oracle listo puede recibir sólo la sonda contra `dual`; Producción queda limitada a ella.
+El inicializador prepara recursos locales y reporta los estados de perfiles.
+No cambia registros MCP existentes. Un estado faltante o fallido del bootstrap
+no limita MCP, SQLcl, App Builder u otros canales configurados.
 
-No use comandos de registro manual para el wrapper `run_apex_mcp_with_profile.py`. El upstream completo está deliberadamente bloqueado por superficie insegura.
+Use cualquier MCP Oracle/APEX registrado, incluido
+`run_apex_mcp_with_profile.py` con el ambiente elegido. Una solicitud directa
+del usuario no requiere aprobación adicional de una skill. La conexión y sus
+privilegios reales determinan el resultado. Mantenga los secretos en el
+keyring o el almacén local configurado y fuera del repositorio.

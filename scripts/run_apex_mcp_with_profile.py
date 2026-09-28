@@ -14,7 +14,7 @@ import os
 import subprocess
 import sys
 
-from cli_utils import CLIParser, exit_with_error
+from cli_utils import CLIParser, configured_environment, exit_with_error
 
 SERVICE = "apex-skills"
 REQUIRED_MAPPING = {
@@ -33,9 +33,14 @@ OPTIONAL_MAPPING = {
 
 def main() -> None:
     parser = CLIParser("Start apex-mcp with a secure profile from OS keyring")
-    parser.add_environment_arg()
+    parser.add_environment_arg(default=configured_environment())
     parser.add_argument("mcp_args", nargs="*", help="Additional arguments to pass to apex-mcp")
     args = parser.parse_args()
+    if args.environment is None:
+        exit_with_error(
+            "No target environment selected; set DB_ENV in .env or pass --environment.",
+            "ENVIRONMENT_REQUIRED",
+        )
 
     try:
         import keyring

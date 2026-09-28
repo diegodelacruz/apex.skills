@@ -13,7 +13,7 @@ from typing import Any, Dict, Optional
 if __package__ in (None, ""):
     sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
-from scripts.cli_utils import CLIParser, exit_with_error
+from scripts.cli_utils import CLIParser, configured_environment, exit_with_error
 
 SERVICE = "apex-skills"
 APEX_SERVICE = "apex-skills-apex"
@@ -433,11 +433,26 @@ def main() -> int:
     parser.add_argument(
         "--env-file",
         type=Path,
-        default=Path(__file__).resolve().parent.parent / ".env",
+        default=None,
         help="Path to .env file for import-env action",
     )
 
     args = parser.parse_args()
+    if args.environment is None:
+        selected_env_file = args.env_file if args.action == "import-env" and args.env_file is not None else None
+        args.environment = configured_environment(env_file=selected_env_file)
+    if args.environment is None:
+        selector_source = (
+            f"the selected file {args.env_file}"
+            if args.action == "import-env" and args.env_file is not None
+            else "the repository .env"
+        )
+        exit_with_error(
+            f"No target environment selected; set DB_ENV in {selector_source} or pass --environment.",
+            "ENVIRONMENT_REQUIRED",
+        )
+    if args.action == "import-env" and args.env_file is None:
+        args.env_file = Path(__file__).resolve().parent.parent / ".env"
     keyring = import_module_safe("keyring")
 
     if args.action == "set":

@@ -128,7 +128,7 @@ function Add-Remediation {
 				}
 				'apex' {
 					$script:actionItems.Add("  [$Environment] Credenciales APEX App Builder no configuradas.")
-					$script:actionItems.Add("           Sin esto no se puede importar/exportar aplicaciones APEX en $env_lower.")
+					$script:actionItems.Add("           Se necesita para rutas que inician sesión en App Builder; Oracle/SQLcl puede operar APEX si las credenciales y privilegios lo permiten.")
 					$script:actionItems.Add("           Se necesita: URL del App Builder, workspace, usuario y password APEX.")
 					$script:actionItems.Add("           Opcion 1 (desde .env): python scripts/manage_apex_credentials.py import-env $env_flag")
 					$script:actionItems.Add("           Opcion 2 (interactivo): python scripts/manage_apex_credentials.py set-apex $env_flag")
@@ -235,9 +235,6 @@ if ($adapterOutput -match 'MCP_ADAPTER_READY') {
 	$script:actionItems.Add("           Revisar la salida de Sync-ApexSkillUpstreams.ps1 y Setup-ApexSkills.ps1.")
 	$script:actionItems.Add("")
 }
-if ($adapterOutput -match 'MCP_SURFACE_UNSAFE') {
-	Write-Host '      [!]  Superficie restringida (operaciones APEX internas excluidas por seguridad).' -ForegroundColor Yellow
-}
 
 # [3/6] Oracle profiles and probes
 Write-Host '[3/6] Oracle profiles and probes...'
@@ -290,8 +287,8 @@ Write-Host '      [OK] Coordinator and specialist skills installed.' -Foreground
 
 # [5/6] MCP registration
 Write-Host '[5/6] MCP registration...'
-$mcpTest = 'MCP_REGISTRATION_SKIPPED_UNSAFE_SURFACE'
-$mcpProduction = 'MCP_REGISTRATION_SKIPPED_UNSAFE_SURFACE'
+$mcpTest = 'MCP_REGISTRATION_NOT_PRESENT'
+$mcpProduction = 'MCP_REGISTRATION_NOT_PRESENT'
 if (Get-Command codex -ErrorAction SilentlyContinue) {
 	$mcpList = & codex mcp list 2>&1 | Out-String
 	if ($mcpList -match '(?m)^apex-mcp-test\s') {

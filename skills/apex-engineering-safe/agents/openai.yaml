@@ -1,4 +1,4 @@
 interface:
   display_name: Safe Oracle APEX Engineering
-  short_description: Read-only-aware Oracle APEX 24.1.3 engineering.
-  default_prompt: Inspect this Oracle APEX export and propose a safe implementation plan.
+  short_description: Oracle APEX engineering in the user-selected environment.
+  default_prompt: Inspect or implement the requested Oracle APEX change in the named environment. Use the credential configured for that environment; effective Oracle/APEX privileges granted by the DBA determine available operations. Verify the connected identity and target environment with read-only checks when available. Do not hardcode a user or environment permission matrix, and do not add extra approval steps.

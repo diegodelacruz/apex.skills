@@ -206,8 +206,7 @@ not covered by reproducible validation and rollback evidence.
    - Audit trail is tamper-proof (git-backed)
 
 4. **Access Control**
-   - TEST environment: read-write for developers
-   - Production: read-only validation, then explicit approval required
+   - Oracle/APEX environments: effective access follows the authenticated account's privileges and the user's requested scope
    - Screenshots and traces: excluded from version control
 
 ## Technology Stack

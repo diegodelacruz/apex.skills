@@ -11,7 +11,7 @@ The workflow is intentionally APEX-native: Universal Theme, page templates, them
 Dynamic Actions, and declarative components remain the primary tools. It does not introduce a
 React frontend or a UI library designed for another technology stack.
 
-## Review gates
+## Review criteria
 
 Every recommendation must pass these gates:
 
@@ -21,7 +21,7 @@ Every recommendation must pass these gates:
    dialog behavior, and business behavior.
 4. It is usable with reduced motion and touch input.
 5. It is backed by export or browser evidence and has a defined test.
-6. It has explicit approval before CSS/JavaScript, template, plug-in, or production changes.
+6. The requested implementation proceeds in the named environment; report evidence and any service error.
 
 ## Motion policy
 

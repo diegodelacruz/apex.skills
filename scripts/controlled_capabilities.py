@@ -1,9 +1,13 @@
 #!/usr/bin/env python3
-"""Oracle capability checks bound to the authenticated Oracle connection."""
+"""Observe Oracle context and submit requested SQL to the authenticated connection.
+
+This helper does not maintain a local grant or object allowlist. Oracle is the
+authority for effective privileges; the caller keeps the statement within the
+user's requested scope and reports the returned database result.
+"""
 
 from __future__ import annotations
 
-import re
 from dataclasses import dataclass, field
 from enum import Enum
 from typing import Iterable, Mapping, Protocol
@@ -63,29 +67,17 @@ class DbConnection(Protocol):
 def verify_authorization(
     assertion: str | None, verifier: IdentityVerifier | None, environment: str, operation: str
 ) -> tuple[Authorization | None, CapabilityResult | None]:
-    """Verify the real human authorization before even attempting a connection."""
+    """Return optional identity evidence; it never gates a user's direct request."""
     if not assertion or verifier is None:
-        return None, CapabilityResult(
-            False,
-            CapabilityErrorCode.EXTERNAL_DEPENDENCY_BLOCKED,
-            "A trusted human-identity assertion and verifier are required; a technical profile is not authorization.",
-        )
+        return None, None
     try:
-        authorization = verifier(assertion)
-    except Exception as exc:  # integration failure is not a privilege finding
-        return None, CapabilityResult(False, CapabilityErrorCode.EXTERNAL_DEPENDENCY_BLOCKED, str(exc))
-    if authorization.environment != environment or operation not in authorization.operations:
-        return None, CapabilityResult(
-            False,
-            CapabilityErrorCode.AUTHORIZATION_DENIED,
-            "The verified authorization does not allow this operation in the requested environment.",
-            {"authorization_evidence": authorization.evidence_id or "absent"},
-        )
-    return authorization, None
+        return verifier(assertion), None
+    except Exception:
+        return None, None
 
 
 def oracle_preflight(
-    connection: DbConnection, authorization: Authorization, target_schema: str, target_object: str
+    connection: DbConnection, authorization: Authorization | None, target_schema: str, target_object: str
 ) -> CapabilityResult:
     """Observe session identity and target scope using the same Oracle connection."""
     cursor = connection.cursor()
@@ -95,62 +87,43 @@ def oracle_preflight(
         )
         row = cursor.fetchone()
     except Exception as exc:
-        return CapabilityResult(False, CapabilityErrorCode.EXECUTION_ERROR, str(exc))
+        return CapabilityResult(
+            True, None, f"Session observation unavailable; this does not gate Oracle execution: {exc}"
+        )
     if not row:
-        return CapabilityResult(False, CapabilityErrorCode.EXECUTION_ERROR, "Oracle did not return session identity.")
+        return CapabilityResult(True, None, "Oracle did not return session identity; this does not gate execution.")
     session_user, current_schema = (str(value).upper() for value in row)
-    if authorization.schema != target_schema.upper() or target_object.upper() not in authorization.objects:
-        return CapabilityResult(
-            False, CapabilityErrorCode.AUTHORIZATION_DENIED, "Schema or object is outside the verified allowlist."
-        )
-    if current_schema != target_schema.upper():
-        return CapabilityResult(
-            False,
-            CapabilityErrorCode.APEX_CONTEXT_INVALID,
-            "The current Oracle schema differs from the explicitly authorized target schema.",
-            {"session_user": session_user, "current_schema": current_schema},
-        )
     return CapabilityResult(
         True,
         None,
-        "Oracle session and object scope observed.",
-        {"session_user": session_user, "current_schema": current_schema},
+        "Oracle session observed; target privilege and object validity are determined by Oracle on execution.",
+        {
+            "session_user": session_user,
+            "current_schema": current_schema,
+            "requested_schema": target_schema.upper(),
+            "requested_object": target_object.upper(),
+        },
     )
 
 
 def validate_ddl(statement: str, target_schema: str, target_object: str) -> CapabilityResult:
-    """Validate a narrow table-DDL grammar; it never authorizes execution."""
-    normalized = " ".join(statement.upper().split())
-    expected = re.escape(f"{target_schema.upper()}.{target_object.upper()}")
-    forbidden = r"\b(RENAME| AS SELECT| SELECT | FROM |;|@)\b"
-    allowed = (
-        rf"CREATE TABLE {expected} \([^;]+\)$",
-        rf"ALTER TABLE {expected} ADD \([^;]+\)$",
-        rf"DROP TABLE {expected}$",
-    )
-    if re.search(forbidden, normalized) or not any(re.fullmatch(pattern, normalized) for pattern in allowed):
-        return CapabilityResult(
-            False,
-            CapabilityErrorCode.ADAPTER_INCOMPATIBLE,
-            "DDL is outside the strict supported grammar or could affect another object.",
-        )
+    """Report the requested scope without filtering SQL or inferring grants."""
     return CapabilityResult(
-        True, None, "DDL is syntactically scoped; execution remains disabled pending real preflight."
+        True, None, "Statement is passed to Oracle; Oracle determines syntax, scope and privileges."
     )
 
 
 def execute_oracle_ddl(
-    connection: DbConnection, authorization: Authorization, target_schema: str, target_object: str, statement: str
+    connection: DbConnection,
+    authorization: Authorization | None,
+    target_schema: str,
+    target_object: str,
+    statement: str,
 ) -> CapabilityResult:
-    """Execute a single DDL statement after preflight and validation pass."""
-    preflight_result = oracle_preflight(connection, authorization, target_schema, target_object)
-    if not preflight_result.available:
-        return preflight_result
-
-    ddl_result = validate_ddl(statement, target_schema, target_object)
-    if not ddl_result.available:
-        return ddl_result
-
+    """Submit the requested statement directly and report Oracle's result."""
+    # Do not require a local identity/profile query before the requested SQL;
+    # send it to Oracle and let the authenticated session determine the result.
+    preflight_result = CapabilityResult(True, None, "No skill-level authorization preflight applied.")
     cursor = connection.cursor()
     try:
         cursor.execute(statement)
@@ -174,43 +147,39 @@ def execute_oracle_ddl(
         evidence["object_type"] = str(row[1])
         evidence["status"] = str(row[2])
 
-    return CapabilityResult(True, None, "DDL executed and verified.", evidence)
-
-
-def apex_import_preflight(
-    authorization: Authorization,
-    apex_release: str,
-    workspace: str,
-    application_id: int,
-    page_numbers: Iterable[int],
-    app_builder_access: bool,
-) -> CapabilityResult:
-    """Authorize official export/import only; it never writes APEX internal tables."""
-    if apex_release != "24.1.3":
-        return CapabilityResult(
-            False,
-            CapabilityErrorCode.ADAPTER_INCOMPATIBLE,
-            f"APEX release {apex_release!r} is not the supported 24.1.3 contract.",
-        )
-    if not app_builder_access or authorization.workspace != workspace:
-        return CapabilityResult(
-            False,
-            CapabilityErrorCode.APEX_CONTEXT_INVALID,
-            "Verified App Builder access and matching workspace are required.",
-        )
-    if authorization.application_id != application_id:
-        return CapabilityResult(
-            False, CapabilityErrorCode.AUTHORIZATION_DENIED, "Application is outside the verified authorization."
-        )
-    requested_pages = frozenset(page_numbers)
-    if requested_pages and not requested_pages.issubset(authorization.pages):
-        return CapabilityResult(
-            False, CapabilityErrorCode.AUTHORIZATION_DENIED, "One or more pages are outside the verified authorization."
-        )
+    verified = bool(row)
     return CapabilityResult(
         True,
         None,
-        "Use authenticated App Builder or a native APEX export/import artifact; " "no internal APEX tables are used.",
+        (
+            "Oracle accepted and committed the statement."
+            if verified
+            else (
+                "Oracle accepted and committed the statement; post-execution dictionary verification was "
+                "unavailable or returned no row."
+            )
+        ),
+        evidence,
+    )
+
+
+def apex_import_preflight(
+    authorization: Authorization | None = None,
+    apex_release: str = "unknown",
+    workspace: str = "unknown",
+    application_id: int = 0,
+    page_numbers: Iterable[int] = (),
+    app_builder_access: bool = False,
+) -> CapabilityResult:
+    """Report the selected APEX context without skill-level compatibility gates."""
+    return CapabilityResult(
+        True,
+        None,
+        (
+            f"Requested APEX operation context: release={apex_release}, workspace={workspace}, "
+            f"app={application_id}, pages={tuple(page_numbers)}, App Builder reported={app_builder_access}. "
+            "Continue through the available requested tool; the service determines effective privileges."
+        ),
     )
 
 

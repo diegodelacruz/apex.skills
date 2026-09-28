@@ -8,7 +8,7 @@
       2. Existing environment variables
       3. Interactive prompt (if neither source available)
 .PARAMETER Environment
-    Target environment: testing or production. Default: testing.
+    Target environment: testing or production. If omitted, use DB_ENV from the selected .env file.
 .PARAMETER EnvFile
     Path to .env file. Default: repo root .env.
 .EXAMPLE
@@ -17,8 +17,8 @@
 #>
 
 param(
-    [ValidateSet("testing", "production")]
-    [string]$Environment = "testing",
+    [ValidateSet("test", "testing", "prod", "production")]
+    [string]$Environment,
 
     [string]$EnvFile
 )
@@ -59,14 +59,34 @@ if (Test-Path $EnvFile) {
     Write-Host "[OK] Loaded .env from $EnvFile" -ForegroundColor Green
 }
 
+if (-not $Environment) {
+    $Environment = $envVars["DB_ENV"]
+    if (-not $Environment) { $Environment = [Environment]::GetEnvironmentVariable("DB_ENV") }
+}
+
+if (-not $Environment) {
+    Write-Error "Environment is not selected. Set DB_ENV in .env or pass -Environment testing|production."
+    return
+}
+
+$Environment = $Environment.Trim().ToLowerInvariant()
+if ($Environment -in @("test", "testing")) {
+    $Environment = "testing"
+} elseif ($Environment -in @("prod", "production")) {
+    $Environment = "production"
+} else {
+    Write-Error "Invalid environment. Use test/testing or prod/production."
+    return
+}
+
 # Resolve connection parameters
 $prefix = if ($Environment -eq "production") { "DB_PRODUCTION" } else { "DB_TESTING" }
 
 function Get-EnvOrFile {
     param([string]$Key)
+    if ($envVars.ContainsKey($Key)) { return $envVars[$Key] }
     $envVal = [Environment]::GetEnvironmentVariable($Key)
     if ($envVal) { return $envVal }
-    if ($envVars.ContainsKey($Key)) { return $envVars[$Key] }
     return $null
 }
 

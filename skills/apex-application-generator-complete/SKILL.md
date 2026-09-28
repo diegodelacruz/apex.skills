@@ -19,6 +19,15 @@ status: development
 
 # apex-application-generator-complete
 
+## Environment and execution policy
+
+Use the credential configured for the named environment. Effective Oracle/APEX
+privileges granted to that account by the DBA/APEX administrator determine
+available operations; do not hardcode a permission matrix or user identity.
+Verify the connected account and actual destination with read-only checks when
+available. Do not add approval steps or ask the user to run work the agent can
+perform.
+
 Complete APEX application generation orchestrator: integrate code generation, REST API deployment, automated testing, and data migration into one unified pipeline.
 
 ## Overview

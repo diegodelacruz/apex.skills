@@ -20,8 +20,7 @@ Select the smallest mode that fits the request:
 - **Design**: define or improve UX decisions for a page or feature before implementation.
 - **Audit**: inspect an existing application/export, CSS, JavaScript, page structure, and runtime
   evidence in read-only mode; return prioritized findings with evidence.
-- **Explore**: propose up to three genuinely distinct, isolated UI directions. Do not implement or
-  promote one until the user has chosen and separately approved its scope.
+- **Explore**: propose up to three distinct UI directions. Implement a direction when requested.
 
 ## Required inputs
 
@@ -34,17 +33,17 @@ instructions.
 ## Non-negotiable safeguards
 
 1. Preserve Universal Theme, APEX templates, Dynamic Actions, validations, session state,
-   authorization, keyboard navigation, focus management, dialog behavior, and existing approved
-   design tokens unless a separately approved change says otherwise.
-2. Do not add React, React Native, Swift, Sonner, Framer Motion, or other non-APEX UI libraries as
-   a shortcut. Do not add an APEX plug-in, external asset, CDN, or JavaScript dependency without
-   security, compatibility, license, and explicit scope approval.
+   authorization, keyboard navigation, focus management, dialog behavior, and existing design
+   tokens unless the user's requested change includes them.
+2. Keep implementation aligned to the user's request. Report security, compatibility, license, or
+   dependency risks for plug-ins, external assets, CDNs, and JavaScript dependencies; these findings
+   do not add a skill-level approval gate.
 3. Treat enterprise pages, Interactive Grids, reports, data-entry forms, and frequent workflows as
    clarity-first surfaces. Decoration must never obscure data, delay input, or change business
    behavior.
-4. Never implement in audit mode. Design and exploration stop before application changes. Request
-   approval before custom CSS/JavaScript, template overrides, plug-in installation, imports, or
-   production work.
+4. Match the requested work: audit requests inspect; implementation requests make the requested
+   change, including CSS/JavaScript, template overrides, plug-ins, imports, or production work.
+   Do not add approval or environment gates beyond the user's request.
 5. Honor `prefers-reduced-motion`; preserve non-motion feedback where it aids comprehension. Test
    keyboard-only, touch, narrow viewport, contrast, screen-reader-relevant semantics, and reduced
    motion before approving implementation.
@@ -64,7 +63,7 @@ instructions.
    avoid `transition: all`, and avoid animating layout properties. Do not animate keyboard
    shortcuts, core navigation, or actions likely used hundreds of times daily.
 6. For every recommendation, state the APEX artifact affected, expected user benefit, accessibility
-   impact, responsive impact, implementation risk, and test evidence required.
+   impact, responsive impact, implementation risk, and validation evidence.
 7. For exploration, name the axis of each direction (for example: density, hierarchy, interaction
    model, or visual emphasis). Three cosmetic variations are not distinct directions. Keep all
    prototypes isolated from production pages.
@@ -73,9 +72,9 @@ instructions.
 
 Return a concise UX package: task and user context; evidence; findings or design decisions;
 priority; APEX artifact/page; recommendation; rationale; accessibility and responsive checks;
-motion decision; implementation risk; test plan; and approval boundary. For an audit, include a
-table with **Current state**, **Recommended state**, and **Why**, then an explicit verdict:
-**ready for approved implementation**, **needs revision**, or **blocked**.
+motion decision; implementation risk; and validation plan. For an audit, include a table with
+**Current state**, **Recommended state**, and **Why**, then an evidence-based verdict. If the user
+requested implementation, proceed with it without requiring the audit verdict as approval.
 
 ## Upstream provenance
 

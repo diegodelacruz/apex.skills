@@ -32,6 +32,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ### Fixed
 
+- Stopped treating a SQLcl login that differs from an APEX workspace parsing schema as a metadata-access denial; APEX diagnostics now retry the verified same-environment APEX MCP route and fall back to public metadata views when a page-detail adapter is incompatible.
+- Restored the regular-expression import used by the MCP adapter contract validator after it was removed from the active working copy, preventing a Python `NameError` during project initialization.
+- Clarified that remote Oracle/APEX source inspection may use a repository-backed read-only SQL artifact when required by the configured production connector; a non-Git project folder does not block the requested inspection.
+- Fixed upstream setup failing after successful synchronization when Windows cannot remove a locked staging file; cleanup now warns and preserves staging for later inspection.
 - Fixed cross-platform secret-baseline matching and excluded Git internals from full repository scans; replaced a credential-shaped documentation example that triggered GitHub CI.
 - Fixed local CI failures in formatting, lint, and type checks for external-repository context tooling.
 - Fixed test expectation from 21 → 30 skills in `test_quality_audit.py`.
@@ -39,6 +43,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ### Changed
 
+- Replaced the hardcoded Oracle/APEX environment permission matrix with the effective grants of the credential configured for the selected environment; added read-only session/destination and privilege inspection at task start when available.
+- Removed the environment-only block from native APEX import so Oracle/APEX can return the actual result for the selected credential; generic SQL and APEX routes do not grant privileges beyond that account's grants.
+- Made SQLcl environment selection use the requested environment or `DB_ENV`; it no longer falls back silently to TEST when no target is configured.
+- Removed stale approval language from APEX page/schema examples and made DATA governance defaults inferable so routine schema work does not stop for avoidable questions.
+- Aligned APEX delivery/data orchestrators and engineering prompts with configured credentials and DBA/APEX-granted privileges; removed fixed per-environment permission statements.
+- Restored concrete design-review and QA orchestration phases and deliverables while keeping them advisory and non-blocking; clarified boundaries with specialist implementation and test skills.
+- Documented tool routing for Oracle inspection/execution and APEX inspection/import by operation, including that connector surfaces do not grant privileges and connector labels do not prove target identity.
 - Required the local CI runner before integration and clarified repository-wide audit requirements before GitHub publication.
 - Made changelog updates part of the required change and publication workflow.
 - Updated architecture, security, and GitHub setup documentation to reflect the current test suite, CI status, and changelog version.

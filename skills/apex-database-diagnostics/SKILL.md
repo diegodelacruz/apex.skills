@@ -2,8 +2,8 @@
 name: apex-database-diagnostics
 category: "Apex Database & Diagnostics"
 order: 1
-tags: ["diagnostics", "inspection", "oracle", "read-only"]
-description: "Diagnose Oracle and APEX errors with read-only TEST or production inspection."
+tags: ["diagnostics", "inspection", "oracle"]
+description: "Diagnose Oracle and APEX requests in the user-selected environment through available authenticated routes."
 ---
 
 # APEX Database Diagnostics
@@ -11,10 +11,11 @@ description: "Diagnose Oracle and APEX errors with read-only TEST or production 
 ## Workflow
 
 1. Identify the requested environment, target application/page/object, and whether the request is inspection, comparison, or a proposed correction.
-2. The full `apex-mcp` upstream is not an approved diagnostic connection. Do not register, start, or rely on it; use only an explicitly authorized, technically constrained connection when one exists.
-3. If the request requires database inspection, validate the requested profile through the permitted read-only path. If it is absent, invalid, or unauthorized, report that exact limitation and stop only the requested database flow; do not request secrets or silently substitute another environment. A static review of supplied local SQL/PLSQL does not require a database profile or connection.
-4. Execute only narrow read-only queries through an authorized connection when database inspection is requested. Include executed queries and summarized evidence in the result only after running them.
-5. A local SQL/PLSQL file can be reviewed without its folder being a Git repository. Do not require `.git`, `git status`, or repository metadata for static inspection; use Git only when the user asks for history, branch, or change provenance. Treat the supplied file as evidence and state when database/runtime validation was not performed. This permission covers static inspection only; execution or deployment still requires its separate authorized workflow and controls.
-6. Use local files as supplementary evidence, or when the requested connection validation failed. For bootstrap limits, refer to `references/connection-bootstrap.md`.
-7. For an existing-page error or edit, run `apex-environment-alignment-complete` before proposing a change. A two-environment comparison must validate both profiles and write `control-proyecto/cambios/<id>/evidencia/environment-diff.md`.
-8. Return reproducible evidence, cause hypothesis, scope, correction plan, TEST/runtime validation when applicable (otherwise state that it was not performed), production-install artifact requirements when applicable, rollback condition, and any access limitation.
+2. Select the configured credential for the named environment (`DB_TESTING_*` / `DB_PRODUCTION_*` in `.env` for SQLcl, or the matching environment profile used by the chosen connector). At the start, inspect the connected account and actual database/service; use `inspect_oracle_privileges` when available. Do not hardcode a user or permissions by environment, and do not treat the connector name as proof of its target.
+3. Oracle and APEX operations use the effective privileges of the credential selected for that environment, as granted by the DBA/APEX administrator. Inspect APEX application/workspace context through the configured route when available. A SQLcl user differing from the workspace parsing schema is descriptive context, not a denial and not a reason to block read-only metadata queries. If a write privilege cannot be observed without making a change, do not invent a denial or run a test mutation: perform the user's requested operation and report the actual service response.
+4. Execute the requested operation against the named environment. Report connection and database errors accurately; do not substitute another environment.
+5. For a diagnostic request, use read queries unless the user also requested a change. Include queries and summarized evidence in the result after running them.
+6. For APEX page metadata, prefer the configured APEX MCP read operation. First connect with its configured profile and verify `SESSION_USER`, `DB_NAME`, and `CON_NAME` through a read-only `sys_context` query; use it only if the observed target matches the requested environment. Use `apex_get_page_details` when compatible. If it fails on a metadata-column error such as `ORA-00904`, query the public `APEX_APPLICATION_*` views directly with bound application/page IDs using the configured read-only SQL operation. A SQLcl user differing from the workspace parsing schema does not block those queries; Oracle's actual response decides access. Do not query or modify `WWV_FLOW_*` internals. A local SQL/PLSQL file can be reviewed without its folder being a Git repository. For remote SQL inspection, stage the query in the configured connector checkout only if that tool requires a repository-backed `.sql` file; do not make the user's project folder satisfy a connector constraint. When initialized SQLcl is available, `scripts/Execute-OracleSql.ps1 -Sql <query>` or `-SqlFile <file>` is another route. Do not ask the user to run a query the agent can execute. If a route fails, try another configured route for the same environment before reporting the limitation.
+7. Use local files as supplementary evidence, or when a requested connection is unavailable. Bootstrap status is informational and does not restrict another configured channel.
+8. For an existing-page error or edit, use `apex-environment-alignment-complete` for comparison evidence when useful; a missing comparison does not block the requested work.
+9. Return reproducible evidence, cause hypothesis, scope, correction plan, runtime validation when applicable (otherwise state that it was not performed), rollback condition, and any observed access limitation.

@@ -29,11 +29,11 @@ class TestCLIParser:
 
     @pytest.mark.unit
     def test_environment_arg_default(self):
-        """Test environment argument defaults."""
+        """Environment stays unset when neither caller nor user selected it."""
         parser = CLIParser("Test")
         parser.add_environment_arg()
         args = parser.parse_args([])
-        assert args.environment == "test"
+        assert args.environment is None
 
     @pytest.mark.unit
     def test_add_json_output_arg(self):

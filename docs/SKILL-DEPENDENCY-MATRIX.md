@@ -1,5 +1,9 @@
 # Skill Dependency Matrix
 
+> **Policy update (2026-09-28):** Use the credential configured for the requested environment;
+> effective Oracle/APEX grants determine available operations. Skills do not hardcode users or
+> permission matrices, add approval gates, or ask the user to perform work available to the agent.
+
 **Last Updated:** 2026-09-17
 **Total Skills:** 26
 **Orchestrators:** 4 (1 maestro, 3 coordinadores)

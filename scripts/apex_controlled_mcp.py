@@ -31,7 +31,7 @@ select 'role=' || role from session_roles order by role;
 select 'object_privilege=' || owner || '.' || table_name || ':' || privilege
 from user_tab_privs
 order by owner, table_name, privilege;
-"""
+    """
 
 
 @dataclass(frozen=True)
@@ -112,10 +112,37 @@ def doctor_report() -> dict[str, Any]:
     }
 
 
-def load_profile(environment: str) -> tuple[dict[str, str] | None, dict[str, Any] | None]:
-    """Load a local TEST/production profile and return only sanitized errors."""
-    if environment not in {"test", "production"}:
-        return None, {"code": "CONFIGURATION_REQUIRED", "message": "Ambiente inválido; use test o production."}
+def resolve_environment(environment: str | None) -> tuple[str | None, dict[str, Any] | None]:
+    """Resolve an explicit environment or the non-secret DB_ENV selector."""
+    env_path = ROOT / ".env"
+    values: dict[str, str] = {}
+    if env_path.is_file():
+        for line in env_path.read_text(encoding="utf-8").splitlines():
+            cleaned = line.strip()
+            if cleaned and not cleaned.startswith("#") and "=" in cleaned:
+                key, value = cleaned.split("=", 1)
+                values[key.strip()] = value.strip()
+    selected = environment or values.get("DB_ENV") or os.environ.get("DB_ENV")
+    if not selected:
+        return None, {
+            "code": "ENVIRONMENT_REQUIRED",
+            "message": "No se indicó ambiente y DB_ENV no está configurado; especifique test o production.",
+        }
+    normalized = {"test": "test", "testing": "test", "prod": "production", "production": "production"}
+    resolved = normalized.get(selected.strip().lower())
+    if resolved is None:
+        return None, {
+            "code": "CONFIGURATION_REQUIRED",
+            "message": "Ambiente inválido; use test/testing o production.",
+        }
+    return resolved, None
+
+
+def load_profile(environment: str | None) -> tuple[dict[str, str] | None, dict[str, Any] | None]:
+    """Load the configured profile for an explicit or DB_ENV-selected environment."""
+    environment, environment_error = resolve_environment(environment)
+    if environment_error is not None:
+        return None, environment_error
     env_path = ROOT / ".env"
     if not env_path.is_file():
         return None, {"code": "PROFILE_MISSING", "message": "No existe .env; no se intentó conectar."}
@@ -257,8 +284,12 @@ def write_audit_event(environment: str, operation: str, source: Path, result: di
         handle.write(json.dumps(entry, ensure_ascii=False) + "\n")
 
 
-def execute_artifact(relative_path: str, environment: str, operation: str) -> dict[str, Any]:
+def execute_artifact(relative_path: str, environment: str | None, operation: str) -> dict[str, Any]:
     """Execute one reviewed SQL artifact using the profile for an explicit environment."""
+    environment, environment_error = resolve_environment(environment)
+    if environment_error is not None:
+        return {"ok": False, **environment_error}
+    assert environment is not None
     readiness = doctor_report()
     if not readiness["ready"]:
         return readiness
@@ -279,12 +310,10 @@ def execute_artifact(relative_path: str, environment: str, operation: str) -> di
 mcp = FastMCP(
     "apex-controlled-mcp",
     instructions=(
-        "Use inspect_environment once when starting work in an environment to report its capabilities. "
-        "Execute only reviewed SQL artifacts in the workspace. "
-        "Oracle privileges are authoritative; report observed ORA errors without inventing authorization. "
-        "Do not run per-operation APEX capability probes; execute the requested artifact "
-        "and report Oracle/APEX results. "
-        "Use native APEX export imports, never DML against APEX_240100.WWV_FLOW_* or internal APEX packages."
+        "The user's request defines the operation, scope, and environment. Select that environment's configured "
+        "credential; effective Oracle/APEX privileges granted to that credential determine which operations succeed. "
+        "Inspect the session and target environment at the start when read-only tools are available. Do not hardcode a "
+        "user or environment permission matrix. Report observed errors accurately."
     ),
 )
 
@@ -302,8 +331,11 @@ def doctor() -> dict[str, Any]:
     description="Comprueba identidad de la sesión Oracle con una consulta de solo lectura.",
     annotations={"readOnlyHint": True},
 )
-def inspect_oracle_session(environment: str = "test") -> dict[str, Any]:
+def inspect_oracle_session(environment: str | None = None) -> dict[str, Any]:
     """Connect read-only and return the observed Oracle identity."""
+    environment, environment_error = resolve_environment(environment)
+    if environment_error is not None:
+        return {"ok": False, **environment_error}
     readiness = doctor_report()
     if not readiness["ready"]:
         return readiness
@@ -352,8 +384,11 @@ order by sequence_no, record;
     description="Informa al inicio las asociaciones APEX y aplicaciones disponibles del ambiente, sin modificar nada.",
     annotations={"readOnlyHint": True},
 )
-def inspect_environment(environment: str = "test") -> dict[str, Any]:
+def inspect_environment(environment: str | None = None) -> dict[str, Any]:
     """Return dynamic environment readiness; it informs but never blocks later operations."""
+    environment, environment_error = resolve_environment(environment)
+    if environment_error is not None:
+        return {"ok": False, **environment_error}
     readiness = doctor_report()
     if not readiness["ready"]:
         return readiness
@@ -428,8 +463,11 @@ order by sequence_no;
     description="Verifica en solo lectura la asociación entre sesión SQLcl, aplicación, workspace y esquema APEX.",
     annotations={"readOnlyHint": True},
 )
-def inspect_apex_context(application_id: int, environment: str = "test") -> dict[str, Any]:
+def inspect_apex_context(application_id: int, environment: str | None = None) -> dict[str, Any]:
     """Verify the Oracle session, APEX application, workspace and parsing-schema mapping."""
+    environment, environment_error = resolve_environment(environment)
+    if environment_error is not None:
+        return {"ok": False, **environment_error}
     if not isinstance(application_id, int) or application_id <= 0:
         return {"ok": False, "code": "INVALID_APPLICATION", "message": "application_id debe ser un entero positivo."}
     readiness = doctor_report()
@@ -465,7 +503,7 @@ def inspect_apex_context(application_id: int, environment: str = "test") -> dict
             "environment": environment,
             "application_id": application_id,
         }
-    context = {
+    context: dict[str, Any] = {
         "environment": environment,
         "application_id": application_id,
         "workspace": values.get("workspace"),
@@ -476,21 +514,24 @@ def inspect_apex_context(application_id: int, environment: str = "test") -> dict
         "workspace_schemas": schemas,
         "anchor_page": values.get("anchor_page"),
     }
-    if session_user.upper() not in {schema.upper() for schema in schemas}:
-        return {
-            "ok": False,
-            "code": "APEX_CONTEXT_INVALID",
-            "message": "La cuenta Oracle de SQLcl no está asociada al workspace de la aplicación.",
-            **context,
-        }
-    return {"ok": True, "code": "SUCCESS", "message": "Contexto APEX asociado a la sesión SQLcl.", **context}
+    session_schema_associated = session_user.upper() in {schema.upper() for schema in schemas}
+    context["session_schema_associated"] = session_schema_associated
+    message = (
+        "La cuenta SQLcl pertenece a un esquema del workspace."
+        if session_schema_associated
+        else (
+            "La cuenta SQLcl no es un esquema del workspace; la asociación es informativa y no bloquea "
+            "consultas de metadata."
+        )
+    )
+    return {"ok": True, "code": "SUCCESS", "message": message, **context}
 
 
 @mcp.tool(
     description="Prueba mediante una exportación temporal de solo lectura si SQLcl puede operar una aplicación APEX.",
     annotations={"readOnlyHint": True},
 )
-def probe_native_apex_context(application_id: int, environment: str = "test") -> dict[str, Any]:
+def probe_native_apex_context(application_id: int, environment: str | None = None) -> dict[str, Any]:
     """Run a disposable SQLcl native export of one existing page before APEX deployment."""
     context = inspect_apex_context(application_id, environment)
     if not context.get("ok"):
@@ -521,8 +562,11 @@ def probe_native_apex_context(application_id: int, environment: str = "test") ->
     description="Informa privilegios Oracle efectivos y roles en TEST/producción sin alterar objetos.",
     annotations={"readOnlyHint": True},
 )
-def inspect_oracle_privileges(environment: str = "test") -> dict[str, Any]:
+def inspect_oracle_privileges(environment: str | None = None) -> dict[str, Any]:
     """Return observed session privileges without inferring grants from configuration."""
+    environment, environment_error = resolve_environment(environment)
+    if environment_error is not None:
+        return {"ok": False, **environment_error}
     readiness = doctor_report()
     if not readiness["ready"]:
         return readiness
@@ -551,7 +595,7 @@ def inspect_oracle_privileges(environment: str = "test") -> dict[str, Any]:
     description="Ejecuta un archivo SQL revisado dentro del repositorio usando el ambiente indicado.",
     annotations={"readOnlyHint": False, "destructiveHint": True},
 )
-def execute_sql_file(path: str, environment: str = "test") -> dict[str, Any]:
+def execute_sql_file(path: str, environment: str | None = None) -> dict[str, Any]:
     """Execute any versioned database SQL permitted to the connected account."""
     return execute_artifact(path, environment, "oracle_sql_file")
 
@@ -560,8 +604,8 @@ def execute_sql_file(path: str, environment: str = "test") -> dict[str, Any]:
     description="Importa un export nativo de página APEX desde un archivo SQL del repositorio.",
     annotations={"readOnlyHint": False, "destructiveHint": True},
 )
-def deploy_apex_page(path: str, environment: str = "test") -> dict[str, Any]:
-    """Deploy a native APEX export; the artifact must carry the approved page definition."""
+def deploy_apex_page(path: str, environment: str | None = None) -> dict[str, Any]:
+    """Submit a native APEX export using the selected Oracle profile's privileges."""
     try:
         source = workspace_sql_file(path)
     except ValueError as exc:

@@ -4,7 +4,7 @@
 This module does not connect to Oracle and must not be treated as an APEX CRUD
 adapter. In particular it never accesses ``WWV_FLOW_*`` tables. Apply a reviewed
 specification only through the authenticated App Builder or native APEX
-export/import route governed by ``controlled_capabilities``.
+export/import preparation; effective execution access is determined by the authenticated service.
 """
 
 import json

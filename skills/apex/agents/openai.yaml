@@ -1,4 +1,4 @@
 interface:
   display_name: "Oracle and APEX Coordinator"
-  short_description: "Route Oracle or APEX requests with required validation gates."
-  default_prompt: "Describe your Oracle or APEX objective; the coordinator will select the required workflows and validation gates."
+  short_description: "Route Oracle or APEX requests by the user's requested scope."
+  default_prompt: "Describe your Oracle or APEX objective and environment. The coordinator uses the credential configured for that environment; effective privileges granted by the DBA determine available Oracle/APEX operations. It verifies the connected account and target environment with read-only checks when available, uses configured routes without extra approval steps, and reports observed results."

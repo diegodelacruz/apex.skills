@@ -102,7 +102,7 @@ def test_inspect_privileges_returns_observed_groups(monkeypatch):
     assert result["object_privileges"] == ["DATA.T_TEST:SELECT"]
 
 
-def test_inspect_apex_context_rejects_session_schema_not_in_workspace(monkeypatch):
+def test_inspect_apex_context_reports_session_schema_mismatch_without_blocking(monkeypatch):
     monkeypatch.setattr(mcp, "doctor_report", lambda: {"ready": True, "code": "READY"})
     monkeypatch.setattr(mcp, "load_profile", lambda environment: ({"user": "x"}, None))
     monkeypatch.setattr(
@@ -119,7 +119,9 @@ def test_inspect_apex_context_rejects_session_schema_not_in_workspace(monkeypatc
 
     result = mcp.inspect_apex_context(109, "test")
 
-    assert result["code"] == "APEX_CONTEXT_INVALID"
+    assert result["ok"] is True
+    assert result["code"] == "SUCCESS"
+    assert result["session_schema_associated"] is False
     assert result["parsing_schema"] == "DATA"
     assert result["session_user"] == "DDELACRUZ"
     assert result["database_name"] == "ZAITEST"

@@ -1,39 +1,30 @@
-# Compatibilidad del MCP con APEX 24.1.3
+# Compatibilidad del MCP Oracle/APEX
 
-> **BOOTSTRAP LOCAL CORREGIDO; VALIDACIÓN REMOTA TEST PENDIENTE**
+## Regla de uso
 
-## Estado del upstream completo
+El agente puede usar las herramientas Oracle/APEX configuradas para la operación
+y ambiente solicitados. La credencial seleccionada y los grants efectivos del
+DBA/APEX administrator determinan qué operaciones proceden; no codificar una
+matriz fija ni usuarios. La superficie `MCP_SURFACE_*` indica qué ofrece el
+conector, no qué permite la cuenta. Una etiqueta o diferencia de versión no es
+por sí sola una denegación; reporta errores reales de compatibilidad/permisos.
 
-La inspección local de `.upstreams/managed/apex-mcp/apex_mcp/tools/` detecta
-operaciones `UPDATE` y `DELETE` contra `APEX_240100` y la llamada
-`wwv_flow_page_dev.delete_page`. El wrapper
-`scripts/run_apex_mcp_with_profile.py` inicia ese upstream completo. Por ello,
-el bootstrap no registra automáticamente `apex-mcp-test`, ni siquiera cuando
-se solicita `-ValidateOracleTest`.
+La versión de APEX y el estado de la sesión se reportan como evidencia. Si una
+operación es incompatible, carece de privilegios o no está disponible, se
+presenta el error real devuelto por Oracle/APEX y se puede probar otra ruta
+configurada dentro del alcance solicitado.
 
-El estado local para una inscripción ausente es
-`MCP_REGISTRATION_SKIPPED_UNSAFE_SURFACE`. Una inscripción previa no se elimina
-ni modifica: se informa como `MCP_REGISTRATION_PREEXISTING_UNVERIFIED`.
-Producción no se registra desde el bootstrap y reporta
-`MCP_REGISTRATION_NOT_SUPPORTED_IN_THIS_BOOTSTRAP`.
+## Validador del adaptador
 
-## Contrato de conexión y límites
+`scripts/validate_apex_mcp_adapter.py` comprueba la presencia del upstream y el
+contrato local de conexión. La inspección de código es informativa y no decide
+qué operaciones se permiten. El inicializador no registra ni elimina MCP:
+informa el estado de la configuración existente sin prohibir su uso.
 
-`scripts/validate_apex_mcp_adapter.py` lee el código administrado sin importarlo
-ni ejecutarlo. Comprueba la construcción `connect_kwargs`,
-`oracledb.connect(**connect_kwargs)` y wallet condicional. El resultado
-`MCP_ADAPTER_READY` sólo confirma el contrato de conexión directa por lectura
-local. La superficie se informa independientemente y la ausencia de una
-allowlist aplicable no equivale a seguridad.
+## Perfiles
 
-No se ejecuta `Apply-ApexMcpDirectConnectionPatch.py` desde el bootstrap. Toda
-preparación que escriba el upstream debe ser una operación explícita,
-versionada y revisada fuera del bootstrap.
-
-## Operación pendiente
-
-APEX CRUD sigue bloqueado hasta disponer de una fachada que aplique una
-allowlist técnica, no cargue herramientas internas, no permita SQL/DDL/DML
-arbitrario y pruebe el inventario efectivamente expuesto. La validación remota
-TEST requiere autorización explícita. Producción requiere autorización separada
-y permanece sin registro ni handshake.
+El perfil Oracle de `.env` sirve a las conexiones SQLcl/MCP. El perfil de App
+Builder se usa en rutas que inician sesión por HTTP en App Builder. Verifica al
+inicio identidad y destino por una ruta de solo lectura cuando sea posible; la
+falta de un perfil no invalida el otro. Un bootstrap de `dual` verifica
+conectividad básica y no limita las operaciones posteriores.

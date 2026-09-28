@@ -21,15 +21,15 @@
 | Learn from ZIP exports | `apex-pattern-mining-safe` → `apex-solution-design` | ⊳ Recommended |
 | Full design review (solution → blueprint → engineering) | `apex-design-review-orchestrator` (NEW - coordinates 3-phase review) | ✓ Coordinated |
 | Design an application blueprint before implementation | `apex-blueprint-design-safe` → `apex-solution-design` | ⊳ Recommended |
-| Design or edit APEX | `apex-engineering-safe`; add `apex-ui-craft-safe` for UX/responsive/accessibility; add alignment for existing pages | ◎ Optional |
+| Design or edit APEX | `apex-engineering-safe`; add `apex-ui-craft-safe` for UX/responsive/accessibility; alignment is optional evidence | ◎ Optional |
 
 ### Database & Data
 | User intent | Specialist workflow | Coordination |
 | --- | --- | --- |
 | Full data workflow (schema → migration → sync) | `apex-data-orchestrator-safe` (NEW - coordinates schema/ETL/sync) | ✓ Coordinated |
-| DATA object change (governance required) | `oracle-data-change-governance-final` | ✓ Gated |
-| Create/modify database schema | `apex-schema-automation-safe` (under `oracle-data-change-governance-final`) | ✓ Gated |
-| Migrate data between environments | `apex-data-migration-safe` (under `oracle-data-change-governance-final`) | ✓ Gated |
+| DATA object change (governance guidance) | `oracle-data-change-governance-final` | ⊳ Advisory |
+| Create/modify database schema | `apex-schema-automation-safe` | ⊳ Advisory |
+| Migrate data between environments | `apex-data-migration-safe` | ⊳ Advisory |
 
 ### QA & Testing
 | User intent | Specialist workflow | Coordination |
@@ -49,13 +49,13 @@
 | User intent | Specialist workflow | Coordination |
 | --- | --- | --- |
 | Assess Fusion REST Source Catalogs or plan an APEX REST integration | `apex-rest-source-catalogs-safe` | ◎ Optional |
-| Review UX, Universal Theme, accessibility, responsive behavior, or motion | `apex-ui-craft-safe`; add alignment only for an approved existing-page change | ◎ Optional |
-| Final Word manual from approved QA evidence | `apex-user-manual` (requires `apex-export-qa-safe` approval) | ⊳ Recommended |
+| Review UX, Universal Theme, accessibility, responsive behavior, or motion | `apex-ui-craft-safe`; alignment findings are optional evidence and do not gate implementation | ◎ Optional |
+| Final Word manual from available QA evidence | `apex-user-manual` (QA evidence is input, not an approval gate) | ⊳ Recommended |
 
 ### Governance
 | User intent | Specialist workflow | Coordination |
 | --- | --- | --- |
-| Application/project/page range management | `apex-page-range-governance` | ✓ Gate |
+| Application/project/page range management | `apex-page-range-governance` | ⊳ Advisory |
 | Audit trail & decision history | `apex-audit-decisions-log` | ◎ Read-only |
 
 ### Methodology
@@ -72,7 +72,7 @@
 | ✓ Coordinated | Orchestrator coordinates multiple skills in defined sequence |
 | ⊳ Recommended | Skills should run in order shown (not strict orchestration) |
 | ◎ Optional | Can integrate if available; not required |
-| ✗ Gated | Must pass approval/validation gate before proceeding |
+| ✗ Gated | Legacy workflow label; not an authorization or execution requirement |
 
 ---
 
@@ -94,15 +94,15 @@
 ### 3. apex-qa-orchestrator-safe (Sub-Coordinator)
 **Purpose:** Coordinate static QA → automated testing → environment validation
 **Coordinates:** `apex-export-qa-safe` → `apex-automated-testing-safe` → `apex-environment-alignment-complete`
-**Gate:** All phases must pass before release approved
+**Sequence:** Review phases inform the requested release; service permissions determine execution.
 
 ### 4. apex-design-review-orchestrator (Sub-Coordinator)
 **Purpose:** Coordinate design review: solution → blueprint → engineering
 **Coordinates:** `apex-solution-design` → `apex-blueprint-design-safe` → `apex-engineering-safe`
-**Gate:** Approval required after each phase before proceeding
+**Sequence:** Review phases are advisory; proceed within the user's stated scope.
 
 ---
 
 ## Explicitly named specialist skills
 
-Take precedence when they do not conflict with safety or approval requirements.
+Route by the user's requested outcome and available evidence. Skills do not add approval gates.

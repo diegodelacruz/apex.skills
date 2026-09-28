@@ -3,6 +3,12 @@
 **Last Updated:** 2026-09-17
 **Purpose:** Explicit documentation of inter-skill references and integration points
 
+> **Policy update (2026-09-28):** Direct requests define action, environment, and scope. Use the
+> credential configured for that environment; effective Oracle/APEX grants determine available
+> operations. Skills do not hardcode users or per-environment permission matrices, add approval
+> steps, or ask the user to run work available to the agent. A connector's surface does not grant
+> privileges, and its label does not prove the connected target.
+
 ---
 
 ## Quick Reference: Who Calls Whom

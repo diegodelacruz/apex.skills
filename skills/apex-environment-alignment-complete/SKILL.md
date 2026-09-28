@@ -11,8 +11,7 @@ description: "Validate and align TEST and production APEX environments safely."
 ## Workflow
 
 - Use `scripts/manage_apex_credentials.py` to set, check, or validate per-user secure profiles. Never request users to paste credentials into chat, source files, Markdown, or Git.
-- On project start, check TEST/production profile status. Validate only with a read-only connection when authorized. Record profile name/state only.
-- Before an existing-page edit, compare TEST and production and write `control-proyecto/cambios/<id>/evidencia/environment-diff.md`.
-- When differences exist, recommend production-to-TEST synchronization and wait for explicit authorization. Record an accepted unsynchronized baseline if declined.
-- After QA, export TEST SQL and a production installation manifest to `control-proyecto/cambios/<id>/release/`. Production installation requires separate explicit authorization and an authorized profile/operator.
-- APEX 24.2 MCP tools remain inspection/dry-run only for APEX 24.1.3 until an approved TEST compatibility result exists.
+- Check the requested environment profile when useful; profile status is evidence about that route, not a veto on another configured route.
+- Before an existing-page edit, compare TEST and production when both are available and useful. Report differences, but do not make a comparison or user approval a prerequisite to the requested edit.
+- After the requested work, prepare exports and release evidence when useful. A direct user request is sufficient authorization; the selected account's actual permissions decide success.
+- Use the APEX version and tools available in the target environment. If a compatibility error occurs, report it and try another configured route when available; do not impose a version-based restriction in the skill.

@@ -10,7 +10,7 @@ description: "Govern DATA changes with decisions, rollback, validation, and audi
 
 ## Required records and decision precedence
 
-Create `control-proyecto/cambios/<id>/decisions.md` and `implementation-plan.md` before executable SQL. First present applicable canonical skill decisions to the user. An explicit decision recorded for the current project then takes precedence for that project; do not silently override it.
+Follow the user's direct request and named environment. Use the credential configured for that environment; the grants effective for that account determine which operations succeed. Do not hardcode a user or environment permission matrix, require the user to prepare project decision/plan files, or ask for second approval before a requested database operation. Create an audit or implementation record when the task requires one, without using it to block execution.
 
 ## Object and script rules
 
@@ -19,10 +19,11 @@ Create `control-proyecto/cambios/<id>/decisions.md` and `implementation-plan.md`
 - Never use `alter` to correct a table or view. Reconstruct a table only after explicit user request. For views use `drop`, `commit`, `create`, `commit`; capture prior DDL/backup before drop and inspect dependents.
 - Retain every backup until the user explicitly decides to purge it. Never purge automatically.
 - On non-migration table recreation, reset identifier sequencing. On a user-declared migration, preserve sequential continuity and disable/re-enable the documented triggers.
-- Default PK generation is the trigger call `data.pk_commons.sp_secuencia('data.<table_name>', :new.id)`. Ask only if the user wants a database sequence instead.
+- Default PK generation is the trigger call `data.pk_commons.sp_secuencia('data.<table_name>', :new.id)`. Use it without asking unless the user explicitly requests a database sequence.
 - Default table order is `id`, `usercrea varchar2(25)`, `fechcrea timestamp`, `usermodi varchar2(25)`, `fechmodi timestamp`, `compania varchar2(5)`, then business columns.
-- Populate audit fields with `nvl(v('user'), 'ORCL')`. If supplied table SQL lacks `compania` or an equivalent, ask whether to add it; exclude it only by explicit project decision.
+- Populate audit fields with `nvl(v('user'), 'ORCL')`. Include `compania` for a new DATA business table by default. If the user supplies exact SQL that omits it, preserve the supplied definition and report the convention difference; do not stop to ask.
 - Do not create any key, constraint, or index unless the user explicitly requests it and it is recorded.
+- Infer missing technical details from the target schema, comparable objects, and these defaults. Ask one concise question only when a missing business rule or target cannot be inferred and would make execution incorrect.
 
 ## UTF-8 Character Encoding
 

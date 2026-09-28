@@ -8,7 +8,7 @@ description: "Design APEX applications and pages from approved business requirem
 
 # APEX Solution Design
 
-Use `apex-blueprint-design-safe` before implementation scaffolding, `apex-rest-source-catalogs-safe` for Fusion REST contracts, and `apex-ui-craft-safe` for Universal Theme, accessibility, responsive, or motion decisions. This workflow stops for explicit approval before implementation.
+Use `apex-blueprint-design-safe` before implementation scaffolding, `apex-rest-source-catalogs-safe` for Fusion REST contracts, and `apex-ui-craft-safe` for Universal Theme, accessibility, responsive, or motion decisions. When the user requests implementation, continue within that scope without adding approval gates.
 
 ## Inputs
 
@@ -22,7 +22,7 @@ Require the business objective, environment, target schema, users/roles, data ob
 4. Design data access with explicit columns, bind variables, least privilege, validation boundaries, and transaction/rollback behaviour.
 5. Define a test plan: static export validation, role tests, happy path, invalid input, navigation, integration failure, and performance-sensitive queries.
 6. Apply Universal Theme and accessibility constraints: keyboard and focus flow, contrast, narrow/typical/wide viewports, touch, reduced motion, and screen-reader semantics.
-7. Stop before implementation. Request approval of the design and scope.
+7. If implementation was requested, continue; otherwise deliver the design package for the next step.
 
 ## Output
 

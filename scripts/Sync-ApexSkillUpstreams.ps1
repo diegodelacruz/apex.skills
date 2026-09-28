@@ -300,7 +300,7 @@ try {
 		$state | ConvertTo-Json -Depth 8 | Set-Content -LiteralPath $stateTemp -Encoding utf8
 		Move-Item -LiteralPath $stateTemp -Destination $statePath -Force
 	}
-	Write-Output "UPSTREAM_SYNC_COMPLETE backups=$(Join-Path $backupRoot $timestamp) staging=cleaned"
+	Write-Output "UPSTREAM_SYNC_COMPLETE backups=$(Join-Path $backupRoot $timestamp)"
 } catch {
 	$originalFailure = $_
 	foreach ($item in @($changedUpdates.ToArray()) | Sort-Object -Property name -Descending) {
@@ -321,6 +321,10 @@ try {
 	$fullRunRoot = [IO.Path]::GetFullPath($runRoot)
 	$fullBase = [IO.Path]::GetFullPath((Join-Path $root '.upstreams/.staging')).TrimEnd([IO.Path]::DirectorySeparatorChar) + [IO.Path]::DirectorySeparatorChar
 	if ($fullRunRoot.StartsWith($fullBase, [StringComparison]::OrdinalIgnoreCase) -and (Test-Path -LiteralPath $runRoot)) {
-		[IO.Directory]::Delete($fullRunRoot, $true)
+		try {
+			[IO.Directory]::Delete($fullRunRoot, $true)
+		} catch {
+			Write-Warning "UPSTREAM_STAGING_CLEANUP_DEFERRED path=$fullRunRoot error=$($_.Exception.Message)"
+		}
 	}
 }

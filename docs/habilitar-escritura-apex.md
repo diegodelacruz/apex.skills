@@ -1,5 +1,9 @@
 # Habilitar escritura APEX
 
-> **OBSOLETO COMO PROCEDIMIENTO OPERATIVO.** Consulte la [guía canónica de inicialización](inicializacion-automatica-codex.md).
+## Acceso Oracle/APEX
 
-No existe una ruta habilitada para APEX CRUD desde este bootstrap. El upstream MCP completo no se registra por su superficie insegura. Una futura habilitación requiere un runner App Builder auténtico, autorización explícita y pruebas controladas; no registre manualmente el wrapper ni reactive herramientas internas.
+No se configura una matriz fija de permisos por ambiente dentro de las skills. Use la credencial configurada para el ambiente pedido; Oracle/APEX decide según los grants vigentes otorgados por el DBA/APEX administrator. Al inicio, verifique cuenta y destino con una ruta de solo lectura cuando esté disponible. Use el MCP Oracle/APEX, SQLcl, App Builder o la ruta configurada adecuada para la operación. La solicitud directa define alcance; no solicite aprobaciones adicionales.
+
+El bootstrap no agrega ni elimina registros MCP. Si el MCP deseado no está
+registrado, el usuario puede registrarlo con el wrapper del entorno; la falta
+de registro no constituye una prohibición de las skills sobre otros canales.

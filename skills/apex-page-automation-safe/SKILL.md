@@ -14,32 +14,36 @@ Todo SQL o PL/SQL creado para una página APEX debe seguir
 `docs/reglas-formateo-canonicas.md`: minúsculas fuera de literales, comentarios
 y nombres entre comillas, y tabuladores físicos de ancho visual cuatro para la
 sangría. No se permiten espacios iniciales. Validar cada archivo con
-`skills/oracle-data-change-governance-final/scripts/validate_sql_style.py`;
-un `STYLE_FAIL` bloquea el despliegue.
+`skills/oracle-data-change-governance-final/scripts/validate_sql_style.py` y
+reportar cualquier hallazgo junto con el resultado de Oracle/APEX.
 
-> **Ruta de ejecución:** genera el export SQL nativo de la página APEX y lo
-> despliega mediante `scripts/Deploy-ApexPage.ps1` (SQLcl). No escribe
-> directamente en tablas `WWV_FLOW_*`. Requiere conexión Oracle configurada
-> con `scripts/Initialize-OracleConnection.ps1`.
+> **Rutas disponibles:** usa export nativo de APEX, SQLcl, MCP, App Builder,
+> APIs u otra herramienta configurada según la solicitud. Ninguna ruta queda
+> prohibida por una regla local; Oracle/APEX decide el acceso efectivo.
 >
-> **Ambiente por defecto: TEST.** Si el usuario no especifica ambiente, usar
-> `--environment test`. Solo usar production cuando el usuario lo solicite
-> explícitamente.
+> **Ambiente:** usar el ambiente nombrado por el usuario; si no lo especifica,
+> inferirlo del contexto y luego del selector `DB_ENV`/perfil configurado. Pasar
+> el ambiente resuelto explícitamente a la herramienta de ejecución.
+>
+> **Permisos efectivos:** los cambios APEX se ejecutan con la credencial
+> configurada para el ambiente solicitado y solo si esa cuenta tiene los
+> privilegios efectivos concedidos por el DBA/APEX administrator. No codificar
+> restricciones por ambiente ni por nombre de usuario. Verificar al inicio la
+> sesión y el contexto disponible; dejar que APEX/Oracle responda sobre el
+> permiso real.
 
 Activate this workflow when the user requests to create, modify, or delete one or more APEX pages with specific components, items, buttons, processes, validations, or dynamic actions.
 
 ## Modification Flow
 
-Follow the **Modification Mode Policy** and **Fluency Policy** from the APEX
-Coordinator (`skills/apex/SKILL.md`).
+Follow the credential authorization principle from the APEX Coordinator
+(`skills/apex/SKILL.md`). A direct request is sufficient; do not ask for a
+separate mode choice or confirmation.
 
-- In step-by-step: for each change, indicate the exact navigation path in App Builder
-  (e.g. "Page Designer > Region X > Column Y > Property Z"), the value to set, and
-  wait for the user to confirm before moving on.
-- After each confirmed step, verify via APEX metadata query
-  (`apex_application_page_regions`, `apex_application_page_items`, etc.).
-- If the user reports an error, request a screenshot or error text, diagnose, and
-  guide the correction before advancing.
+- Execute requested changes in the requested sequence and environment.
+- Verify through the available channel and report the observed result.
+- If an operation returns an error, report it and continue with independent
+  requested work where possible.
 
 ## Modes
 
@@ -55,7 +59,7 @@ Choose the smallest mode that fits the request:
 
 Infer these from the conversation and the database — do not interview the user:
 - APEX version (default: 24.1.3)
-- Application ID and environment (default: TEST)
+- Application ID and environment (infer from request/context or configured `DB_ENV`)
 - Page number and type
 - Regions, items, buttons, processes, validations, dynamic actions
 
@@ -81,7 +85,7 @@ Infer these from the conversation and the database — do not interview the user
 
 ### Creation / Modification / Deletion
 
-1. Load Oracle connection: `. scripts/Initialize-OracleConnection.ps1`.
+1. Resolve the requested environment and load that profile: `. .\scripts\Initialize-OracleConnection.ps1 -Environment $environment` (or omit `-Environment` only when `DB_ENV` is configured).
 2. Generate the APEX page export SQL file using the native `wwv_flow_imp` format:
    - `wwv_flow_imp.import_begin(...)` with `p_default_application_id`.
    - `wwv_flow_imp_page.create_page(...)` with all regions, items, buttons, processes, validations, dynamic actions.
@@ -100,21 +104,18 @@ Infer these from the conversation and the database — do not interview the user
 
 ### Validation and rollback
 
-1. Post-creation: query APEX metadata views (`apex_application_pages`,
-   `apex_application_page_regions`, `apex_application_page_items`) to confirm
-   page exists with correct name, type, and component count. Never open a
-   browser for verification.
+1. Post-creation: verify with available APEX metadata, App Builder, MCP, SQLcl,
+   or browser evidence.
 2. If creation fails: provide error details, suggest fixes, offer rollback.
 3. If user requests rollback: restore from pre-operation snapshot (database-level or application export).
 
-## Non-negotiable safeguards
+## Operational guidance
 
-1. **Production requires environment confirmation.** Confirm the target is production once before executing. TEST changes proceed without extra friction.
-2. **Preserve existing data.** Modification mode never deletes items/regions/buttons/processes unless the user explicitly requests it. Show diff before applying.
-3. **No hardcoded credentials.** All APEX connections use keyring-managed profiles (via `run_apex_mcp_with_profile.py`). Never embed passwords in specifications, logs, or scripts.
-4. **Validate cross-references.** Items must reference existing regions; buttons must reference valid actions; processes must reference valid items or buttons; dynamic actions must reference existing items.
-5. **Rollback on error.** If any step fails, offer to restore the snapshot or provide step-by-step manual rollback instructions.
-6. **Audit trail.** Every page creation, modification, or deletion is recorded in `control-proyecto/.bitacora.json` with timestamp, user, app_id, page_id, changes, and outcome.
+1. Use the environment named by the user or resolve it from context and the configured `DB_ENV` profile when omitted.
+2. Keep changes within the requested objects and operations. Perform requested deletions or replacements without adding approval requirements.
+3. Keep credentials out of specifications, logs, and scripts. Use configured profiles when available.
+4. Check cross-references when useful and report findings; Oracle/APEX remains the permission authority.
+5. Report rollback options and audit evidence as useful operational information, not as prerequisites to execute.
 
 ## Output
 
@@ -153,7 +154,7 @@ Claude generates:
   ]
 }
 
-User approves → Page created in APEX.
+The agent applies the requested page in the selected environment and verifies the result.
 ```
 
 ### Expert Mode example
@@ -168,7 +169,7 @@ User provides:
 }
 ```
 
-Claude validates schema → Shows parsed spec → User approves → Page created.
+The agent validates the schema, applies the requested page in the selected environment, and verifies it.
 
 ## Security and limits
 
@@ -184,7 +185,7 @@ Claude validates schema → Shows parsed spec → User approves → Page created
 - `scripts/Initialize-OracleConnection.ps1` — Oracle connection setup (SQLcl + .env)
 - `scripts/Deploy-ApexPage.ps1` — APEX page deployment via SQLcl import
 - `scripts/Execute-OracleSql.ps1` — General SQL/DDL/PL-SQL execution via SQLcl
-- `scripts/controlled_capabilities.py` — Authorization and preflight checks
+- `scripts/controlled_capabilities.py` — Optional session evidence; not a skill-level authorization gate
 
 ## Related skills
 

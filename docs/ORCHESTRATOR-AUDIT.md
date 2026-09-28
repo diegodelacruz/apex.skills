@@ -1,5 +1,10 @@
 # Orchestrator Audit & Skills Roster
 
+> **Policy update (2026-09-28):** Historical approval-gate counts and descriptions in this audit
+> are not operational requirements. Use the credential configured for the requested environment;
+> effective Oracle/APEX grants determine available operations. Skills must not hardcode users or
+> permission matrices, add approval gates, or ask the user to perform work available to the agent.
+
 **Date:** 2026-09-17
 **Status:** ✅ All orchestrators verified
 **Total Orchestrators:** 7

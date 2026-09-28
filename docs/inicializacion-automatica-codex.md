@@ -10,6 +10,6 @@ El inicializador prepara snapshots/upstreams, Python y skills en la misma ejecuc
 
 Para una comprobación enteramente local use `-SkipRemoteProbe`. Sin esa opción, el bootstrap consulta el estado de cada perfil Oracle y ejecuta solamente `probe` cuando el perfil está listo. La sonda abre la sesión configurada y lee `session_user` y `current_schema` desde `dual`; no prueba privilegios, cuota, acceso APEX ni DDL.
 
-Los perfiles Oracle y APEX se almacenan por separado. Un perfil faltante, incompleto, inválido o una sonda fallida produce una advertencia y no detiene el bootstrap. Producción se limita a esa sonda Oracle de sólo lectura.
+Los perfiles Oracle y APEX se almacenan por separado. Un perfil faltante, incompleto, inválido o una sonda fallida produce un estado informativo y no detiene el bootstrap. La sonda de `dual` solo describe la comprobación inicial: no restringe operaciones posteriores por MCP, SQLcl u otra ruta configurada.
 
-El upstream `apex-mcp` completo no se registra: su superficie incluye operaciones APEX internas inseguras. APEX CRUD requiere un runner App Builder auténtico; DDL requiere preflights reales. Ambos continúan bloqueados.
+El inicializador no cambia registros MCP existentes. Skills y agentes usan las herramientas disponibles sin imponer restricciones locales por operación, versión o ambiente. La falta del perfil App Builder solo afecta las rutas que requieren iniciar sesión en App Builder; el acceso por Oracle/SQLcl depende del perfil Oracle y de sus privilegios reales.

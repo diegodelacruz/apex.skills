@@ -20,11 +20,11 @@ Para una conexión directa definida en el `.env` local, importe sin introducir s
 .\.venv\Scripts\python.exe .\scripts\manage_apex_credentials.py validate --environment test
 ```
 
-Producción se importa sólo para usuarios autorizados y se usa inicialmente en lectura:
+Se importa el perfil del ambiente que el usuario necesita utilizar. La validación del perfil es informativa y no impone modo de solo lectura:
 
 ```powershell
 .\.venv\Scripts\python.exe .\scripts\manage_apex_credentials.py import-env --environment production
 .\.venv\Scripts\python.exe .\scripts\manage_apex_credentials.py validate --environment production
 ```
 
-Un usuario sin acceso a Producción desarrolla y valida en TEST; el proyecto registra estado y limitación, nunca valores del perfil.
+Si una operación no puede conectarse o el servicio deniega privilegios, informe el error real sin sustituir silenciosamente el ambiente. Nunca registre valores del perfil.

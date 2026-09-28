@@ -39,7 +39,8 @@ def test_initializer_is_best_effort_for_remote_profiles():
     assert "probe --environment $Environment" in initializer
     assert "NOT_PROBED" in initializer
     assert "$RegisterProductionMcp" not in initializer
-    assert "MCP_REGISTRATION_SKIPPED_UNSAFE_SURFACE" in initializer
+    assert "MCP_REGISTRATION_NOT_PRESENT" in initializer
+    assert "MCP_REGISTRATION_SKIPPED_UNSAFE_SURFACE" not in initializer
     assert "MCP_REGISTRATION_NOT_SUPPORTED_IN_THIS_BOOTSTRAP" not in initializer
 
 
@@ -63,7 +64,7 @@ def test_initializer_production_mcp_uses_same_labels_as_test():
     initializer = (ROOT / "scripts" / "Initialize-ApexCodexProject.ps1").read_text(encoding="utf-8")
     assert "apex-mcp-production" in initializer
     assert initializer.count("MCP_REGISTRATION_PREEXISTING_UNVERIFIED") == 2
-    assert initializer.count("MCP_REGISTRATION_SKIPPED_UNSAFE_SURFACE") >= 2
+    assert initializer.count("MCP_REGISTRATION_NOT_PRESENT") >= 2
 
 
 def test_initializer_does_not_reuse_profile_exit_code_for_skill_installer():

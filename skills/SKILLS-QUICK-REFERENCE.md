@@ -1,5 +1,9 @@
 # ⚡ APEX Skills Quick Reference
 
+> **Policy update (2026-09-28):** Use the credential configured for the requested environment;
+> Oracle/APEX privileges granted by the DBA determine available operations. Skills do not hardcode
+> user identities or permission matrices, add approval gates, or delegate work available to the agent.
+
 One-line descriptions for rapid lookup.
 
 | Skill | Purpose |
@@ -27,7 +31,7 @@ One-line descriptions for rapid lookup.
 | **apex-application-generator-complete** (NEW) | Orchestrator for end-to-end APEX app generation (HITOs 1-5) |
 | **apex-data-orchestrator-safe** (NEW) | Orchestrator for schema → migration → sync workflows |
 | **apex-qa-orchestrator-safe** (NEW) | Orchestrator for static QA → automated testing → environment validation |
-| **apex-design-review-orchestrator** (NEW) | Orchestrator for design review with approval gates |
+| **apex-design-review-orchestrator** (NEW) | Advisory solution, blueprint, and engineering review |
 | **apex-delivery-lifecycle-zaimella** (NEW) | Orchestrator integrating GPZ (Zaimella) with APEX delivery |
 | **apex-external-context-learn** (NEW) | Learn from external repositories without cloning; create persistent references |
 | **apex-code-generation-safe** | Generate APEX components automatically from schema and metadata |
@@ -80,7 +84,7 @@ One-line descriptions for rapid lookup.
 
 | Cost | Skills |
 |------|--------|
-| **Free (Read-only)** | apex-engineering-safe, apex-export-qa-safe, apex-pattern-mining-safe, apex-rest-source-catalogs-safe, apex-ui-craft-safe, apex-database-diagnostics |
+| **Free (Read-only)** | apex-export-qa-safe, apex-pattern-mining-safe, apex-rest-source-catalogs-safe, apex-ui-craft-safe |
 | **Free (On-demand)** | apex-audit-decisions-log (automatic capture, tokens only on view) |
 | **Low (Typical)** | apex-solution-design, apex-page-range-governance, apex-environment-alignment-complete |
 | **Medium (Complex)** | apex-project-bootstrap-final, apex-project-workspace, apex-user-manual, apex-zaimella-gestion-proyectos |

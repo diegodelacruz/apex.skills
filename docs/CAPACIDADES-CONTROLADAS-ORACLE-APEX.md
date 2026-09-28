@@ -1,65 +1,83 @@
-# Capacidades controladas Oracle APEX y Oracle Database
+# Oracle y APEX: credenciales, ambientes y herramientas
 
-## Estado y límite
+## Fuente de permisos
 
-La identidad operativa es la cuenta autenticada: Oracle para objetos de base de
-datos y APEX para App Builder. Ambas credenciales se guardan por separado en el
-keyring. Si falta una credencial o el runner de App Builder, la operación queda
-en `CONFIGURATION_REQUIRED`; no se sustituye una credencial por la otra.
+El usuario indica la operación, el alcance y el ambiente. El agente usa la
+credencial configurada para ese ambiente (`DB_TESTING_*` o `DB_PRODUCTION_*` en
+`.env` para SQLcl, o el perfil equivalente que usa el conector seleccionado).
+Oracle/APEX y el DBA determinan las operaciones efectivas de esa cuenta. No hay
+una lista fija de permisos por ambiente ni un usuario hardcodeado en las skills.
+La presencia de un perfil, el nombre del MCP, el nombre de una cuenta o un
+resultado histórico no demuestra privilegios actuales.
 
-## Frontera de autorización
+Al iniciar trabajo en un ambiente, el coordinador invoca consultas/herramientas
+de solo lectura para identificar la cuenta conectada y el destino real (base,
+servicio/contenedor y, para APEX, aplicación/workspace cuando aplique). Usar
+`inspect_oracle_privileges` si está disponible para informar privilegios de
+sesión, roles habilitados y grants visibles. Hacer esta inspección una vez por
+ambiente de trabajo, no antes de cada sentencia. La vista es evidencia útil, no una garantía completa de que
+cualquier sentencia tendrá éxito: Oracle/APEX resuelve el permiso efectivo al
+ejecutar la operación solicitada. No realizar una mutación de prueba para
+averiguar permisos. No pedir al usuario que repita una consulta que el agente
+puede ejecutar.
 
-```
-cuenta Oracle o APEX autenticada -> preflight observado -> adaptador -> ambiente objetivo
-```
+Si la identidad o destino observado no corresponde al ambiente solicitado, no
+ejecutar el cambio en otro destino; informar la discrepancia de conexión. Un
+error de privilegio se informa tal como lo devolvió el servicio. Una lectura
+denegada no impide intentar una ruta configurada alternativa para el mismo
+ambiente, sin cambiar de cuenta/destino de manera silenciosa.
 
-El preflight registra cuenta, ambiente, workspace, aplicación/página u objeto y
-resultado sin secretos. `AUTHORIZATION_DENIED` sólo se emite con evidencia de
-Oracle o APEX de que la cuenta autenticada carece del permiso requerido.
+## Herramientas por operación
 
-## APEX
+| Operación | Ruta preferida | Credencial y alcance |
+| --- | --- | --- |
+| Oracle: inspeccionar objetos, columnas, errores y datos | `apex-controlled-mcp.inspect_oracle_session`, `inspect_oracle_privileges`, `inspect_environment`; MCP Oracle de lectura; `scripts/Execute-OracleSql.ps1 -Sql/-SqlFile` | Perfil Oracle seleccionado para el ambiente. La sonda inicial es de solo lectura. |
+| Oracle: ejecutar DDL, DML o PL/SQL solicitado | `apex-controlled-mcp.execute_sql_file`; SQLcl con el perfil seleccionado; MCP Oracle que exponga ejecución SQL | Se envía la operación a Oracle con la credencial de ese ambiente. Oracle determina grants y resultado; el agente mantiene el alcance solicitado. |
+| APEX: listar aplicaciones, inspeccionar páginas/componentes y comparar metadata | Herramientas de lectura del MCP APEX configurado; `inspect_apex_context` / `inspect_environment`; export nativo o App Builder si la cuenta lo permite | Perfil APEX/App Builder configurado para el ambiente, o la sesión Oracle elegida cuando se leen vistas de metadata. Confirmar identidad y destino observados; el rótulo del MCP no basta. |
+| APEX: crear, modificar, importar o eliminar componentes | Herramienta APEX de escritura disponible o `deploy_apex_page` con export nativo vía SQLcl | Usar únicamente la credencial configurada para el ambiente pedido. APEX/Oracle y los privilegios concedidos a esa cuenta deciden si la operación procede. No aplicar un bloqueo local fijo por ambiente. |
+| APEX: diagnóstico de error funcional | Metadata de solo lectura, export existente, logs/herramientas APEX configuradas; `apex-environment-alignment-complete` para comparación cuando aporte evidencia | No modificar durante diagnóstico salvo que el usuario también pidió la corrección. |
 
-La única ruta admisible es App Builder con sesión autenticada y autorización
-verificada, o un artefacto nativo exportado por APEX e importado mediante el
-mecanismo oficial compatible con APEX 24.1.3. El preflight exige release 24.1.3,
-acceso verificado a App Builder, workspace, aplicación y páginas autorizadas.
+Los nombres `DB_TESTING_*` y `DB_PRODUCTION_*` son las claves de configuración
+que consume actualmente el ejecutor SQLcl; no codifican grants. Si no se indica
+ambiente en la solicitud, inferirlo del contexto y luego del selector `DB_ENV`.
+Si ninguno define el destino, pedir solo el ambiente antes de conectar; no
+elegir TEST o Producción a ciegas.
 
-No se permite DML directo sobre `APEX_240100.WWV_FLOW_*` ni paquetes internos.
-La ruta admisible para crear o modificar páginas es generar un export SQL nativo
-(formato `wwv_flow_imp`) y desplegarlo mediante `scripts/Deploy-ApexPage.ps1`,
-que invoca SQLcl con la conexión configurada por
-`scripts/Initialize-OracleConnection.ps1`. `scripts/apex_page_generator.py` es
-un constructor en memoria para generar especificaciones.
+`execute_sql_file` requiere un archivo `.sql` dentro del checkout que sirve al
+MCP. Si el proyecto del usuario está en otra carpeta o no es un repositorio,
+crear el artefacto temporal dentro del checkout del conector, ejecutar la
+consulta solicitada y retirar el temporal al terminar si ya no es evidencia
+necesaria. No convertir una limitación de ruta del archivo en una limitación de
+acceso a Oracle.
 
-## Oracle
+Para diagnóstico de páginas, no exigir que el `SESSION_USER` de SQLcl sea igual
+al esquema de parsing del workspace. Si el chequeo de asociación muestra una
+diferencia, conservarla como contexto y probar la lectura de las vistas públicas
+de metadata con la credencial elegida. Si el helper de página del MCP falla por
+incompatibilidad de columnas, usar consultas enlazadas mediante `apex_run_sql`
+contra `APEX_APPLICATION_PAGE_REGIONS`, items, procesos, botones, acciones y
+validaciones. No acceder a `WWV_FLOW_*` internos.
 
-`scripts/controlled_capabilities.py` ejecuta DDL después de pasar preflight y
-validación. Observa `session_user` y `current_schema` con la misma conexión,
-exige que el objeto y esquema coincidan con la autorización verificada, valida
-la gramática DDL y ejecuta la sentencia. Después verifica existencia y estado
-en `ALL_OBJECTS`. Soporta `CREATE TABLE`, `ALTER TABLE` y `DROP TABLE` sobre
-el objeto autorizado.
+## Separación entre herramientas y privilegios
 
-Para DDL general (vistas, índices, procedimientos, paquetes) o ejecución de
-múltiples sentencias, la ruta principal es `scripts/Execute-OracleSql.ps1`
-que invoca SQLcl directamente. Oracle confirma DDL implícitamente: no se
-promete un rollback transaccional. Después debe comprobarse existencia y,
-para PL/SQL, los errores de compilación (`SHOW ERRORS`).
+Un conector puede exponer operaciones más amplias que las concedidas a su
+credencial. La superficie de herramientas solo determina qué se puede intentar;
+no concede permisos Oracle/APEX. A su vez, las credenciales con privilegios
+amplios no autorizan cambios fuera de la solicitud del usuario. Usar la ruta
+especializada cuando mejore la evidencia o el formato (por ejemplo, import
+nativo APEX), sin añadir un gate de aprobación para una solicitud directa.
 
-## Clasificación de errores
+Por decisión del usuario, se consideran capacidades intencionales la ejecución
+de DDL/DML/PLSQL Oracle solicitado y las operaciones APEX disponibles para la
+credencial configurada, incluso cuando la operación resulte destructiva o el
+ambiente se llame Producción. No son fallos que la skill carezca de una lista
+local de grants/objetos o que envíe la operación a Oracle/APEX para obtener la
+decisión efectiva. La solicitud sigue delimitando qué cambio realizar; el DBA y
+el servicio deciden si la cuenta puede ejecutarlo.
 
-| Código | Cuándo se emite |
-| --- | --- |
-| `AUTHORIZATION_DENIED` | La autorización verificada no contiene ambiente, operación o alcance. |
-| `APEX_CONTEXT_INVALID` | El workspace, App Builder o esquema actual no coincide con el autorizado. |
-| `ADAPTER_INCOMPATIBLE` | El release o contrato técnico no es compatible. |
-| `OBJECT_CONFLICT` | La inspección real confirma que la existencia del objeto contradice la operación. |
-| `EXECUTION_ERROR` | Oracle/APEX devuelve otro error; se conserva su código y mensaje. |
-| `EXTERNAL_DEPENDENCY_BLOCKED` | Falta verificador de identidad, cuenta, aprobación o componente requerido. |
+## Secretos y evidencia
 
-## Requisitos para ejecución
-
-1. Ejecutar `scripts/Initialize-OracleConnection.ps1` con el ambiente deseado.
-2. Para DDL/DML general: `scripts/Execute-OracleSql.ps1 -SqlFile <archivo.sql>`.
-3. Para páginas APEX: `scripts/Deploy-ApexPage.ps1 -PageFile <export.sql> -ApplicationId <id> -Page <num>`.
-4. Producción requiere `-Environment production` y aprobación explícita.
+No imprimir contraseñas ni escribirlas en archivos versionados. Registrar
+ambiente, cuenta observada (sin exponer secretos), destino, objeto/aplicación,
+sentencia/artefacto pertinente y resultado. No guardar cadenas de conexión que
+incluyan contraseña.

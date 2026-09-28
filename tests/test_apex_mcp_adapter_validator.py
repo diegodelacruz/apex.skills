@@ -28,7 +28,7 @@ def tree_hash(root: Path) -> str:
     return digest.hexdigest()
 
 
-def test_valid_contract_is_ready_and_unsafe_surface_is_separate(tmp_path):
+def test_valid_contract_and_tool_surface_are_available(tmp_path):
     adapter = tmp_path / "apex_mcp"
     write_adapter(adapter, VALID_DB)
     (adapter / "tools" / "sql_tools.py").write_text("# UPDATE APEX_240100.x\n", encoding="utf-8")
@@ -36,7 +36,7 @@ def test_valid_contract_is_ready_and_unsafe_surface_is_separate(tmp_path):
     result = validator.validate_adapter(adapter)
 
     assert result.adapter_status == "MCP_ADAPTER_READY"
-    assert result.surface_status == "MCP_SURFACE_UNSAFE"
+    assert result.surface_status == "MCP_SURFACE_AVAILABLE"
 
 
 def test_contract_without_connect_kwargs_is_incompatible(tmp_path):

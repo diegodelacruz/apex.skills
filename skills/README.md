@@ -2,7 +2,7 @@
 
 Complete directory of **31 skills** (25 technical + 6 orchestrators) organized by purpose and workflow:
 - **25 Technical Skills:** Code generation, testing, data integration, design, QA, governance, project management, external context
-- **5 Orchestrators:** Coordinate entire workflows with approval gates
+- **5 Orchestrators:** Coordinate workflows and report evidence; they do not add approval gates
 - **1 Maestro:** Central routing coordinator (apex)
 
 Use `/skills` in Codex/Claude to see the complete list with descriptions and tags. This page provides detailed navigation and quick reference.
@@ -16,12 +16,12 @@ Use `/skills` in Codex/Claude to see the complete list with descriptions and tag
   - *Tags: audit, documentation, decisions, governance*
 
 ### Apex Database & Diagnostics
-- **[apex-database-diagnostics](./apex-database-diagnostics)** - Diagnose APEX and Oracle database errors
-  - *Tags: diagnostics, inspection, oracle, read-only*
+- **[apex-database-diagnostics](./apex-database-diagnostics)** - Diagnose APEX and Oracle database errors; perform requested operations through configured credentials
+  - *Tags: diagnostics, inspection, oracle*
 
 ### Apex Database & Schema
 - **[apex-schema-automation-safe](./apex-schema-automation-safe)** - Create, modify, and drop database objects (tables, views, procedures, functions)
-  - *Tags: database, schema, ddl, automation, full-stack, approval-gated*
+  - *Tags: database, schema, ddl, automation, full-stack*
 
 ### Apex Delivery & Lifecycle
 - **[apex-delivery-lifecycle-complete](./apex-delivery-lifecycle-complete)** - Complete lifecycle with environment validation and DATA governance
@@ -45,13 +45,13 @@ Use `/skills` in Codex/Claude to see the complete list with descriptions and tag
 - **[apex-solution-design](./apex-solution-design)** - Design new APEX apps/pages from business requirements
   - *Tags: design, architecture, planning*
 - **[apex-blueprint-design-safe](./apex-blueprint-design-safe)** - Create a reviewable blueprint before implementation
-  - *Tags: blueprint, design, scaffolding, read-only, approval*
+  - *Tags: blueprint, design, scaffolding, read-only*
 - **[apex-ui-craft-safe](./apex-ui-craft-safe)** - Improve APEX UX, accessibility, responsive behavior, and visual polish
   - *Tags: ux, ui, responsive, accessibility, motion, read-only*
 
 ### Apex Page Automation
 - **[apex-page-automation-safe](./apex-page-automation-safe)** - Create, modify, and delete APEX pages with full component control
-  - *Tags: page-creation, automation, design, full-stack, approval-gated*
+  - *Tags: page-creation, automation, design, full-stack*
 
 ### Apex Environment & Alignment
 - **[apex-environment-alignment-complete](./apex-environment-alignment-complete)** - Validate and sync TEST/production environments
@@ -104,9 +104,9 @@ Use `/skills` in Codex/Claude to see the complete list with descriptions and tag
 - **[apex-data-orchestrator-safe](./apex-data-orchestrator-safe)** (NEW) - Coordinate schema → migration → sync
   - *Tags: orchestration, data-integration, schema, etl, automation*
 - **[apex-qa-orchestrator-safe](./apex-qa-orchestrator-safe)** (NEW) - Coordinate static QA → automated testing → environment validation
-  - *Tags: orchestration, qa, testing, automation, approval-gated*
-- **[apex-design-review-orchestrator](./apex-design-review-orchestrator)** (NEW) - Coordinate design review with approval gates
-  - *Tags: orchestration, design, review, approval-gated, governance*
+  - *Tags: orchestration, qa, testing, automation*
+- **[apex-design-review-orchestrator](./apex-design-review-orchestrator)** (NEW) - Coordinate solution, blueprint, and engineering review
+  - *Tags: orchestration, design, review*
 
 ### Apex Data Migration
 - **[apex-data-migration-safe](./apex-data-migration-safe)** - Schema mapping, data validation, ETL pipeline, and rollback management

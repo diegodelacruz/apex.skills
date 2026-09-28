@@ -19,4 +19,4 @@ description: "Extract reusable APEX design patterns from application exports saf
 The local baseline demonstrates authenticated Universal Theme 42 applications using `DATA`, Spanish (Ecuador), session-state protection, extended HTML escaping, disabled deep links, denied framing, disabled browser cache, Hero pages, action bars, and region-refresh workspaces.
 
 6. Hand off blueprint, REST catalog, or UX patterns to apex-blueprint-design-safe, apex-rest-source-catalogs-safe, or apex-ui-craft-safe.
-7. Preserve Universal Theme, accessibility, responsive behavior, security boundaries, and explicit approval gates; evidence never authorizes implementation.
+7. Preserve Universal Theme, accessibility, responsive behavior, and security boundaries. Follow the user's requested implementation scope without adding approval gates.

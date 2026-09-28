@@ -2,8 +2,9 @@
 """Read-only contract and surface check for the managed Oracle MCP upstream.
 
 This checker never imports ``apex_mcp``, starts a server, opens a database
-connection, or changes the managed upstream. A ready connection contract does
-not make the full MCP surface safe to register.
+connection, or changes the managed upstream. It reports the local connection
+contract and available source surface; it does not decide the user's effective
+privileges or impose an operation allowlist.
 """
 
 from __future__ import annotations
@@ -15,11 +16,6 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent
 ADAPTER = ROOT / ".upstreams" / "managed" / "apex-mcp" / "apex_mcp"
 REQUIRED_FILES = ("__init__.py", "db.py", "tools/sql_tools.py")
-UNSAFE_SURFACE_PATTERNS = (
-    r"\bupdate\s+apex_240100\.",
-    r"\bdelete\s+from\s+apex_240100\.",
-    r"\bwwv_flow_page_dev\.delete_page\b",
-)
 
 
 @dataclass(frozen=True)
@@ -50,19 +46,13 @@ def _read_required(adapter_root: Path) -> tuple[dict[str, str] | None, Validatio
 
 
 def _surface_status(adapter_root: Path) -> tuple[str, str]:
-    """Inspect tools as text; lack of a match is not a safety certification."""
+    """Report local tool-source availability without imposing operation policy."""
     tools_dir = adapter_root / "tools"
     if not tools_dir.is_dir():
         return "MCP_SURFACE_NOT_EVALUATED", "tools_directory_missing"
-    try:
-        sources = [path.read_text(encoding="utf-8") for path in tools_dir.rglob("*.py")]
-    except OSError:
-        return "MCP_SURFACE_NOT_EVALUATED", "tools_source_unreadable"
-    if any(
-        re.search(pattern, source, flags=re.IGNORECASE) for pattern in UNSAFE_SURFACE_PATTERNS for source in sources
-    ):
-        return "MCP_SURFACE_UNSAFE", "internal_apex_dml_or_api_detected"
-    return "MCP_SURFACE_NOT_EVALUATED", "no_allowlist_or_exposure_inventory"
+    if not any(tools_dir.rglob("*.py")):
+        return "MCP_SURFACE_NOT_EVALUATED", "tools_source_missing"
+    return "MCP_SURFACE_AVAILABLE", "tool_sources_present"
 
 
 def validate_adapter(adapter_root: Path = ADAPTER) -> ValidationResult:

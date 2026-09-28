@@ -4,8 +4,8 @@
 
 Use la [guía canónica de inicialización](inicializacion-automatica-codex.md). Los perfiles Oracle y APEX son independientes y no se deben compartir en chat ni repositorio. El bootstrap consulta el perfil Oracle de TEST y Producción y, sólo si está listo, realiza la sonda mínima de lectura contra `dual`. Las advertencias no bloquean la preparación local.
 
-El upstream MCP completo permanece sin registro por superficie insegura. APEX App Builder no está autenticado sin runner real; APEX CRUD y Oracle DDL están bloqueados. Producción no realiza más que la sonda Oracle de lectura.
+El inicializador no altera los registros MCP existentes. Las skills no bloquean APEX CRUD, SQL/DDL/DML, producción ni herramientas MCP por reglas locales. Oracle/APEX decide el acceso según la conexión y sus privilegios. La falta de credenciales App Builder afecta las rutas HTTP de App Builder, no las rutas SQLcl/MCP autenticadas con Oracle.
 
 ## Operación
 
-Describa el objetivo y el ambiente. Para cambios, solicite explícitamente el alcance y siga los controles de gobierno aplicables. Las capacidades bloqueadas no se sustituyen mediante registro manual de un MCP ni parches internos.
+Indique la operación y el ambiente. La solicitud directa autoriza ese alcance; no se requiere aprobación adicional de la skill. Si una operación falla, informe el error real y continúe con trabajo independiente.

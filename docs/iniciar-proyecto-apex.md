@@ -1,6 +1,6 @@
 # Iniciar un proyecto Oracle APEX
 
-Use este flujo para crear una aplicación nueva o agregar páginas a una existente. La base técnica es Oracle APEX 24.1.3 y las operaciones de producción son de solo lectura por defecto.
+Use este flujo para crear una aplicación nueva o agregar páginas a una existente. La versión y el ambiente son los indicados por el usuario; sin ambiente indicado, usa TEST.
 
 ## 1. Definir el alcance
 
