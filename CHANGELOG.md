@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ### Changed
 
+- Updated `.env.example` with the configured TEST Oracle/APEX endpoints and commented production APEX endpoint/workspace reference; credential values remain placeholders.
 - Reduced routine preflight for focused Oracle/APEX reads to one minimal identity check followed immediately by the target query, reusing live-session evidence; clarified that historical failures are context only and must be rechecked on the current route.
 
 ### Added
