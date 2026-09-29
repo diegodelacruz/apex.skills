@@ -101,11 +101,11 @@ class Constraint:
 class ApexSchemaSpec:
     """High-level specification for Oracle schema objects (tables, views, procedures, functions, etc.)."""
 
-    def __init__(self, owner: str = "SCOTT", application_id: Optional[int] = None):
+    def __init__(self, owner: str = "DATA", application_id: Optional[int] = None):
         """Initialize schema specification.
 
         Args:
-            owner: Schema owner (default SCOTT)
+            owner: Schema owner (default DATA; specify another owner when requested)
             application_id: Optional APEX application ID for cross-reference
         """
         self.owner = owner

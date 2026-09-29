@@ -32,6 +32,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ### Fixed
 
+- Clarified that new Oracle objects default to the DATA schema, and that repository-backed SQL tools require temporary artifacts inside the MCP checkout with a same-environment APEX SQL fallback after artifact or context-helper failures.
+- Changed `ApexSchemaSpec` to default generated Oracle objects to `DATA`, matching the DATA governance skill while preserving explicit owner overrides.
 - Stopped treating a SQLcl login that differs from an APEX workspace parsing schema as a metadata-access denial; APEX diagnostics now retry the verified same-environment APEX MCP route and fall back to public metadata views when a page-detail adapter is incompatible.
 - Restored the regular-expression import used by the MCP adapter contract validator after it was removed from the active working copy, preventing a Python `NameError` during project initialization.
 - Clarified that remote Oracle/APEX source inspection may use a repository-backed read-only SQL artifact when required by the configured production connector; a non-Git project folder does not block the requested inspection.

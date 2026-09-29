@@ -64,12 +64,17 @@ cuenta. La falta de un perfil no invalida otro canal autenticado.
 
 `execute_sql_file` ejecuta archivos SQL del checkout con la credencial Oracle
 del ambiente elegido. Si el proyecto del usuario no pertenece a ese checkout,
-crea el `.sql` temporal dentro del checkout del conector, o usa
-`scripts/Execute-OracleSql.ps1 -Sql/-SqlFile` cuando esté disponible; no detengas
-la consulta por la ubicación del proyecto. Usa la ruta nativa APEX para imports
-cuando corresponda. No solicites confirmación separada para una operación ya
-pedida. Informa errores observados y prueba otra ruta configurada para el mismo
-ambiente cuando la primera ruta falle.
+crea el `.sql` temporal dentro del checkout del conector (por ejemplo,
+`.codex-tmp/<nombre>.sql`) y pasa a la herramienta una ruta relativa a ese
+checkout. El servidor rechaza archivos fuera de su raíz, incluidos archivos del
+proyecto del usuario y rutas absolutas. Si recibe `INVALID_ARTIFACT`, no repita
+la misma ruta: cree el archivo dentro del checkout o use `apex_run_sql` en el
+MCP APEX verificado para el mismo ambiente; `scripts/Execute-OracleSql.ps1
+-Sql/-SqlFile` es otra ruta cuando está inicializada. Un `ORA-20987` de
+`inspect_apex_context` informa que falló esa comprobación de contexto; no
+sustituye el resultado de una consulta directa de solo lectura a las vistas
+públicas `APEX_APPLICATION_*`. Informa el resultado real de la consulta e
+intenta otra ruta configurada para el mismo ambiente cuando sea necesario.
 
 Para inventariar objetos de una página, verifica primero el destino real del
 MCP APEX con una consulta de identidad de solo lectura. Si coincide con el

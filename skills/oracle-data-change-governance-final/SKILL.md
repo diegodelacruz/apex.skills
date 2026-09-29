@@ -14,7 +14,7 @@ Follow the user's direct request and named environment. Use the credential confi
 
 ## Object and script rules
 
-- Official objects live in `data`; backups are created in the current user's schema.
+- Official objects live in `data` unless the user explicitly names another owner; backups are created in the current user's schema. Qualify DATA object names in generated DDL and never fall back to the connected user's schema after an authorization error.
 - SQL filenames and non-literal identifiers are lower-case. Use physical four-column tabs, not spaces. Preserve the required casing of string literals, comments, prompts, and quoted identifiers. Document every created object with purpose, owner, dependencies, rules, validation, rollback, and deployment order.
 - Never use `alter` to correct a table or view. Reconstruct a table only after explicit user request. For views use `drop`, `commit`, `create`, `commit`; capture prior DDL/backup before drop and inspect dependents.
 - Retain every backup until the user explicitly decides to purge it. Never purge automatically.
