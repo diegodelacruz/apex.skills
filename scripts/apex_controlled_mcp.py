@@ -204,7 +204,7 @@ def sqlcl_result(
             "set define off",
             "whenever sqlerror exit sql.sqlcode rollback",
             f"connect {connection}",
-            *(("set transaction read only",) if read_only_transaction else ()),
+            *(("set transaction read only;",) if read_only_transaction else ()),
             *bind_setup,
             statements,
             "exit",

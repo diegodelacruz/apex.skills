@@ -156,6 +156,7 @@ def test_sqlcl_read_only_transaction_starts_after_connect(monkeypatch):
     )
     script = captured["script"]
     assert script.index("connect user/") < script.index("set transaction read only")
+    assert "set transaction read only;\n" in script
     assert script.index("set transaction read only") < script.index("select 1 from dual")
 
 
