@@ -23,15 +23,15 @@ iniciales no limitan operaciones posteriores.
 ## Herramientas
 
 El servidor incluye `doctor`, inspección de entorno, sesión Oracle, contexto
-APEX, privilegios, ejecución SQL desde un archivo del checkout y despliegue de
-export SQL nativo. Al iniciar, usa las sondas de solo lectura para identificar
+APEX, privilegios, ejecución de consultas SELECT en transacción de solo lectura,
+ejecución SQL desde un archivo del checkout y despliegue de export SQL nativo. Al iniciar, usa las sondas de solo lectura para identificar
 la cuenta y el destino seleccionado e inspecciona privilegios de sesión cuando
 estén disponibles. La consulta no es una autorización ni sustituye la respuesta
 real del servidor ante la operación solicitada.
 
 | Operación | Herramientas/ruta | Fuente de identidad y permiso |
 | --- | --- | --- |
-| Oracle lectura/diagnóstico | `inspect_oracle_session`, `inspect_environment`, `inspect_oracle_privileges`, `execute_sql_file` con consulta de lectura | Perfil Oracle del ambiente elegido en `.env`; grants y roles observados/efectivos en Oracle |
+| Oracle lectura/diagnóstico | `inspect_oracle_session`, `inspect_environment`, `inspect_oracle_privileges`, `execute_readonly_query` (SELECT inline con binds enteros) | Perfil Oracle del ambiente elegido en `.env`; grants y roles observados/efectivos en Oracle |
 | Oracle DDL/DML/PLSQL | `execute_sql_file` o SQLcl (`Execute-OracleSql.ps1`) | Mismo perfil seleccionado; Oracle aplica los permisos otorgados |
 | APEX lectura/contexto | `inspect_apex_context`, `inspect_environment`, `apex_get_page_details`; si el adaptador falla, `apex_run_sql` con binds sobre `APEX_APPLICATION_*` | Credencial del canal elegido; verificar el destino real y el contexto/app/workspace |
 | APEX escritura/import | `deploy_apex_page` o herramienta APEX de escritura disponible | Credencial del ambiente configurado; permisos efectivos decididos por Oracle/APEX al ejecutar |
@@ -62,15 +62,23 @@ cuenta. La falta de un perfil no invalida otro canal autenticado.
 
 ## Ejecución
 
-`execute_sql_file` ejecuta archivos SQL del checkout con la credencial Oracle
-del ambiente elegido. Si el proyecto del usuario no pertenece a ese checkout,
-crea el `.sql` temporal dentro del checkout del conector (por ejemplo,
-`.codex-tmp/<nombre>.sql`) y pasa a la herramienta una ruta relativa a ese
-checkout. El servidor rechaza archivos fuera de su raíz, incluidos archivos del
-proyecto del usuario y rutas absolutas. Si recibe `INVALID_ARTIFACT`, no repita
-la misma ruta: cree el archivo dentro del checkout o use `apex_run_sql` en el
-MCP APEX verificado para el mismo ambiente; `scripts/Execute-OracleSql.ps1
--Sql/-SqlFile` es otra ruta cuando está inicializada. Un `ORA-20987` de
+`execute_readonly_query` acepta una sola sentencia SELECT en una línea física,
+con binds enteros,
+directamente por SQLcl y la envía dentro de una transacción Oracle de solo
+lectura. El control limita escrituras directas en esa transacción, pero Oracle
+permite que ciertas funciones llamadas desde SELECT tengan efectos laterales;
+por eso esta herramienta se usa para consultas de metadata conocidas, no como
+sandbox para SQL arbitrario o funciones de usuario. La bitácora registra una
+huella conjunta de la consulta y los binds, sin guardar sus textos/valores. Así las lecturas de
+metadata no dependen de que la carpeta del proyecto sea un repositorio Git ni
+de un archivo bajo el checkout del MCP. `execute_sql_file` ejecuta artefactos
+DDL/DML/PLSQL desde el checkout. Si el proyecto del usuario no pertenece a ese
+checkout, crea el `.sql` temporal dentro del checkout del conector (por ejemplo,
+`.codex-tmp/<nombre>.sql`) y pasa una ruta relativa a ese checkout. El servidor
+rechaza archivos fuera de su raíz, incluidos archivos del proyecto y rutas
+absolutas. Para una lectura, usa `execute_readonly_query`; para otro SQL, usa
+`apex_run_sql` en el MCP APEX verificado para el mismo ambiente o
+`scripts/Execute-OracleSql.ps1 -Sql/-SqlFile` si está inicializada. Un `ORA-20987` de
 `inspect_apex_context` informa que falló esa comprobación de contexto; no
 sustituye el resultado de una consulta directa de solo lectura a las vistas
 públicas `APEX_APPLICATION_*`. Informa el resultado real de la consulta e

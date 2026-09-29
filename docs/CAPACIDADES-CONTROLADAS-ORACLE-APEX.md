@@ -31,7 +31,7 @@ ambiente, sin cambiar de cuenta/destino de manera silenciosa.
 
 | Operación | Ruta preferida | Credencial y alcance |
 | --- | --- | --- |
-| Oracle: inspeccionar objetos, columnas, errores y datos | `apex-controlled-mcp.inspect_oracle_session`, `inspect_oracle_privileges`, `inspect_environment`; MCP Oracle de lectura; `scripts/Execute-OracleSql.ps1 -Sql/-SqlFile` | Perfil Oracle seleccionado para el ambiente. La sonda inicial es de solo lectura. |
+| Oracle: inspeccionar objetos, columnas, errores y datos | `apex-controlled-mcp.execute_readonly_query` (SELECT de metadata con binds enteros); `inspect_oracle_session`, `inspect_oracle_privileges`, `inspect_environment`; MCP Oracle de lectura; `scripts/Execute-OracleSql.ps1 -Sql/-SqlFile` | Perfil Oracle seleccionado para el ambiente. La transacción de solo lectura bloquea DML directo; esta ruta se reserva a consultas de metadata conocidas porque un SELECT puede invocar funciones con efectos laterales. |
 | Oracle: ejecutar DDL, DML o PL/SQL solicitado | `apex-controlled-mcp.execute_sql_file`; SQLcl con el perfil seleccionado; MCP Oracle que exponga ejecución SQL | Se envía la operación a Oracle con la credencial de ese ambiente. Oracle determina grants y resultado; el agente mantiene el alcance solicitado. |
 | APEX: listar aplicaciones, inspeccionar páginas/componentes y comparar metadata | Herramientas de lectura del MCP APEX configurado; `inspect_apex_context` / `inspect_environment`; export nativo o App Builder si la cuenta lo permite | Perfil APEX/App Builder configurado para el ambiente, o la sesión Oracle elegida cuando se leen vistas de metadata. Confirmar identidad y destino observados; el rótulo del MCP no basta. |
 | APEX: crear, modificar, importar o eliminar componentes | Herramienta APEX de escritura disponible o `deploy_apex_page` con export nativo vía SQLcl | Usar únicamente la credencial configurada para el ambiente pedido. APEX/Oracle y los privilegios concedidos a esa cuenta deciden si la operación procede. No aplicar un bloqueo local fijo por ambiente. |
@@ -43,19 +43,22 @@ ambiente en la solicitud, inferirlo del contexto y luego del selector `DB_ENV`.
 Si ninguno define el destino, pedir solo el ambiente antes de conectar; no
 elegir TEST o Producción a ciegas.
 
-`execute_sql_file` requiere un archivo `.sql` dentro del checkout que sirve al
-MCP. Si el proyecto del usuario está en otra carpeta o no es un repositorio,
-crear el artefacto temporal dentro del checkout del conector, ejecutar la
-consulta solicitada y retirar el temporal al terminar si ya no es evidencia
-necesaria. No convertir una limitación de ruta del archivo en una limitación de
-acceso a Oracle.
+`execute_readonly_query` ejecuta una sola consulta SELECT de metadata sin archivo
+SQL y no depende de que el proyecto sea un checkout Git. No usarla como sandbox
+para SQL arbitrario: Oracle permite ciertos efectos laterales de funciones
+llamadas desde SELECT aunque la transacción sea de solo lectura.
+`execute_sql_file` requiere un
+archivo `.sql` dentro del checkout que sirve al MCP; úsalo para DDL/DML/PLSQL.
+No convertir una limitación de ruta del archivo en una limitación de acceso a
+Oracle.
 
 Para diagnóstico de páginas, no exigir que el `SESSION_USER` de SQLcl sea igual
 al esquema de parsing del workspace. Si el chequeo de asociación muestra una
 diferencia, conservarla como contexto y probar la lectura de las vistas públicas
 de metadata con la credencial elegida. Si el helper de página del MCP falla por
-incompatibilidad de columnas, usar consultas enlazadas mediante `apex_run_sql`
-contra `APEX_APPLICATION_PAGE_REGIONS`, items, procesos, botones, acciones y
+incompatibilidad de columnas o el helper de contexto devuelve ORA-20987, usar
+consultas enlazadas mediante `execute_readonly_query` o `apex_run_sql` contra
+`APEX_APPLICATION_PAGE_REGIONS`, items, procesos, botones, acciones y
 validaciones. No acceder a `WWV_FLOW_*` internos.
 
 ## Separación entre herramientas y privilegios

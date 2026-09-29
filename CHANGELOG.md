@@ -11,6 +11,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ### Added
 
+- Added a bound, single-SELECT SQLcl route in an Oracle read-only transaction, with hash-only audit logging, so metadata reads do not depend on a repository SQL artifact.
+- Added regressions for inline read-only query validation, ORA-20987-independent metadata routing, and the default DATA schema owner.
+- Restricted inline SQLcl reads to a single physical line and rejected control characters to prevent SQLcl client-command injection.
 - Added a shared local CI runner and aligned GitHub Actions with Python 3.13.
 - Added `.python-version` and documented the local CI workflow and Python baseline.
 - Added an initial 55% combined coverage gate, with 80% retained as a gradual target.

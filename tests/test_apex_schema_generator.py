@@ -22,6 +22,14 @@ from scripts.apex_schema_generator import (
 class TestApexSchemaSpec:
     """Test ApexSchemaSpec builder and schema creation."""
 
+    def test_default_owner_is_data_and_generated_ddl_is_qualified(self):
+        schema = ApexSchemaSpec()
+        table = schema.create_table("t_regression")
+        table.add_column("id", "NUMBER")
+
+        assert schema.owner == "DATA"
+        assert "create table data.t_regression" in table.to_sql().lower()
+
     def test_create_empty_schema(self):
         """Test creating an empty schema."""
         schema = ApexSchemaSpec(owner="SCOTT", application_id=100)

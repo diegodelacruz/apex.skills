@@ -64,6 +64,101 @@ def test_workspace_sql_file_rejects_escape(tmp_path, monkeypatch):
         raise AssertionError("Expected a path escape to be rejected")
 
 
+def test_validate_read_only_query_rejects_mutations_and_multiple_statements():
+    assert mcp.validate_read_only_query("SELECT page_id FROM apex_application_pages") == (
+        "SELECT page_id FROM apex_application_pages;"
+    )
+    for query in (
+        "CREATE TABLE data.t (id NUMBER)",
+        "SELECT 1 FROM dual; DELETE FROM data.t",
+        "SELECT 1 FROM dual -- comment",
+        "SELECT * FROM data.t FOR UPDATE",
+        "SELECT 1 FROM dual\nHOST whoami",
+        "SELECT 1 FROM dual\r! whoami",
+    ):
+        try:
+            mcp.validate_read_only_query(query)
+        except ValueError:
+            pass
+        else:
+            raise AssertionError(f"Expected read-only validation to reject: {query}")
+
+
+def test_execute_readonly_query_bypasses_context_helper_and_audits_hash(monkeypatch, tmp_path):
+    captured = {}
+    monkeypatch.setattr(mcp, "ROOT", tmp_path)
+    monkeypatch.setattr(mcp, "AUDIT_PATH", tmp_path / "audit.jsonl")
+    monkeypatch.setattr(mcp, "doctor_report", lambda: {"ready": True, "code": "READY"})
+    monkeypatch.setattr(mcp, "load_profile", lambda environment: ({"user": "configured"}, None))
+
+    def reject_context_helper(*args, **kwargs):
+        raise AssertionError("direct public metadata query must not depend on APEX context helper")
+
+    def fake_sqlcl(profile, statements, **kwargs):
+        captured.update(kwargs)
+        captured["statements"] = statements
+        return mcp.CommandResult(0, "130|100|Página de prueba", "")
+
+    monkeypatch.setattr(mcp, "inspect_apex_context", reject_context_helper)
+    monkeypatch.setattr(mcp, "sqlcl_result", fake_sqlcl)
+
+    query = (
+        "SELECT application_id, page_id, page_name FROM apex_application_pages "
+        "WHERE application_id = :app AND page_id = :page"
+    )
+    result = mcp.execute_readonly_query(
+        query,
+        "production",
+        {"app": 130, "page": 100},
+    )
+
+    assert result["ok"] is True
+    assert captured["read_only_transaction"] is True
+    assert captured["bind_variables"] == {"app": 130, "page": 100}
+    audit = json.loads((tmp_path / "audit.jsonl").read_text(encoding="utf-8"))
+    assert audit["source"] == "inline_readonly_query"
+    assert audit["source_sha256"]
+    audit_text = (tmp_path / "audit.jsonl").read_text(encoding="utf-8")
+    assert '"app":' not in audit_text
+    assert '"page":' not in audit_text
+    assert query not in audit_text
+
+    second_audit = tmp_path / "second-audit.jsonl"
+    monkeypatch.setattr(mcp, "AUDIT_PATH", second_audit)
+    mcp.write_readonly_query_audit(
+        "production",
+        query,
+        {"app": 130, "page": 101},
+        {"code": "SUCCESS", "exit_code": 0},
+    )
+    assert json.loads(second_audit.read_text(encoding="utf-8"))["source_sha256"] != audit["source_sha256"]
+
+
+def test_sqlcl_read_only_transaction_starts_after_connect(monkeypatch):
+    captured = {}
+    monkeypatch.setattr(mcp, "runtime_state", lambda: {"java_home": "java", "sqlcl_path": "sql"})
+
+    def fake_run(args, **kwargs):
+        captured["script"] = kwargs["input"]
+        return type("Process", (), {"returncode": 0, "stdout": "", "stderr": ""})()
+
+    monkeypatch.setattr(mcp.subprocess, "run", fake_run)
+    mcp.sqlcl_result(
+        {
+            "user": "user",
+            "password": "unit_test_value",  # pragma: allowlist secret
+            "host": "db",
+            "port": "1521",
+            "service": "prod",
+        },
+        "select 1 from dual;",
+        read_only_transaction=True,
+    )
+    script = captured["script"]
+    assert script.index("connect user/") < script.index("set transaction read only")
+    assert script.index("set transaction read only") < script.index("select 1 from dual")
+
+
 def test_execute_artifact_preserves_oracle_authority(monkeypatch, tmp_path):
     artifact = tmp_path / "change.sql"
     artifact.write_text("create table data.tmp_test (id number);", encoding="utf-8")

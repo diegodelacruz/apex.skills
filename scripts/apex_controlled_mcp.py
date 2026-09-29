@@ -2,8 +2,9 @@
 """Controlled local MCP for Oracle/APEX artifacts executed through SQLcl.
 
 The server is intentionally independent from the managed ``apex-mcp``
-upstream.  It never exposes APEX internal-table tools or accepts inline SQL.
-Oracle decides whether an artifact is authorized for the connected account.
+upstream. It never exposes APEX internal-table tools or inline write SQL.
+Inline reads run in an Oracle read-only transaction; Oracle decides whether
+the configured account can access the requested objects.
 """
 
 from __future__ import annotations
@@ -175,6 +176,7 @@ def sqlcl_result(
     statements: str,
     working_directory: str | None = None,
     bind_variables: dict[str, int] | None = None,
+    read_only_transaction: bool = False,
 ) -> CommandResult:
     """Run SQLcl with credentials over stdin, never command-line arguments."""
     state = runtime_state()
@@ -199,8 +201,10 @@ def sqlcl_result(
     script = "\n".join(
         (
             "set echo off feedback off heading off pagesize 0 verify off",
+            "set define off",
             "whenever sqlerror exit sql.sqlcode rollback",
             f"connect {connection}",
+            *(("set transaction read only",) if read_only_transaction else ()),
             *bind_setup,
             statements,
             "exit",
@@ -268,6 +272,22 @@ def workspace_sql_file(relative_path: str) -> Path:
     return candidate
 
 
+def validate_read_only_query(statement: str) -> str:
+    """Accept one single-line SELECT so SQLcl cannot parse injected client commands."""
+    query = statement.strip()
+    if not query or len(query) > 20000:
+        raise ValueError("La consulta está vacía o excede el máximo de 20000 caracteres.")
+    if any(ord(char) < 32 or 127 <= ord(char) <= 159 or char in "\u2028\u2029" for char in query):
+        raise ValueError("La consulta debe estar en una sola línea y no contener caracteres de control.")
+    if not re.match(r"(?is)^select\b", query):
+        raise ValueError("La herramienta de consulta solo acepta una sentencia SELECT.")
+    if re.search(r"--|/\*|\*/|;", query) or re.search(r"(?m)^\s*/\s*$", query):
+        raise ValueError("La consulta debe ser una sola sentencia, sin comentarios ni terminadores SQLcl.")
+    if re.search(r"(?i)\bfor\s+update\b", query):
+        raise ValueError("La consulta no puede bloquear filas con FOR UPDATE.")
+    return query + ";"
+
+
 def write_audit_event(environment: str, operation: str, source: Path, result: dict[str, Any]) -> None:
     """Append non-secret execution evidence for a versioned SQL artifact."""
     AUDIT_PATH.parent.mkdir(parents=True, exist_ok=True)
@@ -277,6 +297,33 @@ def write_audit_event(environment: str, operation: str, source: Path, result: di
         "operation": operation,
         "source": str(source.relative_to(ROOT)),
         "source_sha256": hashlib.sha256(source.read_bytes()).hexdigest(),
+        "result": result["code"],
+        "exit_code": result["exit_code"],
+    }
+    with AUDIT_PATH.open("a", encoding="utf-8") as handle:
+        handle.write(json.dumps(entry, ensure_ascii=False) + "\n")
+
+
+def write_readonly_query_audit(
+    environment: str,
+    statement: str,
+    bind_variables: dict[str, int] | None,
+    result: dict[str, Any],
+) -> None:
+    """Record a digest of the query and binds, never their raw contents."""
+    AUDIT_PATH.parent.mkdir(parents=True, exist_ok=True)
+    fingerprint = json.dumps(
+        {"query": statement, "binds": bind_variables or {}},
+        ensure_ascii=False,
+        sort_keys=True,
+        separators=(",", ":"),
+    )
+    entry = {
+        "timestamp_utc": datetime.now(timezone.utc).isoformat(),
+        "environment": environment,
+        "operation": "oracle_readonly_query",
+        "source": "inline_readonly_query",
+        "source_sha256": hashlib.sha256(fingerprint.encode("utf-8")).hexdigest(),
         "result": result["code"],
         "exit_code": result["exit_code"],
     }
@@ -313,7 +360,9 @@ mcp = FastMCP(
         "The user's request defines the operation, scope, and environment. Select that environment's configured "
         "credential; effective Oracle/APEX privileges granted to that credential determine which operations succeed. "
         "Inspect the session and target environment at the start when read-only tools are available. Do not hardcode a "
-        "user or environment permission matrix. Report observed errors accurately."
+        "user or environment permission matrix. Use execute_readonly_query for one SELECT when metadata inspection "
+        "does not require a repository artifact; it starts an Oracle read-only transaction and records only a hash. "
+        "Use execute_sql_file for requested DDL/DML/PLSQL artifacts. Report observed errors accurately."
     ),
 )
 
@@ -598,6 +647,54 @@ def inspect_oracle_privileges(environment: str | None = None) -> dict[str, Any]:
 def execute_sql_file(path: str, environment: str | None = None) -> dict[str, Any]:
     """Execute any versioned database SQL permitted to the connected account."""
     return execute_artifact(path, environment, "oracle_sql_file")
+
+
+@mcp.tool(
+    description=(
+        "Ejecuta una sola consulta SELECT en una línea física y en una transacción Oracle de solo lectura; "
+        "admite binds enteros y no requiere un archivo SQL del repositorio. Úsala para "
+        "consultas de metadata conocidas; no es un sandbox para funciones definidas por usuarios."
+    ),
+)
+def execute_readonly_query(
+    query: str,
+    environment: str | None = None,
+    bind_variables: dict[str, int] | None = None,
+) -> dict[str, Any]:
+    """Run one single-line SELECT through SQLcl without requiring a file artifact."""
+    environment, environment_error = resolve_environment(environment)
+    if environment_error is not None:
+        return {"ok": False, **environment_error}
+    assert environment is not None
+    try:
+        normalized_query = validate_read_only_query(query)
+    except ValueError as exc:
+        return {"ok": False, "code": "READ_ONLY_QUERY_REQUIRED", "message": str(exc)}
+    if bind_variables is not None and any(
+        not re.fullmatch(r"[a-z][a-z0-9_]*", name) or type(value) is not int for name, value in bind_variables.items()
+    ):
+        return {
+            "ok": False,
+            "code": "INVALID_BIND_VARIABLE",
+            "message": "Los binds deben tener nombres simples en minúsculas y valores enteros.",
+        }
+    readiness = doctor_report()
+    if not readiness["ready"]:
+        return readiness
+    profile, error = load_profile(environment)
+    if error is not None:
+        return {"ok": False, **error}
+    if profile is None:
+        return {"ok": False, "code": "PROFILE_MISSING", "message": "No se encontró un perfil utilizable."}
+    command = sqlcl_result(
+        profile,
+        normalized_query,
+        bind_variables=bind_variables,
+        read_only_transaction=True,
+    )
+    result = classify_result(command)
+    write_readonly_query_audit(environment, query, bind_variables, result)
+    return {**result, "environment": environment, "source": "inline_readonly_query"}
 
 
 @mcp.tool(
