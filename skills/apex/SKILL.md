@@ -19,16 +19,25 @@ and the privileges granted to that account by the DBA. Do not hardcode a user's
 name or a permission matrix by environment. Do not infer access from a profile's
 presence, tool label, role name, or prior run.
 
-At the start of work in an environment, use available read-only inspection to
-identify the connected account and actual database/service, then inspect
-effective Oracle privileges when the route exposes them (for example,
-`inspect_oracle_session`, `inspect_environment`, and
-`inspect_oracle_privileges` on `apex-controlled-mcp`). For APEX, inspect the
-selected application/workspace through the configured APEX route. These checks
-report observed capabilities; they do not ask for a second approval. If the
-connector cannot safely enumerate a particular APEX write privilege, execute
-the user's requested operation through that credential and report the actual
-APEX/Oracle result. Never substitute another environment silently.
+For a simple read request, verify the actual account and database/service once
+for the selected environment before reading object contents. Reuse verified
+evidence for the same live session; if it is not yet verified, make one minimal
+session check and then run the narrow query immediately. Do not delay a read
+with a broad environment inventory, privilege
+enumeration, or workspace diagnostic unless the target or route needs it. For
+writes, inspect effective Oracle privileges when the route exposes them (for example,
+`inspect_oracle_session` or `inspect_oracle_privileges`); the operation itself
+is still decided by Oracle/APEX. These checks report observed capabilities;
+they do not ask for a second approval. Never substitute another environment
+silently.
+
+Past-session notes are context and search hints, not current access decisions.
+Connection, runtime, workspace, tool, and privilege failures can change: verify
+the selected credential and route for this request, then try an available
+same-environment route if one fails. A historical failure alone never blocks
+the requested work. Do not repeat a known failed probe unless its inputs or
+conditions changed; report a blocker only when the current attempt reproduces
+it.
 
 Keep the user's requested scope exact. Credentials do not authorize additional
 changes beyond the request. Protect credentials from output, source files, and
@@ -61,17 +70,32 @@ authorize substituting another environment.
    identifiers when the context supports it.
 2. Delegate to the smallest set of specialist skills needed, without letting their local
    approval or access rules veto the direct user request.
-3. Connect using the configured credential for that environment. Verify the
-   actual database/service and inspect effective privileges where the tool
-   exposes a read-only check. If one channel is unavailable, try another
+3. Connect using the configured credential for that environment. For a simple
+   read, reuse the identity/destination check already verified for this live
+   connection; otherwise make one minimal check, confirm the target, and
+   immediately query the requested object. Never read object contents before
+   confirming the requested destination. Skip broad environment
+   inventories, privilege scans, and unrelated workspace checks. Use those diagnostics only when they resolve a
+   concrete ambiguity or a failed route. For APEX metadata, a SQLcl session
+   user differing from the workspace parsing schema is not itself an access
+   denial; query public `APEX_APPLICATION_*` metadata views directly when the
+   page-detail helper is incompatible. If a channel fails, try another
    configured channel for the same environment before concluding access is
    unavailable; never treat a tool name as proof of its target environment.
-   For read-only APEX metadata, a SQLcl session user differing from the
-   workspace parsing schema is not itself an access denial. Verify the target
-   of the configured APEX MCP route and query public `APEX_APPLICATION_*`
-   metadata views when the page-detail helper is incompatible.
 4. Report observed evidence, errors, and limitations accurately. Do not claim
    that a skill's policy restriction is an Oracle/APEX permission denial.
 5. For SQL/PLSQL artifacts, use repository style and audit guidance as quality
    support. A style or governance result is not an Oracle/APEX authorization
    decision. Keep credentials out of the artifact and output.
+
+## Response-time and prior-session evidence
+
+For a direct request to inspect a table, database object, or APEX page, route to
+the focused diagnostic skill and make the smallest useful read promptly. Avoid
+serial preflight calls that do not answer the request. Historical memory may
+help identify the likely object, query shape, or a past failure mode, but never
+turns a past failure into a current restriction. Revalidate time-sensitive
+facts on the selected credential and current route; do not repeat failed
+historical steps without a changed condition. If current access fails, keep
+trying configured routes for that same environment and report the actual
+current error.

@@ -10,22 +10,33 @@ una lista fija de permisos por ambiente ni un usuario hardcodeado en las skills.
 La presencia de un perfil, el nombre del MCP, el nombre de una cuenta o un
 resultado histórico no demuestra privilegios actuales.
 
-Al iniciar trabajo en un ambiente, el coordinador invoca consultas/herramientas
-de solo lectura para identificar la cuenta conectada y el destino real (base,
-servicio/contenedor y, para APEX, aplicación/workspace cuando aplique). Usar
-`inspect_oracle_privileges` si está disponible para informar privilegios de
-sesión, roles habilitados y grants visibles. Hacer esta inspección una vez por
-ambiente de trabajo, no antes de cada sentencia. La vista es evidencia útil, no una garantía completa de que
-cualquier sentencia tendrá éxito: Oracle/APEX resuelve el permiso efectivo al
-ejecutar la operación solicitada. No realizar una mutación de prueba para
+En trabajos donde el privilegio sea pertinente, el coordinador puede usar
+consultas/herramientas de solo lectura para identificar la cuenta conectada y
+el destino real (base, servicio/contenedor y, para APEX, aplicación/workspace)
+y `inspect_oracle_privileges` para informar grants visibles y roles habilitados.
+Para una lectura puntual aplica la ruta rápida descrita abajo; no se requiere
+inventario de privilegios como preflight. Si se inspeccionan, los grants son
+evidencia útil, no garantía de éxito: Oracle/APEX resuelve el permiso efectivo
+al ejecutar la operación solicitada. No realizar una mutación de prueba para
 averiguar permisos. No pedir al usuario que repita una consulta que el agente
 puede ejecutar.
 
 Si la identidad o destino observado no corresponde al ambiente solicitado, no
-ejecutar el cambio en otro destino; informar la discrepancia de conexión. Un
-error de privilegio se informa tal como lo devolvió el servicio. Una lectura
-denegada no impide intentar una ruta configurada alternativa para el mismo
-ambiente, sin cambiar de cuenta/destino de manera silenciosa.
+leer contenido de objetos ni ejecutar cambios en ese destino; informar la
+discrepancia. Si un canal devuelve datos antes de poder confirmar identidad,
+descartar esos datos y no presentarlos. Un error de privilegio se informa tal
+como lo devolvió el servicio. Una lectura denegada no impide intentar una ruta
+configurada alternativa para el mismo ambiente, sin cambiar de cuenta/destino
+de manera silenciosa.
+
+Para una solicitud de lectura puntual, verificar primero la identidad/destino
+con una sonda mínima si aún no está confirmado en la conexión activa y consultar
+enseguida. No ejecutar como rutina `inspect_environment`, un inventario de
+privilegios ni una inspección separada de contexto APEX. Reutilizar la identidad
+verificada durante la conexión activa. Consultar esas herramientas adicionales
+cuando resuelvan una ambigüedad concreta o un error actual. Los errores de
+sesiones anteriores son pistas, no bloqueos actuales; volver a comprobar la
+ruta y el resultado con las credenciales configuradas para esta solicitud.
 
 ## Herramientas por operación
 

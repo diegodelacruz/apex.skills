@@ -11,10 +11,14 @@ operaciones proceden. No hardcodees usuarios ni una matriz de permisos por
 ambiente, y no confundas la superficie visible del MCP con los permisos de la
 cuenta conectada.
 
-Al comenzar, identifica el usuario de sesión y el destino real con las
-herramientas de solo lectura disponibles (`inspect_oracle_session`,
-`inspect_environment`, `inspect_oracle_privileges` o metadata equivalente).
-Para APEX, comprueba el contexto de aplicación/workspace si la ruta lo permite.
+Antes de leer contenido, identifica una vez el usuario de sesión y el destino
+real con una sonda mínima (`inspect_oracle_session` o metadata equivalente), a
+menos que ya estén verificados en la conexión activa. Luego consulta el objeto
+solicitado enseguida. No ejecutes `inspect_environment`, inventario de grants ni
+diagnóstico de workspace como preflight rutinario de una lectura puntual;
+resérvalos para una ambigüedad o error actual. Si la identidad/destino no
+coincide, no leas ni presentes datos de esa ruta. Para APEX, comprueba el
+contexto de aplicación/workspace solo si la lectura o la ruta lo requiere.
 El wrapper `run_apex_mcp_with_profile.py` obtiene el perfil APEX/Oracle que le
 corresponde desde el keyring; el MCP controlado usa los perfiles Oracle del
 `.env`. Los conectores pueden coexistir. Una falta de perfil para un conector no

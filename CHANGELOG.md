@@ -9,6 +9,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Changed
+
+- Reduced routine preflight for focused Oracle/APEX reads to one minimal identity check followed immediately by the target query, reusing live-session evidence; clarified that historical failures are context only and must be rechecked on the current route.
+
 ### Added
 
 - Added a bound, single-SELECT SQLcl route in an Oracle read-only transaction, with hash-only audit logging, so metadata reads do not depend on a repository SQL artifact.

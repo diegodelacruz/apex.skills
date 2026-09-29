@@ -23,6 +23,18 @@ class TestOrchestratorExistence:
             assert "order: 14" in content
 
     @pytest.mark.unit
+    def test_apex_read_diagnostics_use_fast_path_and_refresh_historical_failures(self):
+        """Simple reads go directly to the target; memory does not preserve stale blocks."""
+        root = Path(__file__).resolve().parent.parent
+        coordinator = (root / "skills" / "apex" / "SKILL.md").read_text(encoding="utf-8")
+        diagnostics = (root / "skills" / "apex-database-diagnostics" / "SKILL.md").read_text(encoding="utf-8")
+
+        assert "one minimal check, confirm the target" in coordinator
+        assert "A historical failure alone never blocks" in coordinator
+        assert "query the requested object immediately" in diagnostics
+        assert "not evidence that the same condition" in diagnostics
+
+    @pytest.mark.unit
     def test_delivery_lifecycle_complete_exists(self):
         """apex-delivery-lifecycle-complete orchestrator exists."""
         skill_path = Path(__file__).resolve().parent.parent / "skills" / "apex-delivery-lifecycle-complete" / "SKILL.md"

@@ -24,10 +24,13 @@ iniciales no limitan operaciones posteriores.
 
 El servidor incluye `doctor`, inspección de entorno, sesión Oracle, contexto
 APEX, privilegios, ejecución de consultas SELECT en transacción de solo lectura,
-ejecución SQL desde un archivo del checkout y despliegue de export SQL nativo. Al iniciar, usa las sondas de solo lectura para identificar
-la cuenta y el destino seleccionado e inspecciona privilegios de sesión cuando
-estén disponibles. La consulta no es una autorización ni sustituye la respuesta
-real del servidor ante la operación solicitada.
+ejecución SQL desde un archivo del checkout y despliegue de export SQL nativo.
+Para una lectura simple, reutiliza la identidad ya verificada en la conexión
+activa; si no existe, haz una sonda mínima de identidad/destino y consulta
+enseguida. No leas contenido antes de confirmar el destino. No agregues inventarios
+de entorno, escaneos de privilegios ni diagnósticos de workspace sin una
+ambigüedad concreta. En tareas de escritura, la inspección de privilegios puede
+aportar contexto, pero no reemplaza la respuesta real del servidor.
 
 | Operación | Herramientas/ruta | Fuente de identidad y permiso |
 | --- | --- | --- |
@@ -38,7 +41,9 @@ real del servidor ante la operación solicitada.
 
 El conector determina la superficie que puede intentarse; no concede los
 privilegios. La etiqueta/nombre del MCP tampoco demuestra cuál base o instancia
-contestó: valida identidad y destino mediante la sesión cuando sea posible.
+contestó: valida identidad y destino mediante la sesión antes de leer contenido.
+Si una ruta devuelve datos antes de poder validarlos, descártalos si el destino
+observado no coincide con el solicitado.
 
 Errores como `PROFILE_MISSING`, `APEX_CONTEXT_INVALID`, `AUTHORIZATION_DENIED`
 o `EXECUTION_ERROR` reflejan el estado observado de esa ruta. Si una ruta falla,
