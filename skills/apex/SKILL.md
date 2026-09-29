@@ -64,6 +64,17 @@ environment explicitly to tools that accept it. Never silently change
 environments. A failed profile or connection is a technical result; it does not
 authorize substituting another environment.
 
+## Oracle object owner default
+
+For every Oracle request that creates, changes, or drops schema objects, use owner
+`DATA` when the user did not explicitly name an owner or schema. This default
+applies even when the connected account or `CURRENT_SCHEMA` is different.
+Qualify object names in generated DDL and any related DML with the selected
+owner. If the user explicitly specifies another owner, use that owner. Follow
+specific governance exceptions (such as backup objects in the connected user's
+schema). If Oracle rejects the selected owner, report the Oracle error and do
+not retry under the connected user's schema.
+
 ## Workflow
 
 1. Classify the request by its Oracle/APEX task and interpret `<application>.<page>` as two

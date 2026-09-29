@@ -28,8 +28,14 @@
 | --- | --- | --- |
 | Full data workflow (schema → migration → sync) | `apex-data-orchestrator-safe` (NEW - coordinates schema/ETL/sync) | ✓ Coordinated |
 | DATA object change (governance guidance) | `oracle-data-change-governance-final` | ⊳ Advisory |
-| Create/modify database schema | `apex-schema-automation-safe` | ⊳ Advisory |
+| Create/modify database schema (owner defaults to DATA) | `apex-schema-automation-safe` | ⊳ Advisory |
 | Migrate data between environments | `apex-data-migration-safe` | ⊳ Advisory |
+
+For requested Oracle schema object creation or changes, default the owner to
+`DATA` unless the user explicitly names another schema. Qualify
+the DDL and related DML with that owner; the connected account's schema is
+never an implicit fallback. Preserve specific governance exceptions such as
+backup objects in the connected user's schema.
 
 ### QA & Testing
 | User intent | Specialist workflow | Coordination |

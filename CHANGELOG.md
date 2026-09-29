@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ### Changed
 
+- Propagated the default Oracle schema owner `DATA` through the coordinator, agent prompt, schema automation, and data orchestrator; explicit schema names override it, related DDL/DML must be owner-qualified, and governed backup objects retain their connected-schema exception.
 - Updated `.env.example` with the configured TEST Oracle/APEX endpoints and commented production APEX endpoint/workspace reference; credential values remain placeholders.
 - Reduced routine preflight for focused Oracle/APEX reads to one minimal identity check followed immediately by the target query, reusing live-session evidence; clarified that historical failures are context only and must be rechecked on the current route.
 
@@ -40,6 +41,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ### Fixed
 
+- Closed a routing gap that allowed omitted Oracle object owners to inherit the connected user's schema despite the existing DATA governance default; added a regression for coordinator and workflow instructions.
 - Fixed SQLcl read-only query execution by terminating `SET TRANSACTION READ ONLY` before the SELECT statement.
 - Clarified that new Oracle objects default to the DATA schema, and that repository-backed SQL tools require temporary artifacts inside the MCP checkout with a same-environment APEX SQL fallback after artifact or context-helper failures.
 - Changed `ApexSchemaSpec` to default generated Oracle objects to `DATA`, matching the DATA governance skill while preserving explicit owner overrides.

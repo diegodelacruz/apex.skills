@@ -2,6 +2,7 @@
 """Unit tests for apex_schema_generator.py (Oracle schema DDL builder)."""
 
 import json
+from pathlib import Path
 
 import pytest
 
@@ -29,6 +30,36 @@ class TestApexSchemaSpec:
 
         assert schema.owner == "DATA"
         assert "create table data.t_regression" in table.to_sql().lower()
+
+    def test_oracle_routing_and_schema_workflow_preserve_data_default(self):
+        root = Path(__file__).resolve().parents[1]
+        coordinator = (root / "skills/apex/SKILL.md").read_text(encoding="utf-8")
+        agent_prompt = (root / "skills/apex/agents/openai.yaml").read_text(encoding="utf-8")
+        schema_skill = (root / "skills/apex-schema-automation-safe/SKILL.md").read_text(encoding="utf-8")
+        orchestrator = (root / "skills/apex-data-orchestrator-safe/SKILL.md").read_text(encoding="utf-8")
+        routing = (root / "skills/apex/references/routing.md").read_text(encoding="utf-8")
+
+        for content in (coordinator, agent_prompt, schema_skill, orchestrator, routing):
+            assert "DATA" in content
+            assert "explicit" in content.lower()
+        assert "connected user's schema" in coordinator.lower()
+        assert "connected user's schema" in agent_prompt.lower()
+        assert "backup" in coordinator.lower()
+        assert "backup" in agent_prompt.lower()
+        assert "backup" in schema_skill.lower()
+        assert "backup" in orchestrator.lower()
+        assert "never retry" in schema_skill.lower()
+        assert "never retry" in orchestrator.lower()
+        assert "related INSERT/UPDATE/DELETE" in schema_skill
+        assert "CREATE, ALTER, DROP" in schema_skill
+
+    def test_explicit_schema_owner_remains_an_override(self):
+        schema = ApexSchemaSpec(owner="SCOTT")
+        table = schema.create_table("t_regression")
+        table.add_column("id", "NUMBER")
+
+        assert schema.owner == "SCOTT"
+        assert "create table scott.t_regression" in table.to_sql().lower()
 
     def test_create_empty_schema(self):
         """Test creating an empty schema."""

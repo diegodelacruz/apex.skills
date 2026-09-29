@@ -17,7 +17,7 @@ description: "Create, modify, and drop Oracle database objects through available
 > ejecutor. Las operaciones disponibles dependen de los permisos efectivos de
 > la credencial seleccionada.
 
-Activate this workflow when the user requests to create, modify, or drop Oracle database objects: tables, views, indexes, sequences, procedures, functions, or packages.
+Activate this workflow when the user requests any Oracle schema-object DDL, including CREATE, ALTER, DROP, and CREATE OR REPLACE for tables, views, indexes, sequences, triggers, synonyms, materialized views, types, procedures, functions, and packages.
 
 ## Estándar de artefactos SQL
 
@@ -75,7 +75,7 @@ Infer these from the conversation and the database — do not interview the user
 ### Creation / Modification / Deletion
 
 1. Load Oracle connection: `. scripts/Initialize-OracleConnection.ps1`.
-2. Set the target owner to `DATA` unless the user explicitly named another schema. Qualify created object names with that owner (for example, `create table data.<name> ...`) so the session user's schema cannot become an accidental default. Verify `SESSION_USER` and `CURRENT_SCHEMA` for context, but do not treat either as a reason to change the requested owner. If Oracle denies the requested owner, report the actual error; never retry by creating the object under the connected user.
+2. Set the target owner to `DATA` unless the user explicitly named another schema. Follow the specific governance exception that backup objects belong in the connected user's schema. This rule applies to every other request, including natural-language requests with misspelled or shorthand type names. Qualify every object name referenced by DDL (CREATE, ALTER, DROP, and CREATE OR REPLACE) and related INSERT/UPDATE/DELETE in DML (for example, `create table data.<name> ...` and `insert into data.<name> ...`) so the session user's schema cannot become an accidental default. Verify `SESSION_USER` and `CURRENT_SCHEMA` for context, but do not treat either as a reason to change the requested owner. If Oracle denies the selected owner for a non-backup object, report the actual error; never retry the operation under the connected user's schema.
 3. Generate SQL files in dependency order:
    - **Create objects**: Tables → Indexes → Views → Sequences → Procedures → Functions → Packages.
    - **Modify objects**: ALTER TABLE (add/drop columns), ALTER CONSTRAINT, etc.; preserve existing data unless explicitly dropping.

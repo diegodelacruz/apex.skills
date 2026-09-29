@@ -149,19 +149,21 @@ audit = orchestrator.get_operation_log()
 Delegate to `apex-schema-automation-safe`:
 
 ```
-1. Apply `oracle-data-change-governance-final` guidance without a separate authorization gate:
+1. Resolve the owner as `DATA` unless the user explicitly names another schema. Apply the specific governance exception for backup objects, which belong in the connected user's schema. Carry the selected owner through every DDL and related DML statement; never infer it from `SESSION_USER` or `CURRENT_SCHEMA`, and never retry a non-backup operation under the connected user's schema after an owner error.
+
+2. Apply `oracle-data-change-governance-final` guidance without a separate authorization gate:
    - Create tables
    - Create views
    - Create sequences
    - Add indexes
    - Add constraints
 
-2. Validate schema:
+3. Validate schema:
    - Syntax validation
    - Object dependencies
    - Naming conventions
 
-3. Create rollback point:
+4. Create rollback point:
    - Save schema snapshot
    - Record DDL statements
    - Store rollback procedure
