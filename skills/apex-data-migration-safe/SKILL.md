@@ -13,7 +13,7 @@ tags:
 access_level: read-write
 cost: high
 created: 2026-09-17
-status: development
+status: active
 ---
 
 # apex-data-migration-safe
@@ -228,7 +228,7 @@ Typical operation times:
 
 ## Status
 
-🔨 **Development** - Data migration framework (10% complete)
+🔨 **Active** - Data migration framework (10% complete)
 
 ---
 

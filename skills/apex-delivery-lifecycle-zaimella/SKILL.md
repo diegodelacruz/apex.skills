@@ -14,7 +14,7 @@ tags:
 access_level: read-write
 cost: medium
 created: 2026-09-17
-status: development
+status: active
 ---
 
 # apex-delivery-lifecycle-zaimella
@@ -311,7 +311,7 @@ Typical timeline (with GPZ governance gates):
 
 ## Status
 
-🚧 **Development** - Zaimella integration orchestrator (15% complete)
+🚧 **Active** - Zaimella integration orchestrator (15% complete)
 
 ---
 
