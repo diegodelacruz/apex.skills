@@ -13,7 +13,7 @@ tags:
 access_level: read
 cost: low
 created: 2026-09-17
-status: development
+status: active
 ---
 
 # apex-code-generation-safe
@@ -132,7 +132,7 @@ Typical generation times:
 
 ## Status
 
-🔨 **Development** - Core generators building (90% complete)
+🔨 **Active** - Core generators building (90% complete)
 
 ---
 

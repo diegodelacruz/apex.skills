@@ -13,7 +13,7 @@ tags:
 access_level: read-write
 cost: medium
 created: 2026-09-17
-status: development
+status: active
 ---
 
 # apex-automated-testing-safe
@@ -224,7 +224,7 @@ Typical operation times:
 
 ## Status
 
-🔨 **Development** - Test generation framework (15% complete)
+🔨 **Active** - Test generation framework (15% complete)
 
 ---
 
