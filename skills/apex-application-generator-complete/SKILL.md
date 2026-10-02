@@ -14,7 +14,7 @@ tags:
 access_level: read-write
 cost: high
 created: 2026-09-17
-status: development
+status: active
 ---
 
 # apex-application-generator-complete
@@ -28,7 +28,7 @@ Verify the connected account and actual destination with read-only checks when
 available. Do not add approval steps or ask the user to run work the agent can
 perform.
 
-Complete APEX application generation orchestrator: integrate code generation, REST API deployment, automated testing, and data migration into one unified pipeline.
+Complete APEX application generation orchestrator: integrate code generation, native SQLcl deployment, automated testing, and data migration into one unified pipeline.
 
 ## Overview
 
