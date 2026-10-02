@@ -1,0 +1,324 @@
+{
+  "inventory": {
+    "timestamp": "2026-10-02T00:00:00Z",
+    "source": "SKILL.md frontmatter metadata (canonical)",
+    "validation_method": "Direct read of individual SKILL.md files",
+    "total_skills": 31,
+    "summary": {
+      "by_status": {
+        "active": 22,
+        "development": 7,
+        "retired": 1
+      },
+      "by_access": {
+        "read_only": 7,
+        "read_write": 15,
+        "coordinator": 8
+      },
+      "by_type": {
+        "specialist": 22,
+        "orchestrator": 5,
+        "maestro": 1,
+        "retired": 1
+      }
+    },
+    "active_skills": [
+      {
+        "order": 0,
+        "name": "apex-audit-decisions-log",
+        "category": "Apex Audit & Decisions",
+        "status": "active",
+        "access": "read-only",
+        "description": "Review and export project decisions and the Git-backed audit trail",
+        "tags": ["audit", "documentation", "decisions", "governance", "read-only"]
+      },
+      {
+        "order": 1,
+        "name": "apex-database-diagnostics",
+        "category": "Apex Database & Diagnostics",
+        "status": "active",
+        "access": "read-only",
+        "description": "Diagnose Oracle and APEX requests in the user-selected environment through available authenticated routes",
+        "tags": ["diagnostics", "inspection", "oracle"]
+      },
+      {
+        "order": 2,
+        "name": "apex-delivery-lifecycle-complete",
+        "category": "Apex Delivery & Lifecycle",
+        "status": "active",
+        "access": "read-write",
+        "description": "Run the complete APEX lifecycle with environment and DATA governance",
+        "tags": ["lifecycle", "workflow", "release", "governance"]
+      },
+      {
+        "order": 3,
+        "name": "apex-delivery-lifecycle-safe",
+        "category": "Apex Delivery & Lifecycle",
+        "status": "active",
+        "access": "read-write",
+        "description": "Coordinate a safe APEX workflow from design through QA and documentation",
+        "tags": ["lifecycle", "workflow", "qa", "governance"]
+      },
+      {
+        "order": 3.5,
+        "name": "apex-external-context-learn",
+        "category": "Apex External Context & Learning",
+        "status": "active",
+        "access": "read-only",
+        "description": "Learn from external repositories without cloning. Create persistent, reusable reference context for APEX engineering workflows",
+        "tags": ["external-context", "learning", "no-clone", "reference", "read-only", "discovery"]
+      },
+      {
+        "order": 4,
+        "name": "apex-engineering-safe",
+        "category": "Apex Engineering & Design",
+        "status": "active",
+        "access": "read-only",
+        "description": "Inspect, design, and implement APEX applications from exports within the user's environment matrix",
+        "tags": ["inspection", "design", "export", "implementation"]
+      },
+      {
+        "order": 5,
+        "name": "apex-environment-alignment-complete",
+        "category": "Apex Environment & Alignment",
+        "status": "active",
+        "access": "read-write",
+        "description": "Validate and align TEST and production APEX environments safely",
+        "tags": ["environment", "alignment", "validation", "governance"]
+      },
+      {
+        "order": 6,
+        "name": "apex-export-qa-safe",
+        "category": "Apex Export & QA",
+        "status": "active",
+        "access": "read-only",
+        "description": "Validate APEX export ZIP structure and readiness before changes",
+        "tags": ["qa", "validation", "export", "read-only"]
+      },
+      {
+        "order": 6.5,
+        "name": "apex-qa-orchestrator-safe",
+        "category": "Apex QA",
+        "status": "active",
+        "access": "coordinator",
+        "description": "Coordinate APEX QA evidence and report results without approval gates",
+        "tags": ["qa", "validation", "orchestration"]
+      },
+      {
+        "order": 7,
+        "name": "apex-page-range-governance",
+        "category": "Apex Page Range Governance",
+        "status": "active",
+        "access": "read-write",
+        "description": "Reserve and validate conflict-free APEX page ranges by project",
+        "tags": ["governance", "pages", "validation"]
+      },
+      {
+        "order": 8,
+        "name": "apex-pattern-mining-safe",
+        "category": "Apex Pattern Mining",
+        "status": "active",
+        "access": "read-only",
+        "description": "Extract reusable APEX design patterns from application exports safely",
+        "tags": ["patterns", "analysis", "export", "read-only"]
+      },
+      {
+        "order": 9,
+        "name": "apex-project-bootstrap-final",
+        "category": "Apex Project Management",
+        "status": "active",
+        "access": "read-write",
+        "description": "Initialize an APEX project with workspace and governance foundations",
+        "tags": ["setup", "initialization", "bootstrap", "governance"]
+      },
+      {
+        "order": 10,
+        "name": "apex-project-workspace",
+        "category": "Apex Project Management",
+        "status": "active",
+        "access": "read-write",
+        "description": "Create and maintain the control-proyecto project workspace",
+        "tags": ["workspace", "organization", "documentation"]
+      },
+      {
+        "order": 11,
+        "name": "apex-solution-design",
+        "category": "Apex Engineering & Design",
+        "status": "active",
+        "access": "read-write",
+        "description": "Design APEX applications and pages from approved business requirements",
+        "tags": ["design", "architecture", "planning"]
+      },
+      {
+        "order": 11.5,
+        "name": "apex-design-review-orchestrator",
+        "category": "Apex Engineering & Design",
+        "status": "active",
+        "access": "coordinator",
+        "description": "Coordinate APEX solution, blueprint, and engineering review without adding execution gates",
+        "tags": ["design", "review", "orchestration"]
+      },
+      {
+        "order": 12,
+        "name": "apex-user-manual",
+        "category": "Apex Documentation",
+        "status": "active",
+        "access": "read-write",
+        "description": "Generate and verify Word user manuals from approved APEX QA evidence",
+        "tags": ["documentation", "automation", "export"]
+      },
+      {
+        "order": 13,
+        "name": "oracle-data-change-governance-final",
+        "category": "Oracle Data Governance",
+        "status": "active",
+        "access": "read-write",
+        "description": "Govern DATA changes with decisions, rollback, validation, and audit evidence",
+        "tags": ["database", "governance", "audit"]
+      },
+      {
+        "order": 14,
+        "name": "apex",
+        "category": "Apex Coordinator",
+        "status": "active",
+        "access": "coordinator",
+        "description": "Route Oracle and APEX requests to the smallest useful specialist workflow",
+        "tags": ["coordinator", "routing", "governance"]
+      },
+      {
+        "order": 15,
+        "name": "apex-blueprint-design-safe",
+        "category": "Apex Engineering & Design",
+        "status": "active",
+        "access": "read-only",
+        "description": "Create reviewable APEX blueprints from user requirements and available metadata",
+        "tags": ["blueprint", "design", "scaffolding", "read-only"]
+      },
+      {
+        "order": 16,
+        "name": "apex-rest-source-catalogs-safe",
+        "category": "Apex Integration",
+        "status": "active",
+        "access": "read-only",
+        "description": "Assess Fusion REST catalogs for safe APEX integration design",
+        "tags": ["rest", "fusion", "integration", "catalog", "read-only"]
+      },
+      {
+        "order": 17,
+        "name": "apex-ui-craft-safe",
+        "category": "Apex UX Craft",
+        "status": "active",
+        "access": "read-only",
+        "description": "Assess and improve accessible, responsive APEX UX with Universal Theme",
+        "tags": ["ux", "accessibility", "responsive", "motion", "read-only"]
+      },
+      {
+        "order": 18,
+        "name": "apex-zaimella-gestion-proyectos",
+        "category": "Zaimella Methodology",
+        "status": "active",
+        "access": "read-write",
+        "description": "Asesor metodológico y operativo para gestión integral de proyectos bajo Metodología GPZ",
+        "tags": ["zaimella", "gpz", "metodologia", "proyectos", "gestion"]
+      },
+      {
+        "order": 19,
+        "name": "apex-page-automation-safe",
+        "category": "Apex Engineering & Design",
+        "status": "active",
+        "access": "read-write",
+        "description": "Create, modify, and deploy APEX pages via native export/import through SQLcl",
+        "tags": ["page-creation", "automation", "design", "full-stack"]
+      },
+      {
+        "order": 20,
+        "name": "apex-schema-automation-safe",
+        "category": "Apex Database & Schema",
+        "status": "active",
+        "access": "read-write",
+        "description": "Create, modify, and drop Oracle database objects through available authenticated routes",
+        "tags": ["database", "schema", "ddl", "automation", "full-stack"]
+      }
+    ],
+    "development_skills": [
+      {
+        "order": 3.5,
+        "name": "apex-delivery-lifecycle-zaimella",
+        "category": "Apex Delivery & Lifecycle",
+        "status": "development",
+        "access": "read-write",
+        "description": "Integrate GPZ (Zaimella) methodology with APEX delivery lifecycle for comprehensive project governance",
+        "tags": ["orchestration", "delivery-lifecycle", "methodology", "gpz", "zaimella"]
+      },
+      {
+        "order": 13.5,
+        "name": "apex-data-orchestrator-safe",
+        "category": "Apex Data Integration",
+        "status": "development",
+        "access": "read-write",
+        "description": "Development outline for schema and data migration workflows; APEX artifact import is separate",
+        "tags": ["orchestration", "data-integration", "schema", "etl", "migration"]
+      },
+      {
+        "order": 21,
+        "name": "apex-automated-testing-safe",
+        "category": "Apex Testing & QA",
+        "status": "development",
+        "access": "read-write",
+        "description": "Selenium test generation, performance testing, and regression validation framework",
+        "tags": ["testing", "automation", "selenium", "performance", "qa"]
+      },
+      {
+        "order": 23,
+        "name": "apex-application-generator-complete",
+        "category": "Apex Application Development",
+        "status": "development",
+        "access": "read-write",
+        "description": "Development prototype for an end-to-end APEX application workflow; API deployment phase non-operational",
+        "tags": ["application-generation", "orchestration", "end-to-end", "automation"]
+      },
+      {
+        "order": 24,
+        "name": "apex-code-generation-safe",
+        "category": "Apex Engineering & Design",
+        "status": "development",
+        "access": "read",
+        "description": "Generate APEX components automatically from schema and metadata",
+        "tags": ["code-generation", "apex", "forms", "reports", "automation"]
+      },
+      {
+        "order": 25,
+        "name": "apex-data-migration-safe",
+        "category": "Apex Data Integration",
+        "status": "development",
+        "access": "read-write",
+        "description": "Schema mapping, data validation, ETL pipeline, and rollback management framework",
+        "tags": ["data-migration", "etl", "schema-mapping", "validation", "rollback"]
+      }
+    ],
+    "retired_skills": [
+      {
+        "order": 22,
+        "name": "apex-api-client-safe",
+        "category": "Apex Integration",
+        "status": "retired",
+        "access": "read",
+        "description": "Retired simulated REST adapter; it must not be used for Oracle APEX deployment",
+        "tags": ["retired", "compatibility", "historical"],
+        "note": "Retained for invocation compatibility only"
+      }
+    ],
+    "validation_report": {
+      "timestamp": "2026-10-02T00:00:00Z",
+      "total_files_read": 31,
+      "successful_parses": 31,
+      "errors": 0,
+      "metrics": {
+        "average_tags_per_skill": 5,
+        "min_order": 0,
+        "max_order": 25,
+        "unique_categories": 19
+      }
+    }
+  }
+}
