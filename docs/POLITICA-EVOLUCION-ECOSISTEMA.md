@@ -126,6 +126,7 @@ Como mínimo, antes de publicar deben ejecutarse:
 
 ```powershell
 python .\scripts\audit_skill_ecosystem.py
+python .\scripts\audit_markdown_links.py
 python -m pytest tests -v
 git diff --check
 git status --short

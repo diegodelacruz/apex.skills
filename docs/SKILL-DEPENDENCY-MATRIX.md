@@ -4,9 +4,11 @@
 > effective Oracle/APEX grants determine available operations. Skills do not hardcode users or
 > permission matrices, add approval gates, or ask the user to perform work available to the agent.
 
-**Last Updated:** 2026-09-17
-**Total Skills:** 26
-**Orchestrators:** 4 (1 maestro, 3 coordinadores)
+**Source inventory:** 31 `skills/*/SKILL.md` files
+**Role counts:** 1 entry coordinator, 7 workflow-orchestrator roles, 22 active specialists, 1 retired compatibility entry
+**Audit state:** Dependency edges below are a legacy working map and have not been fully revalidated. Do not use this document alone as proof of current dependencies or cycle freedom.
+
+`apex-api-client-safe` is retired and non-operational. Any edge below that assigns it deployment, sync, connectivity, or test setup work is unresolved and must not be treated as an available capability. Native APEX export/import or configured App Builder/MCP routes are documented in `docs/CAPACIDADES-CONTROLADAS-ORACLE-APEX.md`.
 
 ## Legend
 
@@ -31,7 +33,7 @@
 
 ## 1. ENTRY POINT
 
-### apex (Coordinador Maestro)
+### apex (L0 Entry Coordinator)
 Routes to specialized skills. No dependencies (entry point).
 
 ```
@@ -48,7 +50,7 @@ COORDINATES:
   - apex-environment-alignment-complete (environment)
   - apex-delivery-lifecycle-complete (full cycle)
   - apex-delivery-lifecycle-safe (safe cycle)
-  - apex-delivery-lifecycle-zaimella (GPZ projects) [NEW]
+  - apex-delivery-lifecycle-zaimella (GPZ projects)
   - oracle-data-change-governance-final (DATA changes)
   - apex-ui-craft-safe (UX)
   - apex-rest-source-catalogs-safe (REST integrations)
@@ -59,7 +61,7 @@ COORDINATES:
 
 ## 2. PRIMARY ORCHESTRATORS
 
-### apex-delivery-lifecycle-complete (Coordinador Secundario)
+### apex-delivery-lifecycle-complete (L1 Workflow Orchestrator)
 ```
 DEPENDENCIES:
   D ▶ apex-project-bootstrap-final (initialization)
@@ -83,7 +85,7 @@ SEQUENCE:
   7. apex-user-manual (documentation)
 ```
 
-### apex-delivery-lifecycle-safe (Coordinador Secundario)
+### apex-delivery-lifecycle-safe (L1 Workflow Orchestrator)
 ```
 DEPENDENCIES:
   D ▶ apex-project-workspace (create workspace)
@@ -102,12 +104,12 @@ SEQUENCE:
   2. apex-pattern-mining-safe (learn patterns)
   3. apex-solution-design (design)
   4. oracle-data-change-governance-final (DATA governance)
-  5. apex-engineering-safe (implement - approved scope only)
+  5. apex-engineering-safe (implementation when requested)
   6. apex-export-qa-safe (QA)
   7. apex-user-manual (documentation)
 ```
 
-### apex-delivery-lifecycle-zaimella (NEW - Coordinador Secundario)
+### apex-delivery-lifecycle-zaimella (L1 Workflow Orchestrator)
 ```
 DEPENDENCIES:
   D ▶ apex-zaimella-gestion-proyectos (GPZ methodology)
@@ -123,27 +125,28 @@ SEQUENCE:
   3. apex-zaimella-gestion-proyectos (close-out GPZ project)
 ```
 
-### apex-application-generator-complete (Coordinador Terciario)
+### apex-application-generator-complete (L1 Workflow Orchestrator)
 ```
 DEPENDENCIES:
-  D ▶ apex-code-generation-safe (HITO 1)
-  D ▶ apex-data-migration-safe (HITO 4)
-  D ▶ apex-api-client-safe (HITO 2)
-  D ▶ apex-automated-testing-safe (HITO 3)
+  D ▶ apex-code-generation-safe (generation phase)
+  D ▶ apex-data-migration-safe (migration phase)
+  D ▶ apex-automated-testing-safe (testing phase)
 
 COORDINATES:
   - apex-code-generation-safe (code gen)
   - apex-data-migration-safe (data mapping/migration)
-  - apex-api-client-safe (deployment)
   - apex-automated-testing-safe (testing)
 
 SEQUENCE:
   1. Code Generation Phase (apex-code-generation-safe)
   2. Data Migration Phase (apex-data-migration-safe)
-  3. Deployment Phase (apex-api-client-safe)
-  4. Testing Phase (apex-automated-testing-safe)
-  5. Verification & Reporting (internal)
+  3. Testing Phase (apex-automated-testing-safe)
+  4. Verification & Reporting (design outline, not an executable full pipeline)
 ```
+
+APEX artifact import, when requested, is a separate operation through
+`apex-page-automation-safe` and the configured native route. The prototype
+does not deploy through an API client.
 
 ---
 
@@ -157,13 +160,13 @@ DEPENDENCIES:
 COORDINATES:
   - apex-schema-automation-safe (DDL governance)
   - apex-data-migration-safe (DATA governance)
-  D ▶ skills/oracle-data-change-governance-final/scripts/validate_sql_style.py (security gate)
+  - SQL style validator: `skills/oracle-data-change-governance-final/scripts/validate_sql_style.py`
 
-BLOCKS:
-  C ✗ No direct SQL execution (use orchestrators)
+This governance skill documents controls; it does not prohibit the user-requested
+direct Oracle route or require an orchestrator.
 ```
 
-### apex-data-orchestrator-safe (NEW - Coordinador Tercio)
+### apex-data-orchestrator-safe (L2 Focused Workflow Outline; not operational end-to-end)
 ```
 DEPENDENCIES:
   D ▶ oracle-data-change-governance-final (governance)
@@ -171,13 +174,32 @@ DEPENDENCIES:
 COORDINATES:
   - apex-schema-automation-safe (create schema)
   - apex-data-migration-safe (migrate data)
-  - apex-api-client-safe (sync to APEX)
 
 SEQUENCE:
   1. apex-schema-automation-safe (DDL)
   2. oracle-data-change-governance-final (validate)
   3. apex-data-migration-safe (ETL)
-  4. apex-api-client-safe (sync)
+  4. Optional APEX artifact import via `apex-page-automation-safe` and the configured native route; this is not data synchronization and is not implemented by this prototype.
+```
+
+### apex-data-migration-safe (specialist)
+```
+SKILL-DECLARED ADJACENCIES:
+  - apex-api-client-safe: explicitly retired; not a prerequisite or execution route
+  - apex-code-generation-safe: related generated-object migration context
+  - apex-schema-automation-safe: related schema-creation context
+  - apex-delivery-lifecycle-safe: optional lifecycle context
+
+OPERATIONAL STATUS:
+  - See the skill's current frontmatter and implementation evidence; this map does not certify Oracle execution.
+```
+
+### apex-external-context-learn (specialist)
+```
+SKILL DEPENDENCIES: None declared.
+SKILL COORDINATORS: None declared.
+SUPPORTING CODE: scripts/external_repo_scanner.py and scripts/external_repo_indexer.py
+OUTPUT: Saved external-repository context for later use when requested.
 ```
 
 ---
@@ -188,11 +210,10 @@ SEQUENCE:
 ```
 DEPENDENCIES:
   D ▶ apex-schema-automation-safe (schema exists)
-  I ⊳ apex-blueprint-design-safe (approved design)
+  I ⊳ apex-blueprint-design-safe (optional design context)
 
 COORDINATES:
   - apex-schema-automation-safe (input schema)
-  - apex-api-client-safe (deployment)
   - apex-automated-testing-safe (testing)
 
 PRODUCES:
@@ -204,7 +225,7 @@ PRODUCES:
 ### apex-page-automation-safe
 ```
 DEPENDENCIES:
-  D ▶ apex-blueprint-design-safe (approved design)
+  D ▶ apex-blueprint-design-safe (design input, not an approval gate)
   D ▶ apex-export-qa-safe (QA before edit)
 
 COORDINATES:
@@ -270,7 +291,7 @@ PRODUCES:
 DEPENDENCIES:
   D ▶ apex-export-qa-safe (validate source)
   I ⊳ apex-environment-alignment-complete (existing pages)
-  I ⊳ apex-blueprint-design-safe (approved design)
+  I ⊳ apex-blueprint-design-safe (optional design context)
 
 COORDINATES:
   - apex-export-qa-safe (validation)
@@ -284,7 +305,7 @@ OPERATIONS:
   - Refactor existing components
 ```
 
-### apex-design-review-orchestrator (NEW - Coordinador Cuaternario)
+### apex-design-review-orchestrator (L2 Focused Orchestrator)
 ```
 DEPENDENCIES:
   D ▶ apex-solution-design (high level)
@@ -326,12 +347,11 @@ VALIDATES:
 ```
 DEPENDENCIES:
   D ▶ apex-code-generation-safe (generated code)
-  I ⊳ apex-api-client-safe (test setup)
 
 COORDINATES:
   - apex-code-generation-safe (test target)
   - apex-page-automation-safe (page structure)
-  - apex-api-client-safe (setup/teardown)
+  - Configured target application and credentials (not a skill dependency)
 
 TEST TYPES:
   - UI tests (Selenium)
@@ -339,7 +359,7 @@ TEST TYPES:
   - Regression tests
 ```
 
-### apex-qa-orchestrator-safe (NEW - Coordinador Cuaternario)
+### apex-qa-orchestrator-safe (L2 Focused Orchestrator)
 ```
 DEPENDENCIES:
   D ▶ apex-export-qa-safe (static QA)
@@ -355,7 +375,7 @@ SEQUENCE:
   1. apex-export-qa-safe (static validation)
   2. apex-automated-testing-safe (automated testing)
   3. apex-environment-alignment-complete (environment validation)
-  4. Gate: Release approved
+  4. Provide environment alignment evidence for the requested scope
 ```
 
 ---
@@ -371,7 +391,7 @@ DEPENDENCIES:
 COORDINATES:
   - apex-database-diagnostics (diagnostics)
   - apex-engineering-safe (changes to existing)
-  - apex-api-client-safe (deployment)
+  - `apex-page-automation-safe` and configured native route for component imports
 
 VALIDATES:
   - TEST ↔ PROD alignment
@@ -381,20 +401,11 @@ VALIDATES:
 
 ### apex-api-client-safe
 ```
-DEPENDENCIES:
-  D ▶ apex-code-generation-safe (code to deploy)
-  D ▶ apex-schema-automation-safe (schema setup)
-
-COORDINATES:
-  - apex-code-generation-safe (input)
-  - apex-automated-testing-safe (post-deployment)
-  - apex-schema-automation-safe (setup)
-  - apex-data-migration-safe (data sync)
-
-OPERATIONS:
-  - Deploy to APEX instances
-  - Sync across environments
-  - Rollback if needed
+Status: retired; compatibility name and invocation entry retained.
+Operational dependencies, coordination edges, and deployment/synchronization
+capabilities: none. The remaining body of its SKILL.md is historical context.
+For APEX component import use `apex-page-automation-safe` and the configured
+native route in `docs/CAPACIDADES-CONTROLADAS-ORACLE-APEX.md`.
 ```
 
 ---
@@ -410,26 +421,8 @@ COORDINATES:
   - apex-engineering-safe (before page creation)
   - apex-page-automation-safe (page automation)
 
-GATES:
-  - Reserve page ranges
-  - Validate no conflicts
-  - Required before new pages
-```
-
-### oracle-data-change-governance-final
-```
-DEPENDENCIES:
-  I ⊳ apex-database-diagnostics (validate before)
-
-COORDINATES:
-  - apex-schema-automation-safe (DDL)
-  - apex-data-migration-safe (DATA)
-  D ▶ skills/oracle-data-change-governance-final/scripts/validate_sql_style.py (security)
-
-GATES:
-  - All DATA changes must pass governance
-  - No direct execution (orchestrated)
-  - Audit trail required
+WHEN USED:
+  - Reserve and validate page ranges when the requested work needs allocation.
 ```
 
 ### apex-audit-decisions-log
@@ -529,7 +522,7 @@ DEPENDENCIES:
 
 COORDINATES:
   - apex-solution-design (design contracts)
-  - apex-api-client-safe (REST integrations)
+  - REST source design only; no APEX deployment dependency
 
 ANALYZES:
   - Fusion REST catalogs
@@ -554,7 +547,7 @@ REVIEWS:
 ### apex-user-manual
 ```
 DEPENDENCIES:
-  D ▶ apex-export-qa-safe (approved QA)
+  D ▶ apex-export-qa-safe (QA evidence, when available)
 
 COORDINATES:
   - apex-export-qa-safe (evidence source)
@@ -591,45 +584,37 @@ PROVIDES:
 
 | Orchestrator | Level | Depends On | Coordinates | Skills |
 |---|---|---|---|---|
-| **apex** | Maestro | None | All | 26 |
-| **apex-delivery-lifecycle-complete** | Secundario | apex-project-bootstrap-final | 7 | 7 |
-| **apex-delivery-lifecycle-safe** | Secundario | apex-project-workspace | 7 | 7 |
-| **apex-delivery-lifecycle-zaimella** | Secundario | Zaimella + lifecycle | 2 | 2 |
-| **apex-application-generator-complete** | Terciario | HITOs 1-5 | 4 | 4 |
-| **apex-data-orchestrator-safe** | Cuaternario | governance | 3 | 3 |
-| **apex-qa-orchestrator-safe** | Cuaternario | QA skills | 3 | 3 |
-| **apex-design-review-orchestrator** | Cuaternario | Design skills | 3 | 3 |
+| **apex** | L0 Entry coordinator | Routes by request | Specialist and workflow routes | 1 |
+| **apex-delivery-lifecycle-complete** | L1 Workflow orchestrator | Project bootstrap | Lifecycle specialists | 7* |
+| **apex-delivery-lifecycle-safe** | L1 Workflow orchestrator | Project workspace | Lifecycle specialists | 7* |
+| **apex-delivery-lifecycle-zaimella** | L1 Workflow orchestrator | GPZ method | Lifecycle workflow | 2* |
+| **apex-application-generator-complete** | L1 Workflow prototype | Application generation | 3 declared skill edges; deployment route is separate | 3 |
+| **apex-data-orchestrator-safe** | L2 Workflow outline | Data governance | 2 declared skill edges; APEX import is separate |
+| **apex-qa-orchestrator-safe** | L2 Focused orchestrator | QA evidence | 3 declared skills |
+| **apex-design-review-orchestrator** | L2 Focused orchestrator | Design review | 3 declared skills |
+
+`*` Counts are legacy declarations and need edge-by-edge evidence before use.
 
 ---
 
 ## Circular Dependency Check
 
-✅ **No circular dependencies found** - All flows are acyclic.
+**Not verified.** The legacy graph has not been reconstructed from all active skill files; no acyclic-graph claim is made.
 
 ```
-Entry Point: apex
-↓
-Coordinators (4 levels)
-↓
-Technical Skills (26 end nodes)
+L0: apex entry coordinator
+L1: four broad workflow orchestrators
+L2: three focused workflow orchestrators
+L3: 22 active domain specialists (the retired API compatibility entry is excluded)
 ```
 
 ---
 
-## Version Compatibility
+## Runtime compatibility
 
-| Skill | Min Version | Max Version | Breaking Changes |
-|-------|---|---|---|
-| apex | 1.0 | current | routing.md changes require apex update |
-| apex-code-generation-safe | 1.0 | current | HITO 1 - stable |
-| apex-data-migration-safe | 1.0 | current | HITO 4 - stable |
-| apex-automated-testing-safe | 1.0 | current | HITO 3 - stable |
-| apex-api-client-safe | 1.0 | current | HITO 2 - stable |
-| All others | 1.0 | current | Stable - safe to upgrade |
+This static dependency map does not certify runtime compatibility. Check the
+skill's current frontmatter and the configured target before claiming execution.
 
 ---
 
-**Last validated:** 2026-09-17
-**Total dependency edges:** 89
-**Orchestration levels:** 4
-**Max depth (entry → leaf):** 3 hops
+**Full edge count, cycle status, and maximum depth:** pending revalidation.

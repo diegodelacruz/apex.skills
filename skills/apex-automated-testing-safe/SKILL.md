@@ -18,6 +18,13 @@ status: active
 
 # apex-automated-testing-safe
 
+> **El generador crea código de prueba; no configura ni despliega el entorno.**
+> Usa una aplicación accesible en el ambiente solicitado y las credenciales
+> configuradas. `apex-api-client-safe` está retirado y no debe usarse para crear,
+> limpiar ni preparar entornos de prueba. Usa las rutas APEX configuradas y
+> `apex-environment-alignment-complete` cuando la validación de ambiente aporte
+> evidencia.
+
 Automated testing framework for Oracle APEX: Selenium test generation, performance testing, and regression validation.
 
 ## Overview
@@ -137,9 +144,9 @@ validator = TestGeneratorFactory.create_generator('regression')
 
 ## Integration
 
-Works seamlessly with:
+Related workflows:
 - `apex-code-generation-safe` (generated app testing)
-- `apex-api-client-safe` (API-based test setup)
+- `apex-environment-alignment-complete` (environment comparison when useful)
 - `apex-delivery-lifecycle-safe` (test in deployment)
 - `apex-page-automation-safe` (page structure understanding)
 

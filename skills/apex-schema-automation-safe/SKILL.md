@@ -98,7 +98,7 @@ Infer these from the conversation and the database — do not interview the user
 
 1. Use the environment named by the user or resolve it from context and the configured `DB_ENV` profile when omitted. Oracle operations use the selected account's effective grants.
 2. Keep changes within the requested objects and operations.
-3. **No hardcoded credentials.** All database connections use keyring-managed profiles (via `run_apex_mcp_with_profile.py`). Never embed passwords in DDL, logs, or scripts.
+3. **No hardcoded credentials.** All database connections read the selected profile from the ignored repository-root `.env` (via `run_apex_mcp_with_profile.py`). Never embed passwords in DDL, logs, or scripts.
 4. **Report permission results.** Oracle decides the grants for the connected account; report a returned denial and continue independent requested work.
 5. **Handle constraints and dependencies.** Tables with FK must create parent table first; dropping a table with FK requires CASCADE or explicit FK removal first. Procedures/functions must reference existing tables; views must reference existing tables/views.
 6. **Rollback information.** Explain rollback options when relevant. Oracle DDL may commit implicitly.

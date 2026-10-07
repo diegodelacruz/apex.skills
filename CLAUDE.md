@@ -6,7 +6,7 @@
 
 **apex.skills** is a canonical framework for Oracle APEX application development and deployment. It provides:
 
-- **31 skills** (25 technical + 6 orchestrators) for design, engineering, QA, governance, lifecycle management, project methodology, and workflow coordination
+- **31 skill entries** (1 entry coordinator, 7 orchestrators, 22 active specialists, and 1 retired compatibility entry); development outlines are labeled in their metadata
 - **Security-hardened pre-commit hooks** for code quality, secrets detection, and exception validation
 - **Comprehensive audit trail system** (Git-based, zero-token automatic capture)
 - **Governance templates** for page ranges, DATA changes, and environment alignment
@@ -78,7 +78,10 @@ apex.skills/
 │   ├── TESTING.md             # Testing guide and coverage info
 │   ├── ARCHITECTURE.md        # System architecture documentation
 │   ├── GUIA-CREAR-NUEVA-SKILL.md # Normative guide for new skills
-│   └── [other reference docs]
+│   ├── POLITICA-EVOLUCION-ECOSISTEMA.md # Mandatory ecosystem evolution policy
+│   ├── SECURITY-THREATS.md   # Security threat model and risks
+│   ├── ORACLE-APEX-DOCUMENTATION-POLICY.md # APEX documentation and standards policy
+│   └── [other guides and policies; see docs/ for the complete inventory]
 │
 ├── scripts/
 │   ├── cli_utils.py           # Unified argument parsing (CLIParser class)
@@ -89,19 +92,22 @@ apex.skills/
 │   └── [other utility scripts]
 │
 ├── skills/
-│   ├── README.md              # Master navigation guide (31 skills: 25 technical + 6 orchestrators)
+│   ├── README.md              # Master navigation guide (31 entries: 1 coordinator + 7 workflow roles + 22 active specialists + 1 retired entry)
 │   ├── SKILLS-QUICK-REFERENCE.md  # Quick lookup tables
 │   ├── apex/                  # Maestro coordinator (routes requests)
-│   ├── apex-application-generator-complete/  # Orchestrator for end-to-end APEX app generation
-│   ├── apex-data-orchestrator-safe/  # Orchestrator for data workflows
+│   ├── apex-application-generator-complete/  # DEVELOPMENT - API deployment phase is non-operational
+│   ├── apex-data-orchestrator-safe/  # DEVELOPMENT - APEX import is separate
 │   ├── apex-design-review-orchestrator/  # Orchestrator for design review
 │   ├── apex-qa-orchestrator-safe/  # Orchestrator for QA workflows
-│   ├── apex-delivery-lifecycle-zaimella/  # Orchestrator for Zaimella + APEX delivery
+│   ├── apex-delivery-lifecycle-zaimella/  # DEVELOPMENT - GPZ + APEX delivery workflow
 │   ├── apex-audit-decisions-log/  # Audit trail viewer
 │   ├── apex-database-diagnostics/
 │   ├── apex-delivery-lifecycle-complete/
 │   ├── apex-delivery-lifecycle-safe/
+│   ├── apex-automated-testing-safe/  # DEVELOPMENT - Selenium testing framework
 │   ├── apex-engineering-safe/
+│   ├── apex-code-generation-safe/  # DEVELOPMENT - code generation framework
+│   ├── apex-data-migration-safe/  # DEVELOPMENT - ETL/migration framework
 │   ├── apex-blueprint-design-safe/  # Reviewable blueprints
 │   ├── apex-environment-alignment-complete/
 │   ├── apex-export-qa-safe/
@@ -143,12 +149,12 @@ apex.skills/
 
 ## Skills Organization
 
-All 31 skills (25 technical + 6 orchestrators) are organized with:
+All 31 skill entries (1 entry coordinator + 7 workflow roles + 22 active specialists + 1 retired compatibility entry) are organized with:
 - **"Apex" prefix** (no emojis) for clear branding
 - **Alphabetical ordering** in menus
-- **Unique order numbers** for display sequencing
+- **Order values** for display sequencing; the duplicate `3.5` values are intentionally retained pending verification of external discovery consumers. Do not renumber from this document alone.
 - **Comprehensive tags** for filtering by workflow, access level, cost
-- **3-level orchestration hierarchy:** 1 Maestro (apex) → 5 Coordinators → 25 Technical Skills
+- **4-level role hierarchy:** L0 entry coordinator (`apex`) → L1 broad orchestrators (4 lifecycle/application flows) → L2 focused orchestrators (3 workflows) → L3 active specialists (22); the retired compatibility entry is outside active routing. Development status is a separate metadata field.
 
 ### Skill Categories
 
@@ -184,9 +190,15 @@ All 31 skills (25 technical + 6 orchestrators) are organized with:
 | Apex Page Automation | apex-page-automation-safe | 19 |
 | Apex Database & Schema | apex-schema-automation-safe | 20 |
 | Apex Testing | apex-automated-testing-safe | 21 |
-| Apex API & Integration | apex-api-client-safe | 22 |
+| Apex Integration (Retired) | apex-api-client-safe | 22 |
 | Apex Code Generation | apex-code-generation-safe | 24 |
 | Apex Data Migration | apex-data-migration-safe | 25 |
+
+`apex-api-client-safe` is a retired compatibility entry with no operational
+REST deployment capability. Its invocation name remains for historical
+context; do not use it for Oracle APEX deployment. Use the authenticated
+App Builder or native export/import workflow documented in
+`docs/CAPACIDADES-CONTROLADAS-ORACLE-APEX.md`.
 
 ---
 
@@ -207,15 +219,20 @@ python3 -m pytest tests/ -v
 
 ### 2. Pre-Commit Hooks
 
-Automatically run on every commit:
+The `.pre-commit-config.yaml` defines 15 pre-commit hooks. The separate
+`.hooks/pre-commit.sh` script captures the local audit trail when installed as
+the Git pre-commit hook; it is not one of those 15 configured pre-commit hooks.
 
-1. **detect-secrets** - Scan for private keys and credentials
-2. **Black** - Format Python code (120-char line length)
-3. **isort** - Sort imports consistently
-4. **Bandit** - Security linting (73 checks)
-5. **Flake8** - Code quality linting
-6. **validate-exception-handling** - Reject bare `except:` blocks
-7. **audit-trail-capture** - Record changes in `.bitacora.json` (zero-token)
+**File validation:** `detect-secrets` (v1.5.0), `detect-private-key`,
+`check-yaml`, `check-json`, `check-added-large-files` (6000 KB limit),
+`end-of-file-fixer`, `trailing-whitespace`, and `mixed-line-ending` (fix to LF).
+
+**Code quality and security:** `black` (Python 3.13, 120 characters), `isort`
+(Black profile, 120 characters), `flake8` (120 characters), and `bandit`
+(`.bandit.yaml` configuration; tests excluded).
+
+**Repository validation:** `ecosystem-audit`, `markdown-link-audit`, and
+`validate-exception-handling` (Python files only).
 
 ### 3. Testing
 
@@ -223,12 +240,14 @@ Automatically run on every commit:
 # Run all tests
 pytest tests/ -v
 
-# Run with coverage
-pytest tests/ --cov=scripts --cov-report=html
+# Run with coverage (pytest.ini configures scripts and skills)
+pytest tests/ --cov-report=html
 
-# Run specific test markers
-pytest tests/ -m unit              # Unit tests only
-pytest tests/ -m requires_oracle   # Tests needing Oracle connection
+# Run specific test markers (integration tests may require Oracle)
+pytest tests/ -m unit
+pytest tests/ -m integration
+pytest tests/ -m requires_oracle
+pytest tests/ -m e2e
 ```
 
 ### 4. Code Quality Standards
@@ -242,7 +261,8 @@ pytest tests/ -m requires_oracle   # Tests needing Oracle connection
 
 ### 5. Audit Trail
 
-Every commit automatically captures:
+When the repository's Git pre-commit capture hook is installed, it records
+staged changes locally before each commit:
 - Timestamp (ISO 8601)
 - Author and email
 - Branch name
@@ -254,7 +274,9 @@ Every commit automatically captures:
 /apex-audit-decisions-log
 ```
 
-This runs the new skill to visualize, filter, and export audit data.
+The file is ignored by Git, so it remains local to this checkout and is not a
+centralized team audit record. Use Git history as the versioned record; export
+the local audit data explicitly when it needs to be shared.
 
 ---
 
@@ -287,7 +309,7 @@ Security scanning configuration:
 Template for MCP (Model Context Protocol) configuration:
 - Environment variables for MCP profiles
 - Connection settings for TEST and production
-- Credentials storage via system keyring
+- Credentials are read from the repository-root `.env`
 
 ---
 
@@ -325,22 +347,22 @@ Centralized path handling:
 ```python
 from scripts.path_setup import get_repo_root, get_script_dir
 
-repo = get_repo_root()  # /home/user/apex.skills
-scripts_dir = get_script_dir()  # /home/user/apex.skills/scripts
+repo = get_repo_root()  # <ruta-a-la-raiz-del-repositorio>
+scripts_dir = get_script_dir()  # <ruta-a-la-raiz-del-repositorio>/scripts
 ```
 
 ---
 
 ## Testing & Coverage
 
-- **485 tests** (latest complete suite: 100% pass rate)
-- **Coverage floor:** 55% (measured 56.63%); long-term target: 80%
-- **Test markers:** unit, integration, slow, requires_oracle
+- **509 tests** (latest recorded complete suite: 100% pass rate)
+- **Coverage floor:** 55% (latest combined result: 57.94%); long-term target: 80%
+- **Test markers:** unit, integration, slow, requires_oracle, e2e (see `pytest.ini`)
 - **Frameworks:** pytest (main), pytest-cov (coverage)
 
 Run coverage report:
 ```bash
-pytest tests/ --cov=scripts --cov-report=html
+pytest tests/ --cov-report=html
 open htmlcov/index.html
 ```
 
@@ -357,11 +379,11 @@ open htmlcov/index.html
 
 ### Credentials Management
 
-**NEVER** hardcode credentials. Use secure per-user profiles:
+**NEVER** hardcode credentials. Use the ignored repository-root `.env`:
 
 ```bash
 python3 scripts/manage_apex_credentials.py set --environment test
-# Credentials stored in system keyring (not git, not files)
+# Writes credentials to the ignored local .env; do not commit or share it
 
 python3 scripts/manage_apex_credentials.py probe --environment test
 # Read-only session identity check against dual

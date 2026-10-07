@@ -2,15 +2,19 @@
 
 ## Credenciales
 
-Las credenciales se mantienen fuera del repositorio. Un perfil local es un medio de conexión, no una condición para proceder; use la herramienta disponible con el ambiente y alcance indicados por el usuario.
+Todas las herramientas locales de este repositorio leen sus perfiles Oracle y
+APEX del archivo `.env` ignorado por Git en la raíz. El proceso no recurre a
+variables de proceso ni almacenes del sistema para completar perfiles.
+El archivo contiene secretos en texto plano: limita el acceso al archivo y no
+lo compartas ni lo agregues al repositorio. Los perfiles anteriores de otros
+almacenes pueden permanecer, pero no se consultan.
 
-| Plataforma | Almacén recomendado |
-| --- | --- |
-| Windows | Credential Manager o SecretManagement |
-| macOS | Keychain |
-| Linux | Secret Service |
-
-El perfil/credencial configurado para el ambiente solicitado determina la identidad de conexión. Los privilegios efectivos concedidos por el DBA/APEX administrator determinan qué operaciones son posibles; no hay usuarios ni grants hardcodeados en las skills. Al inicio, use inspección de solo lectura para confirmar cuenta y destino reales y, cuando esté disponible, privilegios de sesión. Un error de conexión o permiso se reporta desde la herramienta y no se reemplaza silenciosamente el ambiente solicitado. El sondeo de grants es informativo, no sustituye la autorización efectiva que Oracle/APEX comprueba al ejecutar.
+El perfil elegido para el ambiente solicitado determina la identidad de
+conexión. Los privilegios efectivos concedidos por el DBA/APEX administrator
+determinan qué operaciones son posibles; no hay usuarios ni grants hardcodeados
+en las skills. Al inicio, confirma cuenta y destino reales con una inspección
+de solo lectura. Un error de conexión o permiso se reporta desde la herramienta
+y no se reemplaza silenciosamente el ambiente solicitado.
 
 ## Edición de páginas existentes
 

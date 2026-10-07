@@ -1,22 +1,17 @@
 #!/usr/bin/env python3
-"""Start apex-mcp with a TEST or production profile held in the OS keyring.
+"""Start the managed APEX MCP with credentials read from the repository .env."""
 
-Retrieves credentials from the system keyring, maps them to the environment
-variables apex-mcp expects, and launches the MCP server subprocess.
+from __future__ import annotations
 
-Status: ACTIVE
-Tests: Infrastructure script (no automated tests)
-Dependencies: keyring, manage_apex_credentials.py (for profile setup)
-"""
-
-import json
 import os
 import subprocess
 import sys
+from pathlib import Path
 
 from cli_utils import CLIParser, configured_environment, exit_with_error
+from manage_apex_credentials import discover_apex_metadata, get_profile, oracle_error_code
 
-SERVICE = "apex-skills"
+ROOT = Path(__file__).resolve().parent.parent
 REQUIRED_MAPPING = {
     "ORACLE_DB_USER": "db_user",
     "ORACLE_DB_PASS": "db_pass",  # pragma: allowlist secret
@@ -32,43 +27,40 @@ OPTIONAL_MAPPING = {
 
 
 def main() -> None:
-    parser = CLIParser("Start apex-mcp with a secure profile from OS keyring")
+    parser = CLIParser("Start apex-mcp with credentials from the repository .env")
     parser.add_environment_arg(default=configured_environment())
     parser.add_argument("mcp_args", nargs="*", help="Additional arguments to pass to apex-mcp")
     args = parser.parse_args()
     if args.environment is None:
         exit_with_error(
-            "No target environment selected; set DB_ENV in .env or pass --environment.",
-            "ENVIRONMENT_REQUIRED",
+            "No target environment selected; set DB_ENV in .env or pass --environment.", "ENVIRONMENT_REQUIRED"
         )
 
-    try:
-        import keyring
-    except ImportError:
-        exit_with_error("Missing dependency: keyring. Install requirements.txt in the shared skills environment.")
+    profile = get_profile(args.environment)
+    if not profile:
+        exit_with_error(f"Incomplete .env Oracle profile for {args.environment}.", "ENV_PROFILE_INCOMPLETE")
+    metadata_fields = ("workspace_id", "schema", "workspace_name")
+    if not all(profile.get(field) for field in metadata_fields):
+        try:
+            profile = discover_apex_metadata(profile)
+        except Exception as error:
+            code = oracle_error_code(error)
+            suffix = f" error=ORA-{code}" if code else f" error={type(error).__name__}"
+            exit_with_error(
+                f"Cannot prepare the .env profile for the selected APEX workspace:{suffix}", "ENV_PROFILE_INVALID"
+            )
 
-    raw_profile = keyring.get_password(SERVICE, args.environment)
-    if not raw_profile:
-        exit_with_error(f"Missing secure profile: {args.environment}. Import or set it first.")
-        return
-    try:
-        profile = json.loads(raw_profile)
-    except json.JSONDecodeError:
-        exit_with_error(f"Invalid secure profile: {args.environment}. Import or set it again.")
-
-    missing = [
-        environment_name for environment_name, profile_name in REQUIRED_MAPPING.items() if not profile.get(profile_name)
-    ]
+    missing = [name for name, profile_name in REQUIRED_MAPPING.items() if not profile.get(profile_name)]
     if missing:
-        exit_with_error("Incomplete secure profile; missing mapped values: " + ", ".join(missing))
+        exit_with_error("Incomplete .env profile; missing workspace metadata: " + ", ".join(missing))
 
     environment = os.environ.copy()
+    for name in (*REQUIRED_MAPPING, *OPTIONAL_MAPPING):
+        environment.pop(name, None)
     for environment_name, profile_name in {**REQUIRED_MAPPING, **OPTIONAL_MAPPING}.items():
         if profile.get(profile_name):
             environment[environment_name] = str(profile[profile_name])
 
-    # On Windows, os.execvpe can terminate the stdio process before Codex CLI
-    # receives the initialize response. subprocess.run preserves MCP stdio handles.
     result = subprocess.run(
         [sys.executable, "-m", "apex_mcp", *args.mcp_args],
         env=environment,

@@ -4,7 +4,7 @@ Framework canónico para agentes que desarrollan, validan, liberan y documentan 
 
 La calidad del repositorio se mide con la [Matriz de calidad interagentes](docs/MATRIZ-CALIDAD-INTERAGENTES.md) y el auditor reproducible `python .\scripts\audit_quality_score.py`; un `FAIL` bloquea la publicación.
 
-**Inventario actual:** 31 skills (25 técnicas + 6 orquestadores), verificadas por el auditor.
+**Inventario actual:** 31 skills (31 entradas): 1 coordinador de entrada, 7 roles orquestadores, 22 especialistas activos y 1 entrada retirada de compatibilidad. Los roles en desarrollo están identificados en los metadatos.
 
 **Para developers:** Consulte [CLAUDE.md](CLAUDE.md) — estructura del repositorio, configuración, y desarrollo.
 

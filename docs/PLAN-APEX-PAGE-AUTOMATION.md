@@ -83,7 +83,7 @@
 
 | Riesgo | Probabilidad | Impacto | Mitigación |
 |--------|--------------|--------|-----------|
-| Credenciales comprometidas en logs | Media | Crítico | Nunca loguear password; usar keyring; revisar logs en pre-commit |
+| Credenciales comprometidas en logs | Media | Crítico | Leer desde `.env` ignorado por Git; nunca loguear password; revisar logs con detect-secrets |
 | Colisión de page_numbers | Media | Alto | Validar disponibilidad antes de crear; ofrecer auto-número |
 | Corrupción de wwv_flow_* tables | Baja | Crítico | Snapshots de DB; rollback transaccional; backup pre-operación |
 | User sin permisos en workspace | Alta | Medio | Validar acceso en pre-flight; mostrar error claro |

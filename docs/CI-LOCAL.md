@@ -23,19 +23,31 @@ Después de actualizar `requirements.txt`, repetir el último comando.
 ```
 
 El runner comprueba la versión Python, la consistencia de dependencias con
-`pip check`, la auditoría del ecosistema, la puntuación de calidad, la suite
+`pip check`, la auditoría del ecosistema, la cobertura y enlaces Markdown de
+todo el repositorio con `scripts/audit_markdown_links.py`, la puntuación de calidad, la suite
 completa con cobertura, Black, isort, flake8, mypy, Bandit, detect-secrets y
 `git diff --check`. Termina en el primer fallo.
 La política canónica exige ejecutar este comando antes de cada commit o pull
 request; GitHub Actions ejecuta el mismo runner.
 
+El hook de pre-commit ejecuta el mismo `scripts/audit_markdown_links.py`. Su
+salida concilia Markdown versionado encontrado en disco, incluye Markdown
+pertinente no versionado, informa exclusiones y distingue enlaces locales,
+externos rotos y externos no verificables. Un resultado incompleto o roto
+devuelve un código distinto de cero. Se excluyen `.git`, entornos virtuales,
+cachés, checkouts locales `.upstreams` y snapshots binarios bajo
+`vendor/upstreams`; los upstreams se validan por sus propios controles de
+origen/sincronización, no como Markdown mantenido directamente en este repo.
+El índice Git actual no registra submódulos; si se agrega alguno, el auditor
+falla cerrado hasta que cada submódulo tenga una auditoría de Markdown anidada
+desde su propia raíz.
+
 ## Cobertura
 
 El umbral combinado de líneas ejecutables y destinos de ramas es **55%**; no
 exige que las métricas de líneas y ramas alcancen 55% cada una. El último
-reporte dio 60.65% de líneas, 43.12% de ramas y 56.63% combinado con 485
-pruebas aprobadas. La meta
-gradual del combinado es **80%**. `coverage.py` excluye ramas y líneas
+último runner local (2026-09-30) aprobó 509 pruebas con 57.94% de cobertura
+combinada. La meta gradual del combinado es **80%**. `coverage.py` excluye ramas y líneas
 justificadas por su configuración, pero cobertura no demuestra por sí sola que
 las pruebas sean correctas ni que validen todos los casos. Cada aumento del
 piso requiere primero pruebas que alcancen el nuevo valor.

@@ -1,16 +1,11 @@
 <#
 .SYNOPSIS
-    Loads the Oracle connection for SQLcl from .env or environment variables.
+    Loads the Oracle connection for SQLcl from the repository .env.
 .DESCRIPTION
     Sets $env:APEX_SQLCL_CONN with a SQLcl-compatible connection string.
-    Never stores credentials in this file. Reads from:
-      1. .env file in repo root (DB_TESTING_* or DB_PRODUCTION_* variables)
-      2. Existing environment variables
-      3. Interactive prompt (if neither source available)
+    Reads credentials only from the repository-root .env file.
 .PARAMETER Environment
     Target environment: testing or production. If omitted, use DB_ENV from the selected .env file.
-.PARAMETER EnvFile
-    Path to .env file. Default: repo root .env.
 .EXAMPLE
     . .\scripts\Initialize-OracleConnection.ps1
     . .\scripts\Initialize-OracleConnection.ps1 -Environment production
@@ -18,22 +13,18 @@
 
 param(
     [ValidateSet("test", "testing", "prod", "production")]
-    [string]$Environment,
-
-    [string]$EnvFile
+    [string]$Environment
 )
 
 $ErrorActionPreference = "Stop"
 $repoRoot = Split-Path -Parent $PSScriptRoot
 
-if (-not $EnvFile) {
-    $EnvFile = Join-Path $repoRoot ".env"
-}
+$EnvFile = Join-Path $repoRoot ".env"
 
 # SQLcl path — prefer VS Code extension (latest), fallback to standalone
 $sqlclCandidates = @(
     (Get-ChildItem "$env:USERPROFILE\.vscode\extensions\oracle.sql-developer-*\dbtools\sqlcl\bin\sql.exe" -ErrorAction SilentlyContinue | Sort-Object FullName -Descending | Select-Object -First 1),
-    (Get-Item "D:\Users\ddelacruz\Downloads\sqldeveloper_17_4\SQL Developer\sqldeveloper\bin\sql.exe" -ErrorAction SilentlyContinue)
+    (Get-Item (Join-Path $env:USERPROFILE "Downloads\sqldeveloper_17_4\SQL Developer\sqldeveloper\bin\sql.exe") -ErrorAction SilentlyContinue)
 )
 $sqlclPath = ($sqlclCandidates | Where-Object { $_ -ne $null } | Select-Object -First 1).FullName
 
@@ -52,7 +43,16 @@ if (Test-Path $EnvFile) {
         if ($line -and -not $line.StartsWith("#")) {
             $parts = $line -split "=", 2
             if ($parts.Count -eq 2) {
-                $envVars[$parts[0].Trim()] = $parts[1].Trim()
+                $key = $parts[0].Trim()
+                $value = $parts[1].Trim()
+                if ($value.Length -ge 2 -and $value[0] -eq $value[$value.Length - 1] -and $value[0] -in @("'", '"')) {
+                    $quote = [string]$value[0]
+                    $value = $value.Substring(1, $value.Length - 2)
+                    $value = $value.Replace("\\", "\").Replace("\$quote", $quote)
+                } else {
+                    $value = ($value -split " #", 2)[0].TrimEnd()
+                }
+                $envVars[$key] = $value
             }
         }
     }
@@ -61,7 +61,6 @@ if (Test-Path $EnvFile) {
 
 if (-not $Environment) {
     $Environment = $envVars["DB_ENV"]
-    if (-not $Environment) { $Environment = [Environment]::GetEnvironmentVariable("DB_ENV") }
 }
 
 if (-not $Environment) {
@@ -85,8 +84,6 @@ $prefix = if ($Environment -eq "production") { "DB_PRODUCTION" } else { "DB_TEST
 function Get-EnvOrFile {
     param([string]$Key)
     if ($envVars.ContainsKey($Key)) { return $envVars[$Key] }
-    $envVal = [Environment]::GetEnvironmentVariable($Key)
-    if ($envVal) { return $envVal }
     return $null
 }
 
@@ -96,8 +93,8 @@ $host_    = Get-EnvOrFile "${prefix}_HOST"
 $port     = Get-EnvOrFile "${prefix}_PORT"
 $sid      = Get-EnvOrFile "${prefix}_SID"
 
-if (-not $user -or -not $password -or -not $host_ -or -not $sid) {
-    Write-Warning "Incomplete connection for $Environment. Set ${prefix}_USER, ${prefix}_PASSWORD, ${prefix}_HOST, ${prefix}_SID in .env or environment."
+if (-not $user -or -not $password -or -not $host_ -or -not $port -or -not $sid) {
+    Write-Warning "Incomplete connection for $Environment. Set ${prefix}_USER, ${prefix}_PASSWORD, ${prefix}_HOST, ${prefix}_SID in the repository .env."
     Write-Host "Required variables:" -ForegroundColor Yellow
     @("${prefix}_USER", "${prefix}_PASSWORD", "${prefix}_HOST", "${prefix}_PORT", "${prefix}_SID") | ForEach-Object {
         $val = Get-EnvOrFile $_

@@ -24,6 +24,7 @@ def main() -> int:
     commands: Sequence[Sequence[str]] = [
         [sys.executable, "-m", "pip", "check"],
         [sys.executable, "scripts/audit_skill_ecosystem.py"],
+        [sys.executable, "scripts/audit_markdown_links.py"],
         [sys.executable, "scripts/audit_quality_score.py"],
         [
             sys.executable,
@@ -74,6 +75,7 @@ def run_secret_scan() -> int:
     original = json.loads(baseline_path.read_text(encoding="utf-8"))
     temp_path: Path | None = None
     exclude_files = (
+        r"(^|[\\/])\.claude[\\/]worktrees([\\/]|$)|"
         r"(^|[\\/])(\.git|\.env|\.mypy_cache|\.pytest_cache|\.venv|\.upstreams|\.upstream-backups|"
         r"htmlcov|\.secrets\.baseline(\.scan\.[^\\/]+)?|"
         r"control-proyecto[\\/]\.bitacora\.json|runtime[\\/]sqlcl-runtime\.json)([\\/]|$)|"

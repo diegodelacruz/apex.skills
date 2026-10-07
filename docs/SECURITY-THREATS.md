@@ -22,7 +22,7 @@ This document identifies threats, assets, and controls for the apex.skills repos
 | Asset | Type | Value | Protection Level |
 |-------|------|-------|------------------|
 | Source Code | Intellectual Property | HIGH | Encrypted (GitHub HTTPS) |
-| Credentials | Secrets | CRITICAL | System keyring (not in repo) |
+| Credentials | Secrets | CRITICAL | Ignored local `.env` file; plaintext, access-restricted locally |
 | Database Schemas | Configuration | HIGH | SQL comments (not exposed) |
 | Test Data | Data | MEDIUM | Fixtures only (public ZIPs OK) |
 | Documentation | Knowledge | MEDIUM | Unencrypted (public) |
@@ -55,7 +55,7 @@ This document identifies threats, assets, and controls for the apex.skills repos
 **Current Controls:**
 - ✅ detect-secrets pre-commit hook
 - ✅ `.env.example` (no real values)
-- ✅ System keyring for credentials
+- ✅ `.env` is ignored by Git and scanned for accidental inclusion
 - ✅ `.gitignore` blocks .env files
 
 **Residual Risk:** LOW (hook prevents 99% of cases)
@@ -244,7 +244,7 @@ SELECT * FROM customers WHERE name = ''' || user_input || '''';
 **Current Controls:**
 - ✅ Code review policy documented; enforcement awaits branch protection
 - ✅ Limited contributor access
-- ✅ Automated testing (485 tests; local and GitHub CI)
+- ✅ Automated testing (509 tests in the latest local CI run)
 - ✅ Security scanning (Bandit)
 
 **Residual Risk:** LOW (review + testing)
@@ -317,7 +317,7 @@ SELECT * FROM customers WHERE name = ''' || user_input || '''';
 | Bandit scanning | Dangerous patterns | 95% |
 | Code review | Malicious code | 90% |
 | Documentation policy | SQL injection | 85% |
-| System keyring | Credential exposure | 100% |
+| `.env` exclusion and secret scanning | Accidental credential commit | High; does not encrypt local file |
 
 ### Detective Controls
 

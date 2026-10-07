@@ -8,8 +8,9 @@ falls back to the Oracle profile or fabricates a browser session.
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Any
+from pathlib import Path
 
+from scripts.env_credentials import ENV_FILE
 from scripts.manage_apex_credentials import APEX_REQUIRED_FIELDS, get_apex_profile
 
 
@@ -21,14 +22,14 @@ class ApexOperationResult:
     environment: str
 
 
-def preflight(keyring: Any, environment: str) -> ApexOperationResult:
-    """Check secure App Builder profile readiness without exposing values."""
-    profile = get_apex_profile(keyring, environment)
+def preflight(environment: str, env_file: Path = ENV_FILE) -> ApexOperationResult:
+    """Check App Builder profile readiness from the repository .env."""
+    profile = get_apex_profile(environment, env_file)
     if not profile or any(not profile.get(field) for field in APEX_REQUIRED_FIELDS):
         return ApexOperationResult(
             False,
             "CONFIGURATION_REQUIRED",
-            "Configure the separate APEX App Builder profile with set-apex; Oracle credentials are not used.",
+            "Configure APEX_TESTING_* or APEX_PRODUCTION_* in the repository .env; Oracle credentials are not used.",
             environment,
         )
     return ApexOperationResult(

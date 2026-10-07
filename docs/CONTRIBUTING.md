@@ -235,7 +235,9 @@ Step-by-step instructions:
 Portable minimum: all skills must have name and description. This repository additionally uses:
 - `name`: Unique skill identifier (lowercase, kebab-case)
 - `category`: Coherent category matching the repository taxonomy, such as "Apex [Category]" or "Oracle Data Governance"
-- `order`: Unique integer; verify it against the current inventory
+- `order`: Numeric display value; inspect current values and consumers. Do not
+  change an existing value only to force uniqueness until discovery/UI
+  compatibility is verified. Document any duplicate exception and its limits.
 - `tags`: Array of 3-5 tags
 - `description`: One-line description (50-100 chars)
 
@@ -277,7 +279,7 @@ If adding/modifying skills:
 - Update `skills/README.md`
 - Update `skills/SKILLS-QUICK-REFERENCE.md`
 - Update routing and all affected inventory documentation
-- Verify alphabetical ordering, metadata uniqueness and local links
+- Verify alphabetical ordering, metadata consistency, order compatibility and local links
 - Run the ecosystem and quality auditors
 - Obtain independent review; the modified skill cannot be its only reviewer
 

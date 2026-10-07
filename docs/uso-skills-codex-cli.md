@@ -10,4 +10,4 @@ Use cualquier MCP Oracle/APEX registrado, incluido
 `run_apex_mcp_with_profile.py` con el ambiente elegido. Una solicitud directa
 del usuario no requiere aprobación adicional de una skill. La conexión y sus
 privilegios reales determinan el resultado. Mantenga los secretos en el
-keyring o el almacén local configurado y fuera del repositorio.
+archivo `.env` local ignorado por Git en la raíz del repositorio.

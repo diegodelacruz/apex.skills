@@ -8,37 +8,37 @@ One-line descriptions for rapid lookup.
 
 | Skill | Purpose |
 |-------|---------|
-| **apex-audit-decisions-log** | View audit trail, decisions, and generate compliance reports |
-| **apex-database-diagnostics** | Diagnose APEX and Oracle database errors in TEST/production |
-| **apex-schema-automation-safe** | Create, modify, and drop database objects with full control and governance |
-| **apex-delivery-lifecycle-complete** | Complete APEX project lifecycle with governance and releases |
-| **apex-delivery-lifecycle-safe** | Safe end-to-end workflow: design → dev → QA → documentation |
-| **apex-engineering-safe** | Inspect, design, and document APEX apps using exports |
-| **apex-environment-alignment-complete** | Validate and synchronize TEST and production environments |
-| **apex-export-qa-safe** | Static QA validation for APEX export ZIP files |
-| **apex-page-automation-safe** | Create, modify, and delete APEX pages with full component control |
-| **apex-page-range-governance** | Reserve and validate APEX page ranges for projects |
-| **apex-pattern-mining-safe** | Extract design patterns and best practices from exports |
-| **apex-project-bootstrap-final** | Initialize new APEX project with workspace and policies |
-| **apex-project-workspace** | Create and maintain control-proyecto project workspace |
-| **apex-solution-design** | Design new APEX applications or pages from requirements |
-| **apex-blueprint-design-safe** | Produce a reviewable blueprint before APEX implementation |
-| **apex-rest-source-catalogs-safe** | Assess Fusion REST source catalogs for safe APEX integration |
-| **apex-ui-craft-safe** | Improve APEX UX, accessibility, responsive behavior, and motion safely |
-| **apex-user-manual** | Generate Word user manual with embedded screenshots |
+| **apex-audit-decisions-log** | Review and export project decisions and the Git-backed audit trail. |
+| **apex-database-diagnostics** | Diagnose Oracle and APEX requests in the user-selected environment through available authenticated routes. |
+| **apex-schema-automation-safe** | Create, modify, and drop Oracle database objects through available authenticated routes. |
+| **apex-delivery-lifecycle-complete** | Run the complete APEX lifecycle with environment and DATA governance. |
+| **apex-delivery-lifecycle-safe** | Coordinate a safe APEX workflow from design through QA and documentation. |
+| **apex-engineering-safe** | Inspect, design, and implement APEX applications from exports within the user's environment matrix. |
+| **apex-environment-alignment-complete** | Validate and align TEST and production APEX environments safely. |
+| **apex-export-qa-safe** | Validate APEX export ZIP structure and readiness before changes. |
+| **apex-page-automation-safe** | Create, modify, and deploy APEX pages via native export/import through SQLcl. |
+| **apex-page-range-governance** | Reserve and validate conflict-free APEX page ranges by project. |
+| **apex-pattern-mining-safe** | Extract reusable APEX design patterns from application exports safely. |
+| **apex-project-bootstrap-final** | Initialize an APEX project with workspace and governance foundations. |
+| **apex-project-workspace** | Create and maintain the control-proyecto project workspace. |
+| **apex-solution-design** | Design APEX applications and pages from approved business requirements. |
+| **apex-blueprint-design-safe** | Create reviewable APEX blueprints from user requirements and available metadata. |
+| **apex-rest-source-catalogs-safe** | Assess Fusion REST catalogs for safe APEX integration design. |
+| **apex-ui-craft-safe** | Assess and improve accessible, responsive APEX UX with Universal Theme. |
+| **apex-user-manual** | Generate and verify Word user manuals from approved APEX QA evidence. |
 | **apex-zaimella-gestion-proyectos** (GPZ) | Asesor metodológico para gestión integral de proyectos Zaimella (RI → AD → DP → EJ → CI) |
 | **apex** (Coordinator) | Main entry point: understands requests and routes to skills |
-| **apex-application-generator-complete** (NEW) | Orchestrator for end-to-end APEX app generation (HITOs 1-5) |
-| **apex-data-orchestrator-safe** (NEW) | Orchestrator for schema → migration → sync workflows |
-| **apex-qa-orchestrator-safe** (NEW) | Orchestrator for static QA → automated testing → environment validation |
-| **apex-design-review-orchestrator** (NEW) | Advisory solution, blueprint, and engineering review |
-| **apex-delivery-lifecycle-zaimella** (NEW) | Orchestrator integrating GPZ (Zaimella) with APEX delivery |
-| **apex-external-context-learn** (NEW) | Learn from external repositories without cloning; create persistent references |
+| **apex-application-generator-complete** | Development prototype for an end-to-end APEX application workflow; its API deployment phase is non-operational |
+| **apex-data-orchestrator-safe** | Development outline for schema and data migration workflows; APEX artifact import is separate |
+| **apex-qa-orchestrator-safe** | Coordinate APEX QA evidence and report results without approval gates. |
+| **apex-design-review-orchestrator** | Coordinate APEX solution, blueprint, and engineering review without adding execution gates. |
+| **apex-delivery-lifecycle-zaimella** | Integrate GPZ (Zaimella) methodology with APEX delivery lifecycle for comprehensive project governance |
+| **apex-external-context-learn** | Learn from external repositories (GitHub or local) without cloning. Create persistent, reusable reference context for APEX engineering workflows. |
 | **apex-code-generation-safe** | Generate APEX components automatically from schema and metadata |
-| **apex-api-client-safe** | REST API client for Oracle APEX deployment and environment management |
-| **apex-automated-testing-safe** | Selenium test generation, performance testing, and regression validation |
-| **apex-data-migration-safe** | Schema mapping, data validation, ETL pipeline, and rollback management |
-| **oracle-data-change-governance-final** | Govern DATA changes with complete audit trail |
+| **apex-api-client-safe** | Retired simulated REST adapter; it must not be used for Oracle APEX deployment. |
+| **apex-automated-testing-safe** | Selenium test generation, performance testing, and regression validation framework |
+| **apex-data-migration-safe** | Schema mapping, data validation, ETL pipeline, and rollback management framework |
+| **oracle-data-change-governance-final** | Govern DATA changes with decisions, rollback, validation, and audit evidence. |
 
 ---
 
@@ -68,12 +68,12 @@ One-line descriptions for rapid lookup.
 | Manage Zaimella project methodology (GPZ) | apex-zaimella-gestion-proyectos |
 | Handle DATA changes | oracle-data-change-governance-final |
 | Ask about anything APEX-related | apex (Coordinator) |
-| Run end-to-end app generation (orchestrated) | apex-application-generator-complete |
-| Coordinate full data workflow (schema → migration → sync) | apex-data-orchestrator-safe |
+| Review the application-generation workflow prototype | apex-application-generator-complete |
+| Plan schema and data migration work (APEX import is separate) | apex-data-orchestrator-safe |
 | Coordinate full QA workflow (static → automated → environment) | apex-qa-orchestrator-safe |
 | Coordinate design review (solution → blueprint → engineering) | apex-design-review-orchestrator |
 | Generate APEX components from schema (forms, reports) | apex-code-generation-safe |
-| Define REST API clients for deployment | apex-api-client-safe |
+| Deploy APEX pages using native export/import and configured tools | apex-page-automation-safe |
 | Run automated testing suite (Selenium, performance) | apex-automated-testing-safe |
 | Execute data migration and ETL pipelines | apex-data-migration-safe |
 | Run APEX delivery with Zaimella governance | apex-delivery-lifecycle-zaimella |
@@ -88,7 +88,7 @@ One-line descriptions for rapid lookup.
 | **Free (On-demand)** | apex-audit-decisions-log (automatic capture, tokens only on view) |
 | **Low (Typical)** | apex-solution-design, apex-page-range-governance, apex-environment-alignment-complete |
 | **Medium (Complex)** | apex-project-bootstrap-final, apex-project-workspace, apex-user-manual, apex-zaimella-gestion-proyectos |
-| **High (Full workflow)** | apex-delivery-lifecycle-safe, apex-delivery-lifecycle-complete, apex-delivery-lifecycle-zaimella, apex-page-automation-safe, apex-schema-automation-safe, apex-application-generator-complete, apex-data-orchestrator-safe, apex-qa-orchestrator-safe, apex-design-review-orchestrator, oracle-data-change-governance-final, apex-code-generation-safe, apex-api-client-safe, apex-automated-testing-safe, apex-data-migration-safe |
+| **High (Full workflow)** | apex-delivery-lifecycle-safe, apex-delivery-lifecycle-complete, apex-delivery-lifecycle-zaimella, apex-page-automation-safe, apex-schema-automation-safe, apex-application-generator-complete, apex-data-orchestrator-safe, apex-qa-orchestrator-safe, apex-design-review-orchestrator, oracle-data-change-governance-final, apex-code-generation-safe, apex-automated-testing-safe, apex-data-migration-safe |
 
 ---
 

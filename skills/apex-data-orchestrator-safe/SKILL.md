@@ -1,6 +1,6 @@
 ---
 name: apex-data-orchestrator-safe
-description: Orchestrate complete data workflow - schema creation, migration, validation, and APEX sync
+description: Development outline for schema and data migration workflows; APEX artifact import is separate
 category: Apex Data Integration
 order: 13.5
 tags:
@@ -18,6 +18,15 @@ status: active
 
 # apex-data-orchestrator-safe
 
+> **Desarrollo; el flujo integral descrito aquí no está implementado como
+> orquestador operativo.** La fase antigua de REST/APEX Sync dependía de
+> `apex-api-client-safe`, que está retirado. La migración de datos a Oracle y la
+> importación de artefactos APEX son operaciones distintas. Para importación
+> APEX usa la ruta nativa autenticada de
+> `docs/CAPACIDADES-CONTROLADAS-ORACLE-APEX.md`/
+> `apex-page-automation-safe`; no declares sincronización integral completada
+> por ejecutar solo ETL.
+
 ## Environment and execution policy
 
 Use the credential configured for the requested environment. The effective
@@ -30,9 +39,9 @@ same environment when a channel fails. Run relevant quality checks and report
 their actual outcome without turning a successful check or plan into an
 approval prerequisite.
 
-**Sub-Coordinator Orchestrator:** Coordinate schema automation → data migration → APEX sync.
+**Development workflow outline:** schema automation → validation → data migration. APEX artifact import is separate.
 
-Manage complete data workflows from database schema creation through safe migration to APEX synchronization, with comprehensive validation and rollback capability at each step.
+Outline database schema and data migration work with validation and rollback guidance; the full APEX synchronization pipeline is not implemented.
 
 ## Overview
 
@@ -40,7 +49,7 @@ Execute full data pipeline safely:
 - **Schema Automation** - Create/modify database objects under governance
 - **Data Validation** - Comprehensive data quality checks
 - **ETL Migration** - Extract, transform, validate, load data
-- **APEX Sync** - Deploy and synchronize across environments
+- **APEX artifact import** - Separate operation through a configured native route; not data synchronization
 - **Rollback Ready** - Automatic rollback points at each phase
 
 ## Architecture
@@ -77,18 +86,17 @@ Execute full data pipeline safely:
 │ └────────────────────────────────────────────┘  │
 │                      ↓                           │
 │ ┌────────────────────────────────────────────┐  │
-│ │ Phase 4: APEX Sync                         │  │
-│ │ Delegate to: apex-api-client-safe          │  │
-│ │ - Deploy schema objects to APEX            │  │
-│ │ - Synchronize data to TEST/PROD            │  │
-│ │ - Verify sync integrity                    │  │
+│ │ Phase 4: Optional APEX artifact import    │  │
+│ │ Use configured native import route         │  │
+│ │ - Import selected APEX artifacts           │  │
+│ │ - Verify result in the requested target    │  │
 │ └────────────────────────────────────────────┘  │
 │                      ↓                           │
 │ ┌────────────────────────────────────────────┐  │
 │ │ Outputs:                                    │  │
 │ │ - Schema created in target environment    │  │
 │ │ - Data migrated safely                     │  │
-│ │ - APEX synchronized                        │  │
+│ │ - Optional native APEX import verified     │  │
 │ │ - Rollback points created                  │  │
 │ │ - Audit trail recorded                     │  │
 │ └────────────────────────────────────────────┘  │
@@ -98,7 +106,7 @@ Execute full data pipeline safely:
 
 ## Capabilities
 
-### Safe Data Pipeline Execution
+### Proposed Data Workflow (not executable end-to-end)
 
 ```python
 # Initialize orchestrator with source/target environments
@@ -132,11 +140,8 @@ result = orchestrator.execute_migration(
     }
 )
 
-# Phase 4: Sync to APEX
-orchestrator.sync_to_apex(
-    instances=['https://apex-test.example.com', 'https://apex-prod.example.com'],
-    verify_integrity=True
-)
+# Optional APEX component import is a separate operation using the configured native route.
+# This prototype does not implement data or application sync to APEX.
 
 # Get complete audit trail
 audit = orchestrator.get_operation_log()
@@ -221,25 +226,19 @@ Delegate to `apex-data-migration-safe`:
    - Business rule checks
 ```
 
-### Phase 4: APEX Sync
+### Phase 4: APEX artifact import (separate operation)
 
-Delegate to `apex-api-client-safe`:
+The prototype does not synchronize data to APEX. When the user requested an
+APEX component import, use `apex-page-automation-safe` and the configured
+authenticated native route documented in
+`docs/CAPACIDADES-CONTROLADAS-ORACLE-APEX.md`. Oracle data migration remains
+the separate Phase 3 operation. Do not route this phase through
+`apex-api-client-safe`.
 
 ```
-1. Deploy schema objects:
-   - Package objects as exportable components
-   - Deploy to TEST environment first
-   - Verify object creation in APEX
-
-2. Synchronize data:
-   - Create REST endpoints for data
-   - Sync to TEST environment
-   - Sync to PROD environment
-
-3. Verify sync:
-   - Row count verification
-   - Data integrity checks
-   - Connection validation
+1. Prepare the native APEX export/import artifact.
+2. Import through the configured route for the user-selected environment.
+3. Inspect the resulting APEX components and report the observed outcome.
 ```
 
 ## Integration Points
@@ -250,7 +249,7 @@ Delegate to `apex-api-client-safe`:
 | **Phase 1** | `apex-schema-automation-safe` | Schema creation |
 | **Phase 2** | Internal validation | Pre-migration health check |
 | **Phase 3** | `apex-data-migration-safe` | ETL with rollback |
-| **Phase 4** | `apex-api-client-safe` | APEX synchronization |
+| **Phase 4** | `apex-page-automation-safe` + configured native route | Optional APEX artifact import; separate from data migration |
 | **Audit** | Git (.bitacora.json) | Complete audit trail |
 
 ## Features
@@ -264,7 +263,7 @@ Delegate to `apex-api-client-safe`:
 
 ### Automation
 
-- **End-to-end orchestration** - All 4 phases coordinated
+- **Workflow outline** - Four phases are a design outline; this file does not provide an executable end-to-end orchestrator
 - **Batch optimization** - Large data handling
 - **Parallel processing** - Where possible
 - **Error recovery** - Automatic retry with backoff
@@ -322,11 +321,9 @@ phase_3_migration:
     DEPARTMENTS:
       - "NOT NULL: DEPT_ID"
 
-phase_4_sync:
-  instances:
-    - https://apex-test.example.com
-    - https://apex-prod.example.com
-  verify_integrity: true
+  phase_4_apex_import:
+    route: configured_native_apex_import
+    target_env: user_selected_environment
 ```
 
 ## Error Handling
@@ -334,7 +331,7 @@ phase_4_sync:
 - **Phase 1 (Schema) failure** → Rollback using stored DDL, retry with fixes
 - **Phase 2 (Validation) failure** → Stop before migration, report issues, retry
 - **Phase 3 (Migration) failure** → Rollback to savepoint, investigate, retry
-- **Phase 4 (Sync) failure** → Rollback sync, investigate connectivity, retry
+- **Phase 4 (Import) failure** → Report the configured route's error; use its documented recovery and rollback procedure
 
 ## Logging
 
@@ -387,7 +384,7 @@ Typical end-to-end timing:
 
 ## Status
 
-🚧 **Active** - Data orchestration coordinator (25% complete)
+**Development outline; not an operational end-to-end orchestration pipeline.**
 
 ---
 
@@ -397,4 +394,4 @@ Typical end-to-end timing:
 - `oracle-data-change-governance-final` (governance and audit guidance)
 - `apex-schema-automation-safe` (schema creation)
 - `apex-data-migration-safe` (ETL)
-- `apex-api-client-safe` (APEX sync)
+- `apex-page-automation-safe` (optional APEX component work through configured native routes)

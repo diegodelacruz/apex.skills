@@ -6,7 +6,7 @@ Alinear la documentación vigente y la prueba del auditor con el inventario real
 
 ## Decisión y alcance
 
-- Actualizar los conteos vigentes en `CLAUDE.md`, `skills/README.md` y `docs/ACTUALIZACION-ECOSISTEMA.md` a 31 skills: 25 técnicas y 6 orquestadores.
+- Historical task scope: update the then-current catalogs to the 31-entry count used in that change. This record is not the current taxonomy; see current source metadata and `docs/ORCHESTRATOR-AUDIT.md`.
 - Hacer que `test_quality_audit.py` compare la evidencia del auditor con el número de skills encontrado en el repositorio, en lugar de codificar un total fijo.
 - Mantener intactos los changelogs históricos que describen inventarios anteriores.
 

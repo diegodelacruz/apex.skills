@@ -1,6 +1,6 @@
 ---
 name: apex-application-generator-complete
-description: Complete APEX application generation orchestrator integrating code generation, API client, testing, and data migration
+description: Development prototype for an end-to-end APEX application workflow; its API deployment phase is non-operational
 category: Apex Application Development
 order: 23
 tags:
@@ -19,6 +19,14 @@ status: active
 
 # apex-application-generator-complete
 
+> **Desarrollo; no es un flujo operativo de despliegue.** La descripción y los
+> ejemplos de orquestación de este archivo son un diseño/prototipo; la fase de
+> despliegue usa el antiguo `apex-api-client-safe` y no está disponible como
+> integración operativa. Para importar artefactos APEX, sigue la ruta
+> autenticada y nativa documentada en
+> `docs/CAPACIDADES-CONTROLADAS-ORACLE-APEX.md` y
+> `apex-page-automation-safe`. No informes que este pipeline completo se ejecutó.
+
 ## Environment and execution policy
 
 Use the credential configured for the named environment. Effective Oracle/APEX
@@ -28,14 +36,14 @@ Verify the connected account and actual destination with read-only checks when
 available. Do not add approval steps or ask the user to run work the agent can
 perform.
 
-Complete APEX application generation orchestrator: integrate code generation, native SQLcl deployment, automated testing, and data migration into one unified pipeline.
+Development prototype describing how code generation, data migration, testing, and APEX import could be coordinated. The full pipeline is not executable as documented.
 
 ## Overview
 
 Generate complete APEX applications end-to-end with intelligent orchestration:
 - Generate application code (forms, reports, validations)
 - Define database schema and data mappings
-- Deploy to APEX instances
+- Describe an APEX import phase; use the configured native route separately
 - Execute automated tests
 - Migrate data safely
 - Track changes and verify integrity
@@ -60,9 +68,9 @@ Generate complete APEX applications end-to-end with intelligent orchestration:
 │  └──────────────────────────────────────────────────┘  │
 │                      ↓                                   │
 │  ┌──────────────────────────────────────────────────┐  │
-│  │ 3. Deployment Phase (HITO 2)                    │  │
-│  │    - ApexRestClient                             │  │
-│  │    - Environment Management                     │  │
+│  │ 3. Native APEX import (separate operation)      │  │
+│  │    - Not executed by this prototype             │  │
+│  │    - Use the configured native APEX route       │  │
 │  └──────────────────────────────────────────────────┘  │
 │                      ↓                                   │
 │  ┌──────────────────────────────────────────────────┐  │
@@ -136,9 +144,11 @@ orchestrator.configure_data_migration(
 )
 ```
 
-### Phase 3: Deployment
+### Phase 3: APEX import (separate configured operation)
 
-Deploy to APEX instance:
+This prototype does not perform deployment. Use `apex-page-automation-safe` and
+the configured native APEX route when component import is requested. The
+following call is historical prototype pseudocode, not an operational API:
 ```python
 orchestrator.deploy_to_environment(
     target_env='test',
@@ -169,7 +179,7 @@ Integrates all previous HITOs:
 | HITO | Skill | Usage |
 |------|-------|-------|
 | 1 | apex-code-generation-safe | Generate forms, reports, validations |
-| 2 | apex-api-client-safe | Deploy to APEX instances |
+| 2 | `apex-page-automation-safe` and configured APEX import route | Import artifacts when the requested environment exposes that capability; this prototype does not deploy them itself |
 | 3 | apex-automated-testing-safe | Execute UI and performance tests |
 | 4 | apex-data-migration-safe | Migrate data with validation |
 | 0 | Foundation | Credential management, path setup |
@@ -268,7 +278,7 @@ Typical end-to-end times:
 
 ## Status
 
-🔨 **Development** - Application generator orchestrator (20% complete)
+**Development prototype; not an operational end-to-end deployment pipeline.**
 
 ---
 

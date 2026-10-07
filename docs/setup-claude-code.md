@@ -30,17 +30,20 @@ pip install -r requirements.txt
 
 ## Paso 3: Configurar Credenciales APEX
 
-Usa el script de gestión de credenciales para almacenar de forma segura tus perfiles de APEX:
+Configura los perfiles Oracle y APEX en el archivo `.env` local de la raíz del
+repositorio. Parte de `.env.example` y completa los campos requeridos sin
+compartir ni versionar el archivo real.
 
-```bash
-python3 scripts/manage_apex_credentials.py set --environment production
-# Ingresa:
-# - Oracle user: (tu usuario)
-# - Oracle password: (tu contraseña)
-# - Oracle DSN: (host:puerto/sid)
+En Windows, por ejemplo:
+
+```powershell
+Copy-Item .env.example .env
+notepad .env
 ```
 
-Las credenciales se guardan en el almacén seguro del sistema operativo (Keyring en Linux/macOS, Credential Manager en Windows).
+Elige `DB_ENV=testing` o `DB_ENV=production` y completa las variables del
+perfil correspondiente (`DB_TESTING_*`/`DB_PRODUCTION_*` y, si aplica,
+`APEX_TESTING_*`/`APEX_PRODUCTION_*`).
 
 ### Validar la Configuración
 
@@ -77,7 +80,7 @@ pwsh scripts/Initialize-ApexSkillUpstreams-V2.ps1
 ### Opción B: Configuración CLI
 
 ```bash
-claude-code add-project /ruta/a/apex.skills
+claude-code add-project "<ruta-a-la-raiz-del-repositorio>"
 ```
 
 ### Opción C: Configuración de Extensión IDE
@@ -96,7 +99,11 @@ Ejecuta la auditoría de skills para confirmar que todo está configurado correc
 python3 scripts/audit_skill_ecosystem.py
 ```
 
-Deberías ver: `AUDIT_PASS: required resources and local Markdown links are valid`
+La salida `RESOURCE_AND_MARKDOWN_SUBAUDIT_PASS` o
+`RESOURCE_AND_MARKDOWN_SUBAUDIT_PASS_WITH_NA` informa recursos y Markdown; la
+variante `WITH_NA` lista cada URL externa que no se verificó por red pero tiene
+justificación documentada. Ninguna representa la auditoría integral de skills,
+dependencias y compatibilidad.
 
 ## Uso de Skills con Claude Code
 
@@ -125,7 +132,7 @@ Consulta `skills/README.md` para la lista completa.
 | Aspecto | Codex CLI | Claude Code |
 |---------|-----------|-------------|
 | **Instalación** | Setup manual de MCP | Automático |
-| **Credenciales** | Archivo .env | Keyring del SO |
+| **Credenciales** | Archivo `.env` local ignorado por Git | Archivo `.env` local ignorado por Git |
 | **Skills** | Invocación explícita | Automática + manual |
 | **Interfaz** | Terminal | Web/IDE/Desktop |
 | **Escalabilidad** | Monousuario | Multiusuario |
@@ -133,11 +140,12 @@ Consulta `skills/README.md` para la lista completa.
 
 ## Troubleshooting
 
-### "ModuleNotFoundError: No module named 'keyring'"
+### Perfil Oracle incompleto en `.env`
 
-```bash
-pip install -r requirements.txt
-```
+Completa las variables del ambiente solicitado en el `.env` de la raíz del
+repositorio y ejecuta `manage_apex_credentials.py status` para verificar los
+campos requeridos. `.env` es la única fuente de perfiles para los scripts y MCP
+locales de este repositorio.
 
 ### "No functional APEX workspace was found"
 

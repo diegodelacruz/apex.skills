@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Audit controlled local Markdown links and required canonical resources.
+"""Audit required canonical resources and complete repository Markdown links.
 
 Pre-commit hook that verifies all required governance files exist and all
 local Markdown links resolve to existing targets.
@@ -9,8 +9,10 @@ Tests: Covered indirectly by test_quality_audit.py (Q03 link checks)
 Dependencies: none (stdlib only)
 """
 
-import re
+import subprocess
 from pathlib import Path
+
+from audit_markdown_links import audit as audit_markdown
 
 ROOT = Path(__file__).resolve().parent.parent
 REQUIRED = (
@@ -30,7 +32,6 @@ REQUIRED = (
     "docs/decisiones-canonicas-finales.md",
     "upstreams.lock.json",
 )
-LINK = re.compile(r"\[[^\]]+\]\(([^)]+)\)")
 
 
 def main() -> int:
@@ -43,20 +44,41 @@ def main() -> int:
     for rel in REQUIRED:
         if not (ROOT / rel).is_file():
             errors.append(f"missing required resource: {rel}")
-    for base in (ROOT / "docs", ROOT / "skills"):
-        for file in base.rglob("*.md"):
-            text = file.read_text(encoding="utf-8", errors="replace")
-            for target in LINK.findall(text):
-                target = target.split("#", 1)[0].strip()
-                if not target or "://" in target or target.startswith("mailto:") or target.startswith("<"):
-                    continue
-                if not (file.parent / target).resolve().exists():
-                    errors.append(f"broken local link: {file.relative_to(ROOT)} -> {target}")
+    try:
+        link_result = audit_markdown()
+    except (OSError, RuntimeError, subprocess.SubprocessError) as error:
+        errors.append(f"Markdown audit incomplete: {error}")
+        link_result = None
     if errors:
         print("AUDIT_FAIL:")
         print("\n".join(errors))
         raise SystemExit(1)
-    print("AUDIT_PASS: required resources and local Markdown links are valid")
+    assert link_result is not None
+    if not link_result["passed"]:
+        print(
+            "SUBAUDIT_INCOMPLETE: required resources exist; whole-repository Markdown coverage or links are unresolved"
+        )
+        print(
+            f"Markdown expected={link_result['expected']} "
+            f"covered={link_result['covered']} tracked={link_result['tracked']}"
+        )
+        for key in ("broken", "coverage_gaps", "external_broken", "external_unverifiable"):
+            for item in link_result[key]:
+                print(f"{key}: {item}")
+        raise SystemExit(2)
+    audit_status = "PASS_WITH_NA" if link_result["external_na"] else "PASS"
+    print(
+        f"RESOURCE_AND_MARKDOWN_SUBAUDIT_{audit_status}: required resources and whole-repository Markdown "
+        f"coverage/local links are valid (expected={link_result['expected']} covered={link_result['covered']} "
+        f"tracked={link_result['tracked']} tracked_excluded={link_result['tracked_excluded']} "
+        f"untracked_included={link_result['untracked_included']} "
+        f"excluded_markdown={link_result['excluded_markdown']} links={link_result['links']} "
+        f"external={len(link_result['external_links'])} "
+        f"external_unverifiable={len(link_result['external_unverifiable'])} "
+        f"external_na={len(link_result['external_na'])})"
+    )
+    for item in link_result["external_na"]:
+        print(f"external_na: {item}")
     return 0
 
 

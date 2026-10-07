@@ -10,8 +10,6 @@
     Path to a .sql file to execute.
 .PARAMETER Sql
     Inline SQL statement to execute (alternative to SqlFile).
-.PARAMETER Connection
-    SQLcl connection string. Default: $env:APEX_SQLCL_CONN.
 .PARAMETER SqlclPath
     Path to sql.exe (SQLcl). Default: $env:APEX_SQLCL_PATH.
 .PARAMETER ShowErrors
@@ -31,7 +29,6 @@ param(
     [Parameter(ParameterSetName="Inline")]
     [string]$Sql,
 
-    [string]$Connection,
     [string]$SqlclPath,
     [switch]$ShowErrors,
     [switch]$DryRun
@@ -47,9 +44,8 @@ if (-not $SqlclPath -or -not (Test-Path $SqlclPath)) {
 }
 
 # Resolve connection
-if (-not $Connection) { $Connection = $env:APEX_SQLCL_CONN }
-if (-not $Connection) {
-    Write-Error "No Oracle connection. Run Initialize-OracleConnection.ps1 first or pass -Connection."
+if (-not $env:APEX_SQLCL_CONN) {
+    Write-Error "No Oracle connection. Dot-source Initialize-OracleConnection.ps1 after configuring the repository .env."
     exit 1
 }
 
@@ -111,7 +107,7 @@ try {
     $fullScript | Out-File -FilePath $tempScript -Encoding UTF8
 
     $process = Start-Process -FilePath $SqlclPath `
-        -ArgumentList @("-S", $Connection, "@$tempScript") `
+        -ArgumentList @("-S", $env:APEX_SQLCL_CONN, "@$tempScript") `
         -NoNewWindow -Wait -PassThru `
         -RedirectStandardOutput "$tempScript.out" `
         -RedirectStandardError "$tempScript.err"

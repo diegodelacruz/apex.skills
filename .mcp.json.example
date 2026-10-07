@@ -42,7 +42,6 @@
     "requirementsFile": "requirements.txt",
     "testRunner": "pytest",
     "testCoverageTarget": 55,
-    "credentialStorage": "system-keyring",
     "defaultEnvironment": "test",
     "logLevel": "INFO"
   }

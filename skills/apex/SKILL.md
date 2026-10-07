@@ -14,8 +14,9 @@ Before modifying this repository, follow `../../docs/POLITICA-EVOLUCION-ECOSISTE
 
 A direct user request defines the requested action, environment, and scope. The
 effective capabilities come from the credential selected for that environment
-in `.env` or the configured credential store used by the selected connector,
-and the privileges granted to that account by the DBA. Do not hardcode a user's
+in the repository-root `.env` and the privileges granted to that account by
+the DBA. Local scripts and MCP adapters must not fall back to process
+environment variables or credential stores. Do not hardcode a user's
 name or a permission matrix by environment. Do not infer access from a profile's
 presence, tool label, role name, or prior run.
 

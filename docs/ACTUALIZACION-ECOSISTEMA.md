@@ -11,7 +11,9 @@ seguridad, pruebas y documentación Oracle/APEX.
 
 Una actualización no está terminada hasta revisar el repositorio completo, no
 sólo los archivos modificados. El inventario real de skills es la fuente de
-verdad operativa; actualmente contiene **31 skills** (25 técnicas + 6 orquestadores).
+verdad operativa; actualmente contiene **31 entradas**: 1 coordinador de entrada,
+7 roles orquestadores, 22 especialistas activos y 1 entrada retirada de
+compatibilidad. Los orquestadores en desarrollo se identifican en metadata.
 
 Para crear una skill nueva desde el inicio, aplica la [guía canónica de
 creación](GUIA-CREAR-NUEVA-SKILL.md). Esta guía operacionaliza el contrato
@@ -58,7 +60,8 @@ descubrimiento local: `category`, `order`, `tags` y
 `agents/openai.yaml`. Estas extensiones no sustituyen `name` ni
 `description`, no forman parte del mínimo portable y no deben presentarse
 como requisitos universales de Agent Skills. En este repositorio,
-`category`, `order` y `tags` se validan por unicidad/coherencia;
+`category`, `order` y `tags` se validan por coherencia; los `order` duplicados
+requieren evidencia de compatibilidad y una excepción documentada;
 `agents/openai.yaml` sólo se exige cuando la skill se expone mediante ese
 agente.
 

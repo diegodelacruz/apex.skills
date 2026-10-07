@@ -1,13 +1,7 @@
 #!/usr/bin/env python3
-"""Validate the patched apex-mcp direct connection without mutations.
+"""Validate the managed apex-mcp connection using the repository .env."""
 
-Loads the managed apex-mcp modules, injects keyring credentials into
-environment variables, and verifies a read-only SELECT against the database.
-
-Status: ACTIVE
-Tests: Infrastructure script (requires Oracle connection)
-Dependencies: keyring, managed apex-mcp checkout, oracledb
-"""
+from __future__ import annotations
 
 import argparse
 import json
@@ -15,7 +9,7 @@ import os
 import sys
 from pathlib import Path
 
-import keyring
+from manage_apex_credentials import discover_apex_metadata, get_profile
 
 root = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(root / ".upstreams" / "managed" / "apex-mcp"))
@@ -27,10 +21,12 @@ parser = argparse.ArgumentParser()
 parser.add_argument("--environment", choices=("test", "production"), default="test")
 args = parser.parse_args()
 
-raw_profile = keyring.get_password("apex-skills", args.environment)
-if not raw_profile:
-    raise SystemExit(f"{args.environment} profile is missing. Import it first.")
-profile = json.loads(raw_profile)
+profile = get_profile(args.environment)
+if not profile:
+    raise SystemExit(f"{args.environment} .env profile is missing or incomplete.")
+if not all(profile.get(field) for field in ("workspace_id", "schema", "workspace_name")):
+    profile = discover_apex_metadata(profile)
+
 mapping = {
     "ORACLE_DB_USER": "db_user",
     "ORACLE_DB_PASS": "db_pass",  # pragma: allowlist secret
@@ -50,4 +46,4 @@ db._conn.close()
 db._conn = None
 if not rows:
     raise SystemExit("APEX_MCP_DIRECT_CONNECTION_FAIL")
-print(f"APEX_MCP_DIRECT_CONNECTION_PASS environment={args.environment} mode=read-only")
+print(f"APEX_MCP_DIRECT_CONNECTION_PASS environment={args.environment} mode=read-only source=.env")

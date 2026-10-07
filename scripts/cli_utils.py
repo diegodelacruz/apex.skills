@@ -2,10 +2,14 @@
 """Shared CLI utilities for APEX Skills scripts."""
 
 import argparse
-import os
 import sys
 from pathlib import Path
 from typing import Any, Dict, List, NoReturn, Optional, Tuple
+
+try:
+    from env_credentials import parse_env, selected_environment
+except ImportError:
+    from scripts.env_credentials import parse_env, selected_environment
 
 
 class CLIParser:
@@ -81,34 +85,13 @@ def configured_environment(
     choices: Tuple[str, ...] = ("test", "production"),
     env_file: Optional[Path] = None,
 ) -> Optional[str]:
-    """Read DB_ENV from the selected .env, then the process environment if using the default file."""
-    use_process_env = env_file is None
+    """Read DB_ENV from .env only; process environment is not a credential source."""
     env_path = env_file or (Path(__file__).resolve().parent.parent / ".env")
-    selected = None
-    if env_path.is_file():
-        for line in env_path.read_text(encoding="utf-8-sig").splitlines():
-            stripped = line.strip()
-            if not stripped or stripped.startswith("#") or "=" not in stripped:
-                continue
-            key, value = stripped.split("=", 1)
-            if key.strip() == "DB_ENV":
-                selected = value.strip().strip("\"'")
-                break
-    if use_process_env:
-        selected = selected or os.environ.get("DB_ENV")
-    if not selected:
-        return None
-    normalized = selected.strip().lower()
-    aliases = {
-        "test": "test",
-        "testing": "test",
-        "prod": "production",
-        "production": "production",
-    }
-    resolved = aliases.get(normalized)
+    values = parse_env(env_path)
+    resolved = selected_environment(None, values)
     if resolved in choices:
         return resolved
-    if normalized == "production" and "prod" in choices:
+    if resolved == "production" and "prod" in choices:
         return "prod"
     return None
 

@@ -272,9 +272,6 @@ pytest tests/ -m requires_oracle   # Only Oracle tests
 # MCP integration
 -e ./.upstreams/managed/apex-mcp
 
-# Credentials
-keyring>=25.0.0
-
 # Word documents
 python-docx>=1.1.0
 Pillow>=10.0.0
@@ -292,7 +289,7 @@ pylint>=3.0.0
 ```
 
 **Why each package:**
-- keyring: Secure credential storage
+- `.env`: Local Oracle/APEX credential source, ignored by Git
 - python-docx: Generate Word manuals
 - Pillow: Embed screenshots in docs
 - pytest: Testing framework
@@ -341,30 +338,19 @@ control-proyecto/**/traces/
 
 ## .env.example
 
-**Purpose:** Template for environment variables
+**Purpose:** Template for local Oracle and APEX profile variables
 
 **IMPORTANT:** No real values, just examples and instructions
 
 ```
-# TEST Environment
-APEX_TEST_HOST=apex-test.example.com
-APEX_TEST_PORT=8080
-APEX_TEST_USERNAME=ADMIN
-APEX_TEST_PASSWORD=CHANGE_ME
+# Copy .env.example to .env, then complete DB_TESTING_* or DB_PRODUCTION_*.
+# App Builder uses APEX_TESTING_* or APEX_PRODUCTION_*.
+# DB_ENV selects the default Oracle environment.
 
-# Production Environment
-APEX_PROD_HOST=apex.example.com
-APEX_PROD_PORT=8080
-APEX_PROD_USERNAME=YOUR_USER
-APEX_PROD_PASSWORD=CHANGE_ME
-
-# Development
-LOG_LEVEL=DEBUG
-PYTHONPATH=.
-
-# ⚠️ NEVER commit real credentials
-# Use: python3 scripts/manage_apex_credentials.py set
-# Credentials stored in system keyring (OS-specific)
+# ⚠️ NEVER commit or share real credentials
+# Optional interactive setup writes into the ignored repository-root .env:
+python3 scripts/manage_apex_credentials.py set --environment test
+# .env is plaintext; restrict local file access and never commit it.
 ```
 
 ---
@@ -397,8 +383,8 @@ pre-commit run --all-files
 ### Credentials leak detected?
 ```bash
 # Remove the secret from file
-# Use system keyring:
-python3 scripts/manage_apex_credentials.py set <profile>
+# Update the ignored repository-root .env, then validate it:
+python3 scripts/manage_apex_credentials.py probe --environment test
 
 # Update baseline:
 detect-secrets scan --baseline .secrets.baseline

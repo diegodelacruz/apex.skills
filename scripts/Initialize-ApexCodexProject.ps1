@@ -153,8 +153,8 @@ function Add-Remediation {
 		}
 		'INVALID' {
 			if ($Component -eq 'profile') {
-				$script:actionItems.Add("  [$Environment] Perfil Oracle corrupto en el keyring.")
-				$script:actionItems.Add("           Recrear con: python scripts/manage_apex_credentials.py set $env_flag")
+				$script:actionItems.Add("  [$Environment] Perfil Oracle inválido en .env.")
+				$script:actionItems.Add("           Revisar las variables DB_* correspondientes en .env.")
 				$script:actionItems.Add("")
 			}
 		}

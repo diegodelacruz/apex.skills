@@ -65,6 +65,13 @@ repos:
         pass_filenames: false
         always_run: true
         stages: [commit]
+      - id: markdown-link-audit
+        name: Whole-repository Markdown coverage and link audit
+        entry: python scripts/audit_markdown_links.py
+        language: system
+        pass_filenames: false
+        always_run: true
+        stages: [commit]
 
   # Validate exception handling (no bare except)
   - repo: local

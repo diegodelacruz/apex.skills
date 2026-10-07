@@ -18,6 +18,12 @@ status: active
 
 # apex-code-generation-safe
 
+> **Genera artefactos de especificación; no despliega directamente a APEX.**
+> El JSON generado aquí no sustituye por sí solo un export importable. Para
+> cambios de componentes, prepara/importa el artefacto por la ruta autenticada
+> documentada en `docs/CAPACIDADES-CONTROLADAS-ORACLE-APEX.md` y
+> `apex-page-automation-safe`.
+
 ## Estándar de código generado
 
 Para SQL, PL/SQL y artefactos APEX generados, aplicar
@@ -96,16 +102,16 @@ print(js)
    ↓
 5. Generate JavaScript → Dynamic interactions
    ↓
-6. Import into APEX Workspace
+6. Convert/review the specification as an APEX export artifact
    ↓
-7. Result: Fully functional forms + reports + validations
+7. Import through the configured native APEX route and verify the result
 ```
 
 ## Integration
 
-Works seamlessly with:
+Related workflows:
 - `apex-schema-automation-safe` (schema creation)
-- `apex-api-client-safe` (deploying generated code)
+- `apex-page-automation-safe` (native APEX component workflow where configured)
 - `apex-automated-testing-safe` (testing generated forms)
 - `apex-delivery-lifecycle-safe` (deployment pipeline)
 

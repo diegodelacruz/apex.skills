@@ -11,12 +11,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ### Changed
 
+- Centralized Oracle and App Builder profile reads and writes on the ignored repository-root `.env`; removed alternate credential-source fallback and direct PowerShell connection overrides, aligned MCP wrappers, validators, setup guidance, and credential regressions with the single source.
+- Retired the legacy APEX REST/SQLcl client facades, made them fail closed without retaining supplied credentials, and aligned their skill metadata and regression tests with the retired status.
+- Corrected stale architecture counts and hierarchy labels; synchronized catalog descriptions and tags from all skill frontmatter; distinguished the retired compatibility entry from 22 active specialists; aligned order authoring guidance with the documented duplicate-order compatibility exception; added the missing external-context Claude command adapter; made Markdown audit fail closed for un-audited submodules; removed unsupported approver assignments, stale synchronization and cycle-certification claims; labeled old release counts as historical; renamed a presence-only test that had claimed to prove acyclic dependencies.
+- Corrected `CLAUDE.md` to match the configured 15 pre-commit hooks, current role/status taxonomy, local-only audit trail, test markers, and named documentation references; retained the documented duplicate skill order values pending external-consumer verification.
+- Marked all six development-status skills in the repository tree and clarified the retired API compatibility entry and supported APEX deployment route.
+- Replaced the nonexistent `v1.0.0` release examples in `docs/GITHUB-SETUP.md` with explicit placeholders after confirming the public repository has no tags or releases.
+- Made the ecosystem subaudit label documented external-link N/A results explicitly and scoped the quality Q03 evidence to local links.
+- Corrected application-generation and data-orchestration catalogs, skill instructions, dependency maps, and regression expectations so the retired API adapter is not described as an operational deployment, sync, or test-setup dependency; preserved its historical invocation entry.
+- Made the standalone SQLcl fallback use the current user's profile path, removed the machine-specific `mcp` checkout location from historical documentation, and replaced hard-coded repository path examples with explicit root-path placeholders.
 - Propagated the default Oracle schema owner `DATA` through the coordinator, agent prompt, schema automation, and data orchestrator; explicit schema names override it, related DDL/DML must be owner-qualified, and governed backup objects retain their connected-schema exception.
 - Updated `.env.example` with the configured TEST Oracle/APEX endpoints and commented production APEX endpoint/workspace reference; credential values remain placeholders.
 - Reduced routine preflight for focused Oracle/APEX reads to one minimal identity check followed immediately by the target query, reusing live-session evidence; clarified that historical failures are context only and must be rechecked on the current route.
 
 ### Added
 
+- Added a whole-repository Markdown coverage and link auditor with fragment checks, explicit exclusions, external URL status reporting, regression tests, and shared CI/pre-commit invocation.
 - Added a bound, single-SELECT SQLcl route in an Oracle read-only transaction, with hash-only audit logging, so metadata reads do not depend on a repository SQL artifact.
 - Added regressions for inline read-only query validation, ORA-20987-independent metadata routing, and the default DATA schema owner.
 - Restricted inline SQLcl reads to a single physical line and rejected control characters to prevent SQLcl client-command injection.
@@ -76,6 +86,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [1.2.0] - 2026-09-17
 
+> Historical release record. Its capability descriptions and inventory counts
+> reflect the claims made at that time; use the current frontmatter inventory
+> and current workflow maps as the source of truth.
+
 ### Added
 
 - **4 new technical skills** (HITOs 1-5):
@@ -97,8 +111,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ### Changed
 
-- Skills inventory: 21 → **30 skills** (26 technical + 4 orchestrators).
-- Orchestration hierarchy: flat → **3-level** (1 Maestro → 5 Coordinators → 26 Technical).
+- Historical skills inventory claim: 21 → **30 skills** (26 technical + 4 orchestrators); not the current inventory.
+- Historical hierarchy claim: flat → **3-level** (1 Maestro → 5 Coordinators → 26 Technical); superseded by the current L0-L3 role taxonomy.
 - Test suite: 202 → **426 tests** (100% pass rate).
 - Quality audit score: 85/100 → **100/100** (all Q01-Q09 passing).
 
@@ -127,17 +141,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [1.0.0] - 2026-08-21
 
+> Historical release record; statements below describe the release snapshot, not current metadata policy.
+
 ### Added
 
 #### Core Framework (Phases 1-5)
 - **15 specialized Oracle APEX skills** with hierarchical organization.
 - **Coordinator skill** (`apex`) for intelligent routing to specialized skills.
 - **Apex prefix naming convention** (no emojis) for consistent display.
-- **Alphabetical ordering** with unique order numbers for sequencing.
+- Alphabetical ordering with order values for sequencing (uniqueness was the original release claim; current duplicate-order compatibility is documented separately).
 
 #### Security Hardening (Phase 1)
 - Pre-commit hooks with 8 integrated checks: detect-secrets, Black, isort, Bandit, Flake8, exception validation, audit trail capture, large file detection.
-- Credentials management via system keyring (`manage_apex_credentials.py`).
+- Credential profile setup through `manage_apex_credentials.py`.
 - `.secrets.baseline` for known credential detection.
 
 #### Code Quality & Testing (Phases 2-3)
@@ -163,7 +179,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 - No hardcoded secrets in codebase.
 - Pre-commit secrets detection, Bandit scanning (73 checks), private key detection.
-- Credentials stored in system keyring (per-user, encrypted).
+- Credential profiles managed locally per user.
 
 ---
 

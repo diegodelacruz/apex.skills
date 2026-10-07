@@ -1,8 +1,7 @@
 # Routing table
 
-**Updated:** 2026-09-17
-**Orchestrators:** 4 maestros (1 entry point, 3 coordinators + 3 sub-coordinators)
-**Skills:** 26 specialized skills
+**Inventory:** 31 entries: 1 entry coordinator, 7 workflow-orchestrator roles, 22 active specialists, and 1 retired compatibility entry.
+**Classification:** Coordinators route requests; orchestrators coordinate a multi-skill workflow; specialists perform one domain task.
 
 ## Primary Routing (Entry Points)
 
@@ -10,8 +9,12 @@
 | --- | --- | --- |
 | **Start a new APEX project (standard)** | `apex-project-bootstrap-final` → `apex-project-workspace` → `apex-delivery-lifecycle-complete` | ✓ Coordinated |
 | **Start a new APEX project (safe workflow)** | `apex-project-workspace` → `apex-delivery-lifecycle-safe` | ✓ Coordinated |
-| **Start a new project under GPZ methodology** | `apex-delivery-lifecycle-zaimella` (integrates Zaimella + APEX workflow) | ✓ Coordinated (NEW) |
-| **Generate complete APEX application (end-to-end)** | `apex-application-generator-complete` (orchestrates HITOs 1-5) | ✓ Coordinated |
+| **Start a new project under GPZ methodology** | `apex-delivery-lifecycle-zaimella` (integrates Zaimella + APEX workflow) | ✓ Coordinated |
+| **Build and deliver an APEX application** | `apex-delivery-lifecycle-complete` → relevant design, generation, page-import, QA, and documentation specialists | ✓ Workflow coordinated; report each operation's actual evidence |
+| **Review the application-generation prototype** | `apex-application-generator-complete` | △ Development outline; its deployment phase is not operational |
+| **Learn from an external repository** | `apex-external-context-learn` | ◎ Specialist |
+| **Generate APEX forms, reports, validations, or components** | `apex-code-generation-safe` | ◎ Specialist |
+| **Create or modify APEX pages** | `apex-page-automation-safe` using native export/import and configured APEX tools | ◎ Specialist |
 
 ## Specialized Workflows
 
@@ -19,14 +22,15 @@
 | User intent | Specialist workflow | Coordination |
 | --- | --- | --- |
 | Learn from ZIP exports | `apex-pattern-mining-safe` → `apex-solution-design` | ⊳ Recommended |
-| Full design review (solution → blueprint → engineering) | `apex-design-review-orchestrator` (NEW - coordinates 3-phase review) | ✓ Coordinated |
+| Full design review (solution → blueprint → engineering) | `apex-design-review-orchestrator` (coordinates three phases) | ✓ Coordinated |
 | Design an application blueprint before implementation | `apex-blueprint-design-safe` → `apex-solution-design` | ⊳ Recommended |
 | Design or edit APEX | `apex-engineering-safe`; add `apex-ui-craft-safe` for UX/responsive/accessibility; alignment is optional evidence | ◎ Optional |
 
 ### Database & Data
 | User intent | Specialist workflow | Coordination |
 | --- | --- | --- |
-| Full data workflow (schema → migration → sync) | `apex-data-orchestrator-safe` (NEW - coordinates schema/ETL/sync) | ✓ Coordinated |
+| **Plan schema and Oracle data migration work** | `apex-data-orchestrator-safe` | △ Development outline; no end-to-end executor |
+| **Import APEX component artifacts** | `apex-page-automation-safe` using the configured native import route | ◎ Specialist; separate from Oracle data migration |
 | DATA object change (governance guidance) | `oracle-data-change-governance-final` | ⊳ Advisory |
 | Create/modify database schema (owner defaults to DATA) | `apex-schema-automation-safe` | ⊳ Advisory |
 | Migrate data between environments | `apex-data-migration-safe` | ⊳ Advisory |
@@ -40,14 +44,14 @@ backup objects in the connected user's schema.
 ### QA & Testing
 | User intent | Specialist workflow | Coordination |
 | --- | --- | --- |
-| Full QA & testing workflow (static → automated → environment) | `apex-qa-orchestrator-safe` (NEW - coordinates 3-phase testing) | ✓ Coordinated |
+| Full QA & testing workflow (static → automated → environment) | `apex-qa-orchestrator-safe` (coordinates three phases) | ✓ Coordinated |
 | Export/static QA only | `apex-export-qa-safe` | ◎ First phase |
 | Automated testing (UI/performance/regression) | `apex-automated-testing-safe` | ◎ Second phase |
 
 ### Environment & Deployment
 | User intent | Specialist workflow | Coordination |
 | --- | --- | --- |
-| TEST/production copy, release, or environment alignment | `apex-environment-alignment-complete` → `apex-delivery-lifecycle-complete` | ⊳ Recommended |
+| TEST/production copy, release, or environment alignment | `apex-environment-alignment-complete` → `apex-delivery-lifecycle-complete`; use native import/App Builder instead of the retired simulated REST adapter | ⊳ Recommended |
 | Inspect APEX/Oracle, diagnose an error, or investigate slowness/performance | `apex-database-diagnostics`; add `apex-environment-alignment-complete` for existing-page changes | ◎ Optional |
 | Optimize an Oracle object, query, or PL/SQL execution | `apex-database-diagnostics`; add `oracle-data-change-governance-final` only when a change is requested | ⊳ Recommended |
 
@@ -82,7 +86,17 @@ backup objects in the connected user's schema.
 
 ---
 
-## New Orchestrators (2026-09-17)
+## Orchestrator Map
+
+| Workflow role | Current status and scope |
+|---|---|
+| `apex-delivery-lifecycle-complete` | Broad lifecycle workflow; follow its current `SKILL.md` and target evidence |
+| `apex-delivery-lifecycle-safe` | Broad lifecycle workflow; follow its current `SKILL.md` and target evidence |
+| `apex-delivery-lifecycle-zaimella` | Development status; GPZ and APEX coordination |
+| `apex-application-generator-complete` | Development prototype; deployment phase is unavailable through the retired API adapter |
+| `apex-data-orchestrator-safe` | Development outline; APEX component import is separate |
+| `apex-qa-orchestrator-safe` | QA evidence workflow; does not add an approval gate |
+| `apex-design-review-orchestrator` | Advisory design workflow; implementation continues when requested |
 
 ### 1. apex-delivery-lifecycle-zaimella (Coordinator)
 **Purpose:** Integrate GPZ (Zaimella) methodology with APEX delivery lifecycle
@@ -92,17 +106,18 @@ backup objects in the connected user's schema.
 2. Execute APEX workflow (Zaimella-governed)
 3. Close-out GPZ project (Zaimella)
 
-### 2. apex-data-orchestrator-safe (Sub-Coordinator)
-**Purpose:** Coordinate schema creation → data migration → APEX sync
-**Coordinates:** `apex-schema-automation-safe` → `apex-data-migration-safe` → `apex-api-client-safe`
-**Governance:** Under `oracle-data-change-governance-final`
+### 2. apex-data-orchestrator-safe (L2 focused workflow outline)
+**Purpose:** Outline schema, validation, and Oracle data migration work.
+**Coordinates:** `apex-schema-automation-safe` → `apex-data-migration-safe`.
+APEX component import is a separate optional operation via the configured
+native route; this outline does not implement end-to-end synchronization.
 
-### 3. apex-qa-orchestrator-safe (Sub-Coordinator)
+### 3. apex-qa-orchestrator-safe (L2 focused workflow orchestrator)
 **Purpose:** Coordinate static QA → automated testing → environment validation
 **Coordinates:** `apex-export-qa-safe` → `apex-automated-testing-safe` → `apex-environment-alignment-complete`
 **Sequence:** Review phases inform the requested release; service permissions determine execution.
 
-### 4. apex-design-review-orchestrator (Sub-Coordinator)
+### 4. apex-design-review-orchestrator (L2 focused workflow orchestrator)
 **Purpose:** Coordinate design review: solution → blueprint → engineering
 **Coordinates:** `apex-solution-design` → `apex-blueprint-design-safe` → `apex-engineering-safe`
 **Sequence:** Review phases are advisory; proceed within the user's stated scope.

@@ -1,7 +1,14 @@
 # Cross-Skill Integration Guide
 
-**Last Updated:** 2026-09-17
 **Purpose:** Explicit documentation of inter-skill references and integration points
+**Audit state:** Legacy integration map; API-client edges below are unresolved and are not operational routes.
+
+`apex-api-client-safe` is retired. Replace APEX component deployment references
+with native APEX export/import or the configured App Builder/MCP route described
+in `docs/CAPACIDADES-CONTROLADAS-ORACLE-APEX.md`. This guide's dependent-flow
+remaining tables are a legacy map and do not prove full graph or cycle
+compatibility. Direct edges assigning work to the retired adapter have been
+removed from active dependent workflows; its row below is historical only.
 
 > **Policy update (2026-09-28):** Direct requests define action, environment, and scope. Use the
 > credential configured for that environment; effective Oracle/APEX grants determine available
@@ -20,10 +27,10 @@
 - **`apex-delivery-lifecycle-complete`** → Coordinates 7 skills for full cycle
 - **`apex-delivery-lifecycle-safe`** → Coordinates 7 skills for safe cycle
 - **`apex-delivery-lifecycle-zaimella`** → Integrates GPZ + APEX workflow
-- **`apex-application-generator-complete`** → Orchestrates HITOs 1-5
+- **`apex-application-generator-complete`** → Development prototype; not an executable deployment pipeline
 
 ### Sub-Coordinators
-- **`apex-data-orchestrator-safe`** → Coordinates schema → migration → sync
+- **`apex-data-orchestrator-safe`** → Development outline for schema → migration; no APEX sync implementation
 - **`apex-qa-orchestrator-safe`** → Coordinates static QA → automated testing → environment
 - **`apex-design-review-orchestrator`** → Coordinates solution → blueprint → engineering
 
@@ -59,16 +66,16 @@ apex-engineering-safe
 └─ Calls: oracle-data-change-governance-final (if DATA changes)
 ```
 
-**Orchestrator:** `apex-design-review-orchestrator` coordinates these 3 with approval gates
+**Orchestrator:** `apex-design-review-orchestrator` coordinates these 3 as an advisory review
 
 ---
 
 ### Code Generation Pipeline
-**Workflow:** Schema → Code Generation → Testing → Deployment
+**Workflow:** Schema → Code Generation → Testing; APEX import is a separate operation
 
 ```
 apex-schema-automation-safe
-├─ Requires: oracle-data-change-governance-final gate
+├─ Related guidance: oracle-data-change-governance-final (when DATA governance is in scope)
 ├─ Provides: Created database objects
 ├─ Integrates with: apex-page-automation-safe (pages using objects)
 ├─ Integrates with: apex-code-generation-safe (code using schema)
@@ -76,16 +83,16 @@ apex-schema-automation-safe
 
 apex-code-generation-safe
 ├─ Requires: apex-schema-automation-safe (schema exists)
-├─ Requires: apex-blueprint-design-safe (approved design)
+├─ Uses: apex-blueprint-design-safe (design context, when available)
 ├─ Provides: Generated APEX code (forms, reports, validations)
 ├─ Generates: PL/SQL packages, APEX page code
-├─ Passes to: apex-api-client-safe (deployment)
+├─ Artifact import: `apex-page-automation-safe` and configured native APEX route (separate operation)
 ├─ Passes to: apex-automated-testing-safe (testing)
 └─ Integrates with: apex-delivery-lifecycle-safe (pipeline)
 
 apex-page-automation-safe
-├─ Requires: apex-blueprint-design-safe (approved design)
-├─ Requires: apex-export-qa-safe (QA validation)
+├─ Uses: apex-blueprint-design-safe (design context, when available)
+├─ Can use: apex-export-qa-safe (static validation, when requested)
 ├─ Provides: Created/modified APEX pages
 ├─ Operations: Create, modify, delete pages
 ├─ Calls: oracle-data-change-governance-final (if DML)
@@ -94,45 +101,39 @@ apex-page-automation-safe
 apex-automated-testing-safe
 ├─ Consumes: Generated code from apex-code-generation-safe
 ├─ Works with: apex-page-automation-safe (page structure)
-├─ Requires: apex-api-client-safe (test setup/teardown)
+├─ Uses: configured target application and credentials (no setup/teardown API dependency)
 ├─ Provides: Test results (UI, performance, regression)
 └─ Output: Test reports with pass/fail status
 ```
 
-**Orchestrator:** `apex-application-generator-complete` coordinates code gen → data migration → deployment → testing
+**Prototype:** `apex-application-generator-complete` describes a development workflow; its retired API deployment phase is not operational.
 
 ---
 
 ### Data Pipeline
-**Workflow:** Schema → Validation → Migration → Sync
+**Workflow:** Schema → Validation → Migration; APEX artifact import is a separate operation
 
 ```
 oracle-data-change-governance-final
-├─ Gates: ALL DATA changes require approval
-├─ Receives: Change requests from all skills
-├─ Delegates: DDL to apex-schema-automation-safe
-├─ Delegates: DATA migration to apex-data-migration-safe
-├─ Uses: validate_sql_style.py (security gate)
-└─ Output: Approved, audited changes
+├─ Provides: DATA change governance guidance and validation resources
+├─ Related skills: apex-schema-automation-safe, apex-data-migration-safe
+├─ Uses: validate_sql_style.py for applicable SQL style checks
+└─ Does not add a user approval gate or replace the requested Oracle route
 
-apex-data-migration-safe (HITO 4)
-├─ Requires: oracle-data-change-governance-final gate
-├─ Requires: apex-schema-automation-safe (target schema exists)
+apex-data-migration-safe
+├─ Related: oracle-data-change-governance-final and apex-schema-automation-safe
+├─ Uses the target schema when the requested migration requires one
 ├─ Provides: ETL pipeline, validation, rollback
 ├─ Components: SchemaMappingGenerator, DataValidator, ETLPipeline, RollbackManager
-├─ Passes to: apex-api-client-safe (sync to APEX)
 └─ Output: Migrated data with audit trail
 
-apex-api-client-safe (HITO 2)
-├─ Requires: apex-code-generation-safe (code to deploy)
-├─ Requires: apex-schema-automation-safe (schema setup)
-├─ Provides: Deployment to APEX, environment sync
-├─ Syncs: apex-data-migration-safe (data sync)
-├─ Works with: apex-environment-alignment-complete (environment validation)
-└─ Output: Deployed application, synchronized data
+Optional APEX artifact import
+├─ Uses: apex-page-automation-safe and the configured native APEX route
+├─ Scope: APEX components only; it does not synchronize migrated Oracle data
+└─ Evidence: verify the requested target and imported components
 ```
 
-**Orchestrator:** `apex-data-orchestrator-safe` coordinates schema → validation → migration → sync
+**Prototype:** `apex-data-orchestrator-safe` outlines schema → validation → migration; it does not implement APEX synchronization.
 
 ---
 
@@ -145,14 +146,14 @@ apex-export-qa-safe
 ├─ Provides: Static validation (structure, syntax)
 ├─ Validates: ZIP integrity, component validity
 ├─ Input: APEX export files
-├─ Passes to: apex-automated-testing-safe (after approval)
-├─ Consumed by: apex-user-manual (approved evidence)
+├─ Can inform: apex-automated-testing-safe when testing is requested
+├─ Can provide evidence to: apex-user-manual
 └─ Output: QA report with issues/recommendations
 
-apex-automated-testing-safe (HITO 3)
-├─ Requires: apex-export-qa-safe (static validation passed)
-├─ Requires: apex-code-generation-safe (generated code)
-├─ Requires: apex-api-client-safe (test environment setup)
+apex-automated-testing-safe
+├─ Can use: apex-export-qa-safe (static findings)
+├─ Can use: apex-code-generation-safe (generated artifacts)
+├─ Uses: an existing configured test application; no API setup/teardown dependency
 ├─ Provides: UI tests (Selenium), performance tests, regression tests
 ├─ Components: SeleniumTestGenerator, PerformanceTestGenerator, RegressionTestValidator
 ├─ Uses: apex-page-automation-safe (page structure for testing)
@@ -165,7 +166,7 @@ apex-environment-alignment-complete
 ├─ Works with: apex-delivery-lifecycle-complete (release readiness)
 ├─ Validates: TEST ↔ PROD alignment, connectivity, credentials
 ├─ Output: Environment readiness report
-└─ Gate: Release approved
+└─ Output: environment alignment evidence for the requested scope
 ```
 
 **Orchestrator:** `apex-qa-orchestrator-safe` coordinates export QA → automated testing → environment validation
@@ -195,10 +196,9 @@ apex-page-range-governance
 ├─ Output: Reserved page ranges
 
 oracle-data-change-governance-final
-├─ Required by: ALL DATA changes (schema, migration, changes)
-├─ Gates: DATA change approval (DDL/DML)
-├─ Receives: Requests from apex-schema-automation-safe, apex-data-migration-safe
-├─ Output: Approved, audited changes
+├─ Related to: apex-schema-automation-safe, apex-data-migration-safe
+├─ Provides: DATA change governance guidance when requested
+├─ Does not gate direct user-requested Oracle execution
 
 apex-audit-decisions-log
 ├─ Reads: .bitacora.json (git-backed audit trail)
@@ -224,7 +224,7 @@ When creating a new skill, verify it:
 - [ ] **References related skills** in "Integration" section
 - [ ] **Lists prerequisite skills** if any
 - [ ] **Lists blocking skills** (cannot run concurrently)
-- [ ] **Has approval gates** defined if coordinating others
+- [ ] **Names direct skill edges** and their current operational evidence
 - [ ] **Updates routing.md** if changing entry logic
 - [ ] **Updates SKILL-DEPENDENCY-MATRIX.md** with new edges
 - [ ] **Notifies** all affected upstream skills of new integration
@@ -237,7 +237,7 @@ When creating a new skill, verify it:
 
 | Skill | Provides | Requires | Calls |
 |-------|----------|----------|-------|
-| apex-code-generation-safe | Generated forms, reports, validations | apex-schema-automation-safe, apex-blueprint-design-safe | apex-api-client-safe, apex-automated-testing-safe |
+| apex-code-generation-safe | Generated forms, reports, validations | apex-schema-automation-safe, apex-blueprint-design-safe | apex-automated-testing-safe; native import is separate |
 | apex-page-automation-safe | Page creation/modification | apex-blueprint-design-safe, apex-export-qa-safe | oracle-data-change-governance-final, apex-page-range-governance |
 | apex-schema-automation-safe | Database objects | oracle-data-change-governance-final | apex-page-automation-safe, apex-code-generation-safe |
 
@@ -245,16 +245,16 @@ When creating a new skill, verify it:
 
 | Skill | Provides | Requires | Calls |
 |-------|----------|----------|-------|
-| apex-data-migration-safe | ETL pipeline, data migration | oracle-data-change-governance-final, apex-schema-automation-safe | apex-api-client-safe |
-| apex-api-client-safe | Deployment, REST API client | apex-code-generation-safe, apex-schema-automation-safe | apex-automated-testing-safe, apex-data-migration-safe |
-| oracle-data-change-governance-final | DATA change governance | None (gates all DATA changes) | apex-schema-automation-safe, apex-data-migration-safe |
+| apex-data-migration-safe | ETL pipeline, data migration | oracle-data-change-governance-final, apex-schema-automation-safe | None; APEX import is separate |
+| apex-api-client-safe | Retired simulated REST adapter; non-operational | None | Historical compatibility references only |
+| oracle-data-change-governance-final | DATA change governance guidance | None | apex-schema-automation-safe, apex-data-migration-safe |
 
 ### By Category: Apex Testing & QA
 
 | Skill | Provides | Requires | Calls |
 |-------|----------|----------|-------|
 | apex-export-qa-safe | Static QA validation | None | apex-automated-testing-safe, apex-user-manual |
-| apex-automated-testing-safe | UI/perf/regression tests | apex-export-qa-safe, apex-code-generation-safe, apex-api-client-safe | apex-environment-alignment-complete |
+| apex-automated-testing-safe | UI/perf/regression test generation | apex-export-qa-safe, apex-code-generation-safe | apex-environment-alignment-complete |
 | apex-environment-alignment-complete | Environment readiness | apex-automated-testing-safe, apex-database-diagnostics | apex-delivery-lifecycle-complete |
 
 ### By Category: Apex Design & Engineering
@@ -281,67 +281,38 @@ When creating a new skill, verify it:
 |-------|----------|----------|-------|
 | apex-database-diagnostics | Diagnostics, analysis | None (read-only) | oracle-data-change-governance-final (if corrections) |
 | apex-audit-decisions-log | Audit visualization | None (read-only) | (displays .bitacora.json) |
+| apex-external-context-learn | Saved external-repository context | None declared | scripts/external_repo_scanner.py, scripts/external_repo_indexer.py |
 | apex-rest-source-catalogs-safe | REST integration guidance | apex-solution-design (context) | (advisory only) |
-| apex-user-manual | Documentation generation | apex-export-qa-safe (approved QA) | (upstream: zaimella-skill audit_docx_images.py) |
+| apex-user-manual | Documentation generation | available QA evidence | (upstream: zaimella-skill audit_docx_images.py) |
 | apex-zaimella-gestion-proyectos | Methodology guidance | None (advisory) | apex-delivery-lifecycle-zaimella |
 
 ---
 
-## Approval Gate Dependencies
+## Historical approval assignments
 
-**Must Pass Before Proceeding:**
-
-| Gate | Required By | Approver(s) |
-|------|------------|-------------|
-| Static QA (`apex-export-qa-safe`) | `apex-automated-testing-safe`, `apex-user-manual` | QA team |
-| Automated Tests (`apex-automated-testing-safe`) | `apex-environment-alignment-complete` | QA team |
-| Environment Ready (`apex-environment-alignment-complete`) | Release to PROD | Ops team |
-| Solution Design (`apex-solution-design`) | `apex-blueprint-design-safe` | Business owner, IT director |
-| Blueprint Design (`apex-blueprint-design-safe`) | `apex-engineering-safe` | Technical lead, architect |
-| Engineering Review (`apex-engineering-safe`) | Implementation starts | Principal engineer |
-| DATA Governance (`oracle-data-change-governance-final`) | Any DATA change | Database admin, security |
-| Page Range (`apex-page-range-governance`) | Page creation | Project lead |
+The former approver table is removed because it was unsupported and conflicted
+with current direct-scope routing. This guide does not assign approvers or add
+execution gates; follow the user's request and the configured system's actual
+permissions.
 
 ---
 
 ## Circular Dependencies Check
 
-✅ **CONFIRMED: No circular dependencies**
+**Not verified:** this legacy guide does not establish an acyclic graph. See the
+current edge and cycle limitations in `ORCHESTRATOR-AUDIT.md`.
 
-All flows are acyclic:
 ```
-Entry Point: apex
-  ↓
-Coordinators (4 levels)
-  ↓
-Technical Skills (26 leaf nodes)
-  ↓
-No return paths to coordinators or entry point
+Cycle status: pending complete edge extraction and review.
 ```
 
 ---
 
-## Version Compatibility Matrix
+## Runtime compatibility
 
-**Current Versions (2026-09-17):**
-
-| Skill | Version | Compatibility |
-|-------|---------|---|
-| apex | 1.0 | Stable |
-| apex-code-generation-safe | 1.0 (HITO 1) | Stable - used by `apex-application-generator-complete` |
-| apex-api-client-safe | 1.0 (HITO 2) | Stable - used by `apex-application-generator-complete` |
-| apex-automated-testing-safe | 1.0 (HITO 3) | Stable - used by `apex-application-generator-complete` |
-| apex-data-migration-safe | 1.0 (HITO 4) | Stable - used by `apex-application-generator-complete` |
-| apex-application-generator-complete | 0.2.0-dev | Development - orchestrates HITOs 1-5 |
-| apex-delivery-lifecycle-complete | 1.0 | Stable |
-| apex-delivery-lifecycle-safe | 1.0 | Stable |
-| All others | 1.0 | Stable |
-
-**New Orchestrators (0.1.0-dev):**
-- apex-delivery-lifecycle-zaimella
-- apex-data-orchestrator-safe
-- apex-qa-orchestrator-safe
-- apex-design-review-orchestrator
+This static integration map does not certify runtime compatibility. Check each
+skill's current metadata status and the configured target before claiming that
+an operation ran.
 
 ---
 

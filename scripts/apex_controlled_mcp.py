@@ -22,6 +22,11 @@ from typing import Any
 
 from fastmcp import FastMCP
 
+if __package__ in (None, ""):
+    from env_credentials import parse_env
+else:
+    from scripts.env_credentials import parse_env
+
 ROOT = Path(__file__).resolve().parent.parent
 RUNTIME_ENV = "APEX_SQLCL_RUNTIME_ROOT"
 AUDIT_PATH = ROOT / "control-proyecto" / ".bitacora.json"
@@ -114,16 +119,9 @@ def doctor_report() -> dict[str, Any]:
 
 
 def resolve_environment(environment: str | None) -> tuple[str | None, dict[str, Any] | None]:
-    """Resolve an explicit environment or the non-secret DB_ENV selector."""
-    env_path = ROOT / ".env"
-    values: dict[str, str] = {}
-    if env_path.is_file():
-        for line in env_path.read_text(encoding="utf-8").splitlines():
-            cleaned = line.strip()
-            if cleaned and not cleaned.startswith("#") and "=" in cleaned:
-                key, value = cleaned.split("=", 1)
-                values[key.strip()] = value.strip()
-    selected = environment or values.get("DB_ENV") or os.environ.get("DB_ENV")
+    """Resolve an explicit environment or the .env selector, never process env."""
+    values = parse_env(ROOT / ".env")
+    selected = environment or values.get("DB_ENV")
     if not selected:
         return None, {
             "code": "ENVIRONMENT_REQUIRED",
@@ -147,12 +145,7 @@ def load_profile(environment: str | None) -> tuple[dict[str, str] | None, dict[s
     env_path = ROOT / ".env"
     if not env_path.is_file():
         return None, {"code": "PROFILE_MISSING", "message": "No existe .env; no se intentó conectar."}
-    values: dict[str, str] = {}
-    for line in env_path.read_text(encoding="utf-8").splitlines():
-        cleaned = line.strip()
-        if cleaned and not cleaned.startswith("#") and "=" in cleaned:
-            key, value = cleaned.split("=", 1)
-            values[key.strip()] = value.strip()
+    values = parse_env(env_path)
     prefix = "DB_PRODUCTION" if environment == "production" else "DB_TESTING"
     required = ("USER", "PASSWORD", "HOST", "SID")
     missing = [field for field in required if not values.get(f"{prefix}_{field}")]

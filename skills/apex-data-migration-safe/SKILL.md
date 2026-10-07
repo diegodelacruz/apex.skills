@@ -144,8 +144,8 @@ audit_log = tracker.get_audit_log()
 
 ## Integration
 
-Works seamlessly with:
-- `apex-api-client-safe` (APEX connectivity)
+Uses separate skills/routes for adjacent work:
+- `apex-api-client-safe` is retired and is not an APEX connectivity prerequisite.
 - `apex-code-generation-safe` (generated object migration)
 - `apex-schema-automation-safe` (schema creation)
 - `apex-delivery-lifecycle-safe` (migration in deployment)

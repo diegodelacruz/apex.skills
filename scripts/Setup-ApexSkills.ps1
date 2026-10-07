@@ -56,8 +56,8 @@ Write-Host ''
 Write-Host 'Next steps:' -ForegroundColor Yellow
 Write-Host '1. REQUIRED: create .env in the repository root from .env.example and fill DB_TESTING_USER, DB_TESTING_PASSWORD, DB_TESTING_HOST, DB_TESTING_PORT, and DB_TESTING_SID.' -ForegroundColor Yellow
 Write-Host '   Never commit .env or paste its values into chat.' -ForegroundColor Yellow
-Write-Host '2. Import and validate the TEST profile with manage_apex_credentials.py.' -ForegroundColor Yellow
-Write-Host '   ./.venv/Scripts/python.exe ./scripts/manage_apex_credentials.py import-env --environment test' -ForegroundColor Yellow
+Write-Host '2. Check and validate the TEST profile directly from .env.' -ForegroundColor Yellow
+Write-Host '   ./.venv/Scripts/python.exe ./scripts/manage_apex_credentials.py status --environment test' -ForegroundColor Yellow
 Write-Host '   ./.venv/Scripts/python.exe ./scripts/manage_apex_credentials.py validate --environment test' -ForegroundColor Yellow
 Write-Host '3. Run Initialize-ApexCodexProject.ps1 -ProjectPath <RUTA_PROYECTO_APEX> to validate MCP TEST.' -ForegroundColor Yellow
 Write-Host '4. If connection fails, use the diagnostic message; no credentials are printed.' -ForegroundColor Yellow

@@ -16,8 +16,6 @@
 .PARAMETER ApexDir
     Directory containing APEX export files. Alternative to PageFile —
     the script will look for f{ApplicationId}_page_{Page}.sql in this dir.
-.PARAMETER Connection
-    SQLcl connection string. Default: $env:APEX_SQLCL_CONN.
 .PARAMETER SqlclPath
     Path to sql.exe (SQLcl). Default: $env:APEX_SQLCL_PATH.
 .PARAMETER DryRun
@@ -32,7 +30,6 @@ param(
     [int]$ApplicationId,
     [int]$Page,
     [string]$ApexDir,
-    [string]$Connection,
     [string]$SqlclPath,
     [switch]$DryRun
 )
@@ -47,9 +44,8 @@ if (-not $SqlclPath -or -not (Test-Path $SqlclPath)) {
 }
 
 # Resolve connection
-if (-not $Connection) { $Connection = $env:APEX_SQLCL_CONN }
-if (-not $Connection) {
-    Write-Error "No Oracle connection. Run Initialize-OracleConnection.ps1 first or pass -Connection."
+if (-not $env:APEX_SQLCL_CONN) {
+    Write-Error "No Oracle connection. Dot-source Initialize-OracleConnection.ps1 after configuring the repository .env."
     exit 1
 }
 
@@ -132,7 +128,7 @@ try {
     $wrapperScript | Out-File -FilePath $tempScript -Encoding UTF8
 
     $process = Start-Process -FilePath $SqlclPath `
-        -ArgumentList @("-S", $Connection, "@$tempScript") `
+        -ArgumentList @("-S", $env:APEX_SQLCL_CONN, "@$tempScript") `
         -NoNewWindow -Wait -PassThru `
         -RedirectStandardOutput "$tempScript.out" `
         -RedirectStandardError "$tempScript.err"

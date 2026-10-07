@@ -3,9 +3,6 @@
 # Optional local MCP runtime. Setup-ApexSkills.ps1 installs this after upstream bootstrap.
 # -e ./.upstreams/managed/apex-mcp
 
-# Secure per-user TEST/production credential profiles
-keyring>=25.0.0
-
 # Controlled local MCP.  This is a direct dependency: it must not depend on
 # the managed apex-mcp upstream, whose complete tool surface is not exposed.
 fastmcp>=3.4.7,<4.0.0

@@ -10,7 +10,7 @@ description: "Validate and align TEST and production APEX environments safely."
 
 ## Workflow
 
-- Use `scripts/manage_apex_credentials.py` to set, check, or validate per-user secure profiles. Never request users to paste credentials into chat, source files, Markdown, or Git.
+- Use `scripts/manage_apex_credentials.py` to set, check, or validate the repository-root `.env` profile. Never request users to paste credentials into chat, source files, Markdown, or Git.
 - Check the requested environment profile when useful; profile status is evidence about that route, not a veto on another configured route.
 - Before an existing-page edit, compare TEST and production when both are available and useful. Report differences, but do not make a comparison or user approval a prerequisite to the requested edit.
 - After the requested work, prepare exports and release evidence when useful. A direct user request is sufficient authorization; the selected account's actual permissions decide success.

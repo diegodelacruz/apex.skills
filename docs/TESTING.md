@@ -132,7 +132,7 @@ pytest -m "not requires_oracle"  # Skip Oracle-dependent tests
 
 ### Not Yet Covered
 
-- 🚧 `scripts/manage_apex_credentials.py` - Credential management (requires keyring)
+- `scripts/manage_apex_credentials.py` - Credential management (reads the repository `.env`)
 - 🚧 `skills/*/scripts/validate_export.py` - Export validation CLI
 - 🚧 `skills/*/scripts/inspect_export.py` - Export inspection CLI
 - 🚧 `skills/*/scripts/mine_export_patterns.py` - Pattern mining CLI
@@ -199,7 +199,8 @@ pytest --collect-only  # List discovered tests
 Tests add `scripts/` to the Python path. If imports still fail:
 
 ```bash
-export PYTHONPATH=/home/user/apex.skills/scripts:$PYTHONPATH
+export REPO_ROOT="<ruta-a-la-raiz-del-repositorio>"
+export PYTHONPATH="$REPO_ROOT/scripts:$PYTHONPATH"
 ```
 
 ### Coverage Not Generated
@@ -213,7 +214,7 @@ pip install pytest-cov
 ## Future Improvements
 
 1. **Integration Tests**: Add tests for Oracle APEX connections
-2. **Mocking**: Mock external dependencies (keyring, oracledb)
+2. **Mocking**: Use temporary `.env` files and mock `oracledb` for connection tests
 3. **Fixtures**: Create reusable test data (sample exports, credentials)
 4. **CI/CD**: Integrate coverage reports into GitHub Actions
 5. **CLI Tests**: Test command-line scripts with click or typer

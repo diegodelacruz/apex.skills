@@ -1,7 +1,7 @@
 # GitHub Configuration & Release Management
 
-**Setup Date:** 2026-08-21
-**Branch Protection:** Blocked for this private repository by the current GitHub plan
+**Setup Date:** 2026-08-21 (historical guide date)
+**Repository visibility checked:** Public on 2026-09-30. No tags or releases existed at this check; branch protection rules were not inspected.
 **Release Strategy:** Semantic Versioning
 
 ---
@@ -206,13 +206,17 @@ Format based on [Keep a Changelog](https://keepachangelog.com/).
 ### Fixed
 ### Security
 
-## [1.0.0] - 2026-08-21
+## [<version>] - YYYY-MM-DD
 ### Added
-- Initial release
+- Describe the release here
 
-[Unreleased]: https://github.com/diegodelacruz/apex.skills/compare/v1.0.0...HEAD
-[1.0.0]: https://github.com/diegodelacruz/apex.skills/releases/tag/v1.0.0
+[Unreleased]: https://github.com/diegodelacruz/apex.skills/compare/<previous-tag>...HEAD
+[<version>]: https://github.com/diegodelacruz/apex.skills/releases/tag/<version>
 ```
+
+The repository was confirmed public, but it had no tags or releases on
+2026-09-30. These are templates only; replace the placeholders after creating
+the corresponding tag and release. Do not treat the example URLs as live links.
 
 ---
 

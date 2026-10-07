@@ -2,8 +2,10 @@
 
 ## System Overview
 
-apex.skills is a canonical framework for Oracle APEX development with 18 specialized skills,
-security-hardened pre-commit hooks, and an automatic audit trail system.
+apex.skills is a canonical framework for Oracle APEX work with 31 skills:
+1 entry coordinator, 7 workflow-orchestrator roles, 22 active specialists, and
+1 retired compatibility entry. It also
+provides security hooks and an audit trail.
 
 ### Components
 
@@ -44,8 +46,8 @@ security-hardened pre-commit hooks, and an automatic audit trail system.
 
 ## Layers
 
-### 1. Skills Layer (Highest Level)
-- **18 specialized Oracle APEX skills**
+### 1. Skills Layer
+- **31 entries:** 1 entry coordinator, 7 workflow-orchestrator roles, 22 active specialists, and 1 retired compatibility entry
 - Each skill = SKILL.md file with frontmatter (name, category, order, tags, description)
 - Examples:
   - `apex-engineering-safe` → Inspect and design APEX apps
@@ -53,10 +55,12 @@ security-hardened pre-commit hooks, and an automatic audit trail system.
   - `apex-audit-decisions-log` → View audit trail
   - `oracle-data-change-governance-final` → Govern DATA changes
 
-### 2. Coordinator Skill
-- Entry point: `skills/apex/SKILL.md`
-- Routes requests to specialized skills
-- Understands context and intent
+### 2. Coordination Roles
+- Entry point: `skills/apex/SKILL.md` (L0)
+- L1: four broad lifecycle/application orchestrators
+- L2: three focused workflow orchestrators
+- L3: 22 active domain specialists; the retired API entry is outside active routing
+- The levels describe routing breadth, not authority or guaranteed execution.
 
 ### 3. Utilities Layer
 These are reusable Python modules imported by skills:
@@ -77,8 +81,8 @@ These are reusable Python modules imported by skills:
 - Finds repo root via .git detection
 
 **manage_apex_credentials** (`scripts/manage_apex_credentials.py`)
-- Secure per-user credential profiles
-- Stored in system keyring (not git, not files)
+- Reads and updates Oracle/APEX credential profiles in the ignored repository `.env`
+- The same `.env` is the only credential source for local MCP routes
 - Never expose credentials
 
 ### 4. Hooks Layer
@@ -134,7 +138,7 @@ Specialized Skill
     ├─ Imports from Utilities Layer
     │  (CLIParser, ApexMetadata, path_setup)
     │
-    ├─ Uses system keyring for credentials
+    ├─ Reads credentials from the repository .env
     │  (via manage_apex_credentials)
     │
     ├─ Processes input
@@ -183,7 +187,7 @@ not covered by reproducible validation and rollback evidence.
 ## Security Boundaries
 
 ### What We Protect
-- Credentials: TEST and Production connection strings (stored in system keyring)
+- Credentials: TEST and Production connection strings (stored in the ignored local `.env`)
 - Export files: APEX application schemas and configurations
 - Decision logs: Project decisions and audit trail
 - Screenshots: User interface screenshots (excluded from git)
@@ -194,11 +198,10 @@ not covered by reproducible validation and rollback evidence.
    - Blocks commit if secrets detected
    - Maintains `.secrets.baseline` for known secrets
 
-2. **System Keyring Storage**
-   - Credentials never in git
-   - Never in environment variables
-   - Never in .env files
-   - Stored securely in OS credential manager
+2. **Local `.env` Storage**
+   - `.env` is ignored by Git and is the only credential source for local MCP routes
+   - `.env` is plaintext and is not encrypted by this repository; restrict local file access
+   - Processes receive credentials in memory only after the `.env` profile is selected
 
 3. **Pre-commit Hooks Enforcement**
    - All developers must use hooks
@@ -216,8 +219,8 @@ not covered by reproducible validation and rollback evidence.
 | Skills | Claude + Python | Oracle APEX expertise + orchestration |
 | Utils | Python 3.13 | Reusable components |
 | Hooks | Bash + Python | Git integration, audit trail |
-| Credentials | system-keyring | Secure storage |
-| Testing | pytest + shared local/GitHub CI runner | 485 tests; 55% minimum combined coverage |
+| Credentials | ignored local `.env` | Plaintext local file; restrict access |
+| Testing | pytest + shared local/GitHub CI runner | 509 tests; 55% minimum combined coverage |
 | Documentation | Markdown | GitHub-friendly docs |
 | Version Control | Git + GitHub | History and collaboration |
 
@@ -257,7 +260,7 @@ Production Ready
 
 - **Audit Trail Capture**: <100ms per commit (pure bash/JSON)
 - **Pre-commit Hooks**: ~2-5 seconds total (Black, isort, Bandit)
-- **Test Suite**: 485 automated tests; runtime depends on the local environment
+- **Test Suite**: 509 automated tests; 55% minimum combined coverage
 - **Skill Execution**: Depends on task (typically 30s-5min)
 
 ## Future Enhancements

@@ -1,5 +1,6 @@
 """Comprehensive tests for orchestrator coordination and skill dependencies."""
 
+import re
 import sys
 from pathlib import Path
 
@@ -21,6 +22,17 @@ class TestOrchestratorExistence:
             content = f.read()
             assert "name: apex" in content
             assert "order: 14" in content
+
+    @pytest.mark.unit
+    def test_every_skill_has_its_local_claude_command_adapter(self):
+        root = Path(__file__).resolve().parent.parent
+        skill_names = {path.parent.name for path in (root / "skills").glob("*/SKILL.md")}
+        command_names = {path.stem for path in (root / ".claude" / "commands").glob("*.md")}
+
+        assert skill_names == command_names
+        for name in skill_names:
+            command = (root / ".claude" / "commands" / f"{name}.md").read_text(encoding="utf-8")
+            assert f"skills/{name}/SKILL.md" in command
 
     @pytest.mark.unit
     def test_apex_read_diagnostics_use_fast_path_and_refresh_historical_failures(self):
@@ -179,12 +191,11 @@ class TestOrchhestratorSkillCoordination:
         assert len(coordinated_skills) == 2
 
     @pytest.mark.unit
-    def test_application_generator_coordinates_4_hitos(self):
-        """apex-application-generator-complete coordinates 4 HITOs."""
+    def test_application_generator_lists_only_operational_skill_edges(self):
+        """The development prototype does not depend on the retired API skill."""
         coordinated_skills = [
             "apex-code-generation-safe",  # HITO 1
             "apex-data-migration-safe",  # HITO 4
-            "apex-api-client-safe",  # HITO 2
             "apex-automated-testing-safe",  # HITO 3
         ]
 
@@ -194,15 +205,20 @@ class TestOrchhestratorSkillCoordination:
             skill_path = skills_dir / skill_name / "SKILL.md"
             assert skill_path.exists(), f"Skill {skill_name} must exist"
 
-        assert len(coordinated_skills) == 4
+        assert len(coordinated_skills) == 3
+        api_skill = (skills_dir / "apex-api-client-safe" / "SKILL.md").read_text(encoding="utf-8")
+        api_command = (skills_dir.parent / ".claude" / "commands" / "apex-api-client-safe.md").read_text(
+            encoding="utf-8"
+        )
+        assert "status: retired" in api_skill
+        assert "skills/apex-api-client-safe/SKILL.md" in api_command
 
     @pytest.mark.unit
-    def test_data_orchestrator_coordinates_3_skills(self):
-        """apex-data-orchestrator-safe coordinates 3 skills."""
+    def test_data_orchestrator_lists_only_operational_skill_edges(self):
+        """APEX artifact import stays separate from Oracle data migration."""
         coordinated_skills = [
             "apex-schema-automation-safe",
             "apex-data-migration-safe",
-            "apex-api-client-safe",
         ]
 
         skills_dir = Path(__file__).resolve().parent.parent / "skills"
@@ -211,7 +227,30 @@ class TestOrchhestratorSkillCoordination:
             skill_path = skills_dir / skill_name / "SKILL.md"
             assert skill_path.exists(), f"Skill {skill_name} must exist"
 
-        assert len(coordinated_skills) == 3
+        assert len(coordinated_skills) == 2
+
+    @pytest.mark.unit
+    def test_retired_api_skill_is_not_an_active_integration_edge(self):
+        """Dependent skills keep the alias historical and route live work elsewhere."""
+        root = Path(__file__).resolve().parent.parent
+        skill_names = [
+            "apex-application-generator-complete",
+            "apex-data-orchestrator-safe",
+            "apex-data-migration-safe",
+            "apex-code-generation-safe",
+            "apex-automated-testing-safe",
+        ]
+        for name in skill_names:
+            content = (root / "skills" / name / "SKILL.md").read_text(encoding="utf-8")
+            integration = content.split("## Integration", maxsplit=1)[-1].split("\n## ", maxsplit=1)[0]
+            for line in integration.splitlines():
+                if "apex-api-client-safe" in line:
+                    assert any(term in line.lower() for term in ("retired", "not", "do not", "does not"))
+
+        retired = (root / "skills" / "apex-api-client-safe" / "SKILL.md").read_text(encoding="utf-8")
+        command = (root / ".claude" / "commands" / "apex-api-client-safe.md").read_text(encoding="utf-8")
+        assert "status: retired" in retired
+        assert "skills/apex-api-client-safe/SKILL.md" in command
 
     @pytest.mark.unit
     def test_qa_orchestrator_coordinates_3_skills(self):
@@ -248,12 +287,12 @@ class TestOrchhestratorSkillCoordination:
         assert len(coordinated_skills) == 3
 
 
-class TestNoCircularDependencies:
-    """Verify no circular dependencies exist in orchestration."""
+class TestOrchestratorReferenceCoverage:
+    """Check coordinator presence; this test does not validate graph cycles."""
 
     @pytest.mark.unit
-    def test_no_circular_dependencies(self):
-        """Verify no circular dependencies."""
+    def test_key_orchestrators_exist_and_entry_has_routing(self):
+        """Verify listed coordinators exist and the entry point documents routing."""
         skills_dir = Path(__file__).resolve().parent.parent / "skills"
 
         # Simple check: verify that key orchestrator relationships make sense
@@ -281,8 +320,8 @@ class TestNoCircularDependencies:
             assert "routing" in apex_content.lower() or "route" in apex_content.lower()
 
 
-class TestApprovalGates:
-    """Verify approval gates are defined in orchestrators."""
+class TestWorkflowDefinitions:
+    """Verify orchestrator workflow descriptions exist."""
 
     @pytest.mark.unit
     def test_delivery_lifecycle_complete_exists_and_is_orchestrator(self):
@@ -450,13 +489,24 @@ class TestOrchestratorAudit:
     @pytest.mark.unit
     def test_orchestrator_audit_verifies_skill_existence(self):
         """Audit verifies all coordinated skills exist."""
-        audit_path = Path(__file__).resolve().parent.parent / "docs" / "ORCHESTRATOR-AUDIT.md"
-
-        with open(audit_path, encoding="utf-8") as f:
-            content = f.read()
-
-            # Should verify skills
-            assert "26" in content or "coordination" in content.lower()
+        root = Path(__file__).resolve().parent.parent
+        audit_path = root / "docs" / "ORCHESTRATOR-AUDIT.md"
+        content = audit_path.read_text(encoding="utf-8")
+        orchestrators = [
+            "apex",
+            "apex-delivery-lifecycle-complete",
+            "apex-delivery-lifecycle-safe",
+            "apex-delivery-lifecycle-zaimella",
+            "apex-application-generator-complete",
+            "apex-data-orchestrator-safe",
+            "apex-qa-orchestrator-safe",
+            "apex-design-review-orchestrator",
+        ]
+        assert "31 directories" in content
+        assert "current inventory" in content.lower()
+        for name in orchestrators:
+            assert name in content
+            assert (root / "skills" / name / "SKILL.md").is_file()
 
 
 class TestOrderConsistency:
@@ -485,35 +535,20 @@ class TestOrderConsistency:
                 assert expected_order_line in content, f"{name} should have {expected_order_line}"
 
     @pytest.mark.unit
-    def test_no_duplicate_orders(self):
-        """No duplicate order numbers among orchestrators."""
+    def test_duplicate_order_is_documented_and_preserved(self):
+        """A known duplicate remains explicit until discovery compatibility is verified."""
         skills_dir = Path(__file__).resolve().parent.parent / "skills"
-
-        orders = {}
-        orchestrators = [
-            "apex",
-            "apex-delivery-lifecycle-complete",
-            "apex-delivery-lifecycle-safe",
-            "apex-delivery-lifecycle-zaimella",
-            "apex-application-generator-complete",
-            "apex-data-orchestrator-safe",
-            "apex-qa-orchestrator-safe",
-            "apex-design-review-orchestrator",
-        ]
-
-        for name in orchestrators:
-            skill_path = skills_dir / name / "SKILL.md"
-            with open(skill_path, encoding="utf-8") as f:
-                content = f.read()
-                # Extract order from content
-                for line in content.split("\n"):
-                    if line.startswith("order:"):
-                        order_val = line.split(":")[1].strip()
-                        assert (
-                            order_val not in orders
-                        ), f"Order {order_val} duplicated: {name} and {orders.get(order_val)}"
-                        orders[order_val] = name
-                        break
+        orders: dict[str, list[str]] = {}
+        for skill_file in skills_dir.glob("*/SKILL.md"):
+            match = re.search(r"(?m)^order:\s*(.+?)\s*$", skill_file.read_text(encoding="utf-8"))
+            if match:
+                orders.setdefault(match.group(1), []).append(skill_file.parent.name)
+        duplicates = {value: sorted(names) for value, names in orders.items() if len(names) > 1}
+        assert duplicates == {"3.5": ["apex-delivery-lifecycle-zaimella", "apex-external-context-learn"]}
+        decision = (
+            Path(__file__).resolve().parent.parent / "docs" / "decisiones" / "20260929-markdown-audit-scope.md"
+        ).read_text(encoding="utf-8")
+        assert "external skill discovery/ui behavior is unverified" in re.sub(r"\s+", " ", decision).lower()
 
 
 class TestMetadataCompleteness:

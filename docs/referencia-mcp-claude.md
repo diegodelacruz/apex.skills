@@ -6,8 +6,8 @@
 
 ## Qué hace diferente
 
-El repositorio local `D:\Users\ddelacruz\Desktop\Python\codex\mcp` es un
-administrador de perfiles y procesos. Su parche `apex_mcp_patch` reemplaza la
+El checkout local del repositorio `mcp` es un administrador de perfiles y
+procesos. Su parche `apex_mcp_patch` reemplaza la
 conexión ADB con una conexión Oracle directa mediante Easy Connect y luego
 ejecuta el servidor `apex-mcp` sin introducir un modo de solo lectura propio.
 
@@ -39,7 +39,8 @@ El repositorio no resuelve el problema observado en APEX 24.1.3:
    `wwv_flow_imp_page`.
 4. La separación entre perfiles TEST y Producción.
 
-No se copiará código del repositorio. Nuestro MCP conservará el keyring y el
+No se copiará código del repositorio. Nuestro MCP conservará `.env` como fuente
+única de credenciales y el
 registro Codex, pero incorporará una capa propia de compatibilidad APEX 24.1.3.
 
 ## Conclusión

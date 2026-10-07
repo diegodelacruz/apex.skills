@@ -60,7 +60,11 @@ Requisitos portables:
 Convenciones adicionales de este repositorio:
 
 - `category` debe ser coherente con las categorías existentes.
-- `order` debe ser un entero único y revisarse contra el inventario actual.
+- `order` es un valor de presentación numérico; revísalo contra el inventario y
+  los consumidores locales. No cambies un valor existente para imponer unicidad
+  hasta verificar la compatibilidad de descubrimiento externa. Toda excepción
+  duplicada debe quedar documentada con los consumidores revisados y la
+  limitación pendiente.
 - `tags` debe describir descubrimiento, flujo y nivel de acceso.
 - `agents/openai.yaml` es específico del agente y no puede cambiar el
   significado ni las restricciones de la skill portable.
@@ -71,7 +75,7 @@ Plantilla recomendada:
 ---
 name: apex-nueva-capacidad
 category: "Apex [Categoría]"
-order: <entero disponible>
+order: <valor numérico revisado contra el inventario>
 tags: ["tema", "flujo", "acceso"]
 description: "Descripción orientada a la intención del usuario y al alcance"
 ---

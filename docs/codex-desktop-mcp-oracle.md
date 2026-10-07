@@ -4,9 +4,10 @@ Codex Desktop puede usar los MCP Oracle/APEX que el usuario tenga registrados.
 El inicializador prepara los recursos locales y reporta los estados de perfil;
 no agrega, quita ni altera registros MCP existentes.
 
-La solicitud define acción, alcance y ambiente. Usa el perfil configurado para
-ese ambiente en `.env` o en el almacén de credenciales asociado al MCP. Los
-permisos efectivos concedidos por el DBA/APEX administrator deciden qué
+La solicitud define acción, alcance y ambiente. Todas las rutas MCP locales de
+este repositorio leen el perfil de ese ambiente desde el `.env` de su raíz; no
+se consulta una fuente de credenciales alternativa. Los permisos efectivos
+concedidos por el DBA/APEX administrator deciden qué
 operaciones proceden. No hardcodees usuarios ni una matriz de permisos por
 ambiente, y no confundas la superficie visible del MCP con los permisos de la
 cuenta conectada.
@@ -19,10 +20,10 @@ diagnóstico de workspace como preflight rutinario de una lectura puntual;
 resérvalos para una ambigüedad o error actual. Si la identidad/destino no
 coincide, no leas ni presentes datos de esa ruta. Para APEX, comprueba el
 contexto de aplicación/workspace solo si la lectura o la ruta lo requiere.
-El wrapper `run_apex_mcp_with_profile.py` obtiene el perfil APEX/Oracle que le
-corresponde desde el keyring; el MCP controlado usa los perfiles Oracle del
-`.env`. Los conectores pueden coexistir. Una falta de perfil para un conector no
-demuestra que otro canal del mismo ambiente carezca de acceso.
+El wrapper `run_apex_mcp_with_profile.py`, los validadores y el MCP controlado
+leen el mismo `.env`. Los conectores pueden coexistir, pero no mantienen copias
+separadas de las credenciales. Un error de perfil debe diagnosticarse en ese
+archivo local sin mostrar sus valores.
 
 ```powershell
 python scripts/run_apex_mcp_with_profile.py --environment production

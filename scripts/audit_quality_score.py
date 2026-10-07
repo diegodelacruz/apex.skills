@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import argparse
+import importlib
 import json
 import re
 from dataclasses import dataclass
@@ -15,6 +16,11 @@ POLICY = "Ningún archivo puede obligar técnicamente a un agente externo arbitr
 LINK = re.compile(r"\[[^\]]+\]\(([^)]+)\)")
 FRONTMATTER = re.compile(r"(?s)^---\s*(.*?)\s*---")
 NAME = re.compile(r"^name:\s*[\"']?([^\"'\r\n]+)")
+
+markdown_module = importlib.import_module(
+    f"{__package__}.audit_markdown_links" if __package__ else "audit_markdown_links"
+)
+markdown_audit = markdown_module.audit
 
 
 @dataclass(frozen=True)
@@ -85,20 +91,21 @@ def check_catalogs(names: List[str]) -> Check:
 
 
 def check_links() -> Check:
-    errors = []
-    for path in markdown_files():
-        for target in LINK.findall(path.read_text(encoding="utf-8", errors="replace")):
-            target = target.split("#", 1)[0].strip()
-            if not target or "://" in target or target.startswith(("mailto:", "<", "#")):
-                continue
-            if not (path.parent / target).resolve().exists():
-                errors.append(f"{path.relative_to(ROOT)} -> {target}")
+    # Network results are owned by the dedicated CI/hook invocation of this checker.
+    result = markdown_audit(check_external=False)
+    errors = list(result["broken"]) + list(result["coverage_gaps"]) + list(result["external_broken"])
+    errors += list(result["external_unverifiable"])
+    evidence = (
+        f"Markdown expected={result['expected']} covered={result['covered']} tracked={result['tracked']}; "
+        f"links={result['links']} local_valid={result['local_valid']} external={len(result['external_links'])}; "
+        f"exclusions={len(result['excluded'])}"
+    )
     return Check(
         "Q03",
-        "Local links and references",
+        "Whole-repository Markdown coverage and local links (external checks run separately)",
         10,
         not errors,
-        "; ".join(errors) or "all local Markdown links resolve",
+        "; ".join(errors) or evidence,
         True,
     )
 
@@ -257,7 +264,7 @@ def main() -> int:
     if args.json:
         print(json.dumps(result, ensure_ascii=False, indent=2))
     else:
-        print(f"QUALITY_AUDIT_{'PASS' if result['gates_pass'] else 'FAIL'}: {result['score']}/{result['maximum']}")
+        print(f"QUALITY_SUBAUDIT_{'PASS' if result['gates_pass'] else 'FAIL'}: {result['score']}/{result['maximum']}")
         checks = result["checks"]
         assert isinstance(checks, list)
         for check in checks:

@@ -6,7 +6,7 @@ and verifies the server responds with a valid initialize result.
 
 Status: ACTIVE
 Tests: Infrastructure script (requires Oracle connection)
-Dependencies: run_apex_mcp_with_profile.py, keyring
+Dependencies: run_apex_mcp_with_profile.py, repository-root .env
 """
 
 import argparse
