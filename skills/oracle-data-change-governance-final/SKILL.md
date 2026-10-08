@@ -16,7 +16,7 @@ Follow the user's direct request and named environment. Use the credential confi
 
 - Official objects live in `data` unless the user explicitly names another owner; backups are created in the current user's schema. Qualify DATA object names in generated DDL and never fall back to the connected user's schema after an authorization error.
 - SQL filenames and non-literal identifiers are lower-case. Use physical four-column tabs, not spaces. Preserve the required casing of string literals, comments, prompts, and quoted identifiers. Document every created object with purpose, owner, dependencies, rules, validation, rollback, and deployment order.
-- Never use `alter` to correct a table or view. Reconstruct a table only after explicit user request. For views use `drop`, `commit`, `create`, `commit`; capture prior DDL/backup before drop and inspect dependents.
+- Never use `alter` to correct a table or view. Reconstruct a table only after explicit user request. For a compatible view replacement, prefer `create or replace view` after capturing prior DDL and inspecting dependents; use drop/create only when replacement is not viable and document the availability impact.
 - Retain every backup until the user explicitly decides to purge it. Never purge automatically.
 - On non-migration table recreation, reset identifier sequencing. On a user-declared migration, preserve sequential continuity and disable/re-enable the documented triggers.
 - Default PK generation is the trigger call `data.pk_commons.sp_secuencia('data.<table_name>', :new.id)`. Use it without asking unless the user explicitly requests a database sequence.
@@ -67,7 +67,7 @@ Texts like "agrupación", "Parámetros", "conciliación" contain accented charac
 
 6. **Run the style validator with UTF-8**
    ```
-   python <skill-root>/scripts/validate_sql_style.py <file> --encoding utf-8
+   python <skill-root>/scripts/validate_sql_style.py <file>
    ```
    - Output must display accented characters correctly
    - If validator output shows mojibake: encoding problem detected
@@ -102,4 +102,10 @@ Texts like "agrupación", "Parámetros", "conciliación" contain accented charac
 
 Run `python <skill-root>/scripts/validate_sql_style.py <sql-file-or-directory>` on every generated or changed SQL delivery before handoff. A `STYLE_FAIL` blocks delivery; correct every finding rather than waiving it. Keep its output as validation evidence in the implementation plan.
 
-Keep implementation-plan checkboxes updated. Mark a step complete only with evidence path, environment, timestamp, and result. Deliver scripts, decision record, plan status, validation, rollback procedure, backup retention state, and SQL style result.
+For a single, diagnosed change use a versioned `change.json`, snapshot,
+preflight, apply, verify, rollback and automatic audit event as the minimum
+evidence. Do not require a manually written `implementation-plan.md` merely to
+repeat evidence the bundle records. Keep an implementation plan and decision
+record for multi-object work, data migrations, destructive operations, or a
+change whose business rule remains unresolved. In either mode, deliver the
+observed result, validation, rollback procedure and limitations.

@@ -25,3 +25,6 @@ La opción inicial es un único `.venv` en el repositorio de skills. Los proyect
 Para Codex, `apex-controlled-mcp` usa esa `.venv` y un runtime per-user de
 Java/SQLcl bajo `%LOCALAPPDATA%\ApexSkills\runtimes`. No usa ni registra el
 upstream `apex-mcp` completo.
+
+El mismo MCP ofrece `execute_change_bundle` para correcciones Oracle/APEX ya
+diagnosticadas. No requiere un perfil adicional ni cambia el registro MCP.

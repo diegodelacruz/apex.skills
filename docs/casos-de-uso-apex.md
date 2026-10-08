@@ -43,6 +43,10 @@ La solicitud directa define acción, alcance y ambiente. Use la credencial confi
 3. Para SQL/PLSQL, compare firmas, sobrecargas, dependencias, compilación y sinónimos.
 4. Registre diferencias, causa, alcance, plan TEST y rollback recomendado. No haga cambios durante diagnóstico.
 
+Si el usuario confirma una corrección propuesta, conserve objeto, impacto,
+baseline y validaciones en un paquete de cambio; no repita el inventario
+completo antes de aplicar.
+
 ## 6. Copiar páginas de Producción a TEST
 
 1. Use aplicación, páginas y ambiente indicados en la solicitud.

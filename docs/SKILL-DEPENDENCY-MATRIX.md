@@ -161,6 +161,8 @@ COORDINATES:
   - apex-schema-automation-safe (DDL governance)
   - apex-data-migration-safe (DATA governance)
   - SQL style validator: `skills/oracle-data-change-governance-final/scripts/validate_sql_style.py`
+  - Bounded diagnosed changes use the shared `change.json` protocol; multi-object
+    and migration work retains the full governance record.
 
 This governance skill documents controls; it does not prohibit the user-requested
 direct Oracle route or require an orchestrator.

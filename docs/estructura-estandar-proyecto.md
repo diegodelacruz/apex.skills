@@ -11,9 +11,14 @@ mi-proyecto-apex/
 │  │  └─ plan-maestro.md
 │  ├─ cambios/
 │  │  └─ <id-cambio>/
-│  │     ├─ decisions.md
-│  │     ├─ implementation-plan.md
-│  │     └─ 01_precheck.sql ... 09_rollback.sql
+│  │     ├─ change.json                 # cambio diagnosticado y acotado
+│  │     ├─ snapshot.sql
+│  │     ├─ preflight.sql
+│  │     ├─ apply.sql
+│  │     ├─ verify.sql
+│  │     ├─ rollback.sql
+│  │     ├─ decisions.md                # requerido para cambio formal
+│  │     └─ implementation-plan.md     # requerido para cambio formal
 │  ├─ evidencia/
 │  │  └─ <id-cambio>/
 │  ├─ qa/
@@ -33,7 +38,7 @@ mi-proyecto-apex/
 ## Reglas
 
 - `decisiones-globales.md` registra decisiones transversales del usuario y agentes.
-- Cada cambio posee su propio `decisions.md` e `implementation-plan.md`; no mezclar decisiones de cambios distintos.
+- Cada cambio posee su propia evidencia y rollback; no mezclar cambios distintos. Un cambio diagnosticado, de objeto o componente acotado puede usar `change.json` con sus seis artefactos. Los cambios multiobjeto, migraciones, destructivos o con reglas de negocio abiertas también requieren `decisions.md` e `implementation-plan.md`.
 - El plan maestro enlaza cambios, estados, versiones y manuales.
 - Capturas, trazas y reportes QA no se mezclan con el manual final: el manual consume únicamente evidencia QA aprobada.
 - `manuales/fuentes/` almacena JSON/Markdown editable y el manifiesto de cobertura; `manuales/img/` guarda capturas aprobadas.

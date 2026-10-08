@@ -11,6 +11,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ### Changed
 
+- Added a live Oracle/APEX change protocol that retains a confirmed diagnostic
+  context, validates a versioned `change.json` bundle, and records bounded
+  preflight/apply/verify execution evidence without secrets. Existing SQL and
+  native APEX deployment routes remain compatible.
 - Centralized Oracle and App Builder profile reads and writes on the ignored repository-root `.env`; removed alternate credential-source fallback and direct PowerShell connection overrides, aligned MCP wrappers, validators, setup guidance, and credential regressions with the single source.
 - Retired the legacy APEX REST/SQLcl client facades, made them fail closed without retaining supplied credentials, and aligned their skill metadata and regression tests with the retired status.
 - Corrected stale architecture counts and hierarchy labels; synchronized catalog descriptions and tags from all skill frontmatter; distinguished the retired compatibility entry from 22 active specialists; aligned order authoring guidance with the documented duplicate-order compatibility exception; added the missing external-context Claude command adapter; made Markdown audit fail closed for un-audited submodules; removed unsupported approver assignments, stale synchronization and cycle-certification claims; labeled old release counts as historical; renamed a presence-only test that had claimed to prove acyclic dependencies.

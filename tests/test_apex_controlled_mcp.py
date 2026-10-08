@@ -178,6 +178,109 @@ def test_execute_artifact_preserves_oracle_authority(monkeypatch, tmp_path):
     assert "tmp_test" not in (tmp_path / "audit.jsonl").read_text(encoding="utf-8")
 
 
+def test_execute_change_bundle_requires_valid_preflight_artifacts(monkeypatch, tmp_path):
+    manifest = tmp_path / "change.json"
+    manifest.write_text("{}", encoding="utf-8")
+    monkeypatch.setattr(mcp, "ROOT", tmp_path)
+    monkeypatch.setattr(mcp, "doctor_report", lambda: {"ready": True, "code": "READY"})
+
+    result = mcp.execute_change_bundle_artifact("change.json", "test")
+
+    assert result["ok"] is False
+    assert result["code"] == "INVALID_CHANGE_BUNDLE"
+
+
+def test_execute_change_bundle_records_hashes_and_phase_timings(monkeypatch, tmp_path):
+    artifacts = {}
+    for phase in ("preflight", "apply", "verify", "rollback"):
+        source = tmp_path / f"{phase}.sql"
+        source.write_text(f"prompt {phase}\n", encoding="utf-8")
+        artifacts[phase] = source.name
+    manifest = tmp_path / "change.json"
+    manifest.write_text(
+        json.dumps(
+            {
+                "version": 1,
+                "id": "fix-live-change",
+                "kind": "oracle_ddl",
+                "target": {"type": "view", "name": "data.v_example"},
+                "baseline": {"fingerprint": "sha256:observed"},
+                "artifacts": artifacts,
+            }
+        ),
+        encoding="utf-8",
+    )
+    monkeypatch.setattr(mcp, "ROOT", tmp_path)
+    monkeypatch.setattr(mcp, "AUDIT_PATH", tmp_path / "audit.jsonl")
+    monkeypatch.setattr(mcp, "doctor_report", lambda: {"ready": True, "code": "READY"})
+    monkeypatch.setattr(mcp, "load_profile", lambda environment: ({"user": "x"}, None))
+
+    def sqlcl_result(profile, statements):
+        if "CHANGE_PHASE=preflight" in statements:
+            return mcp.CommandResult(
+                0,
+                "__CHANGE_BASELINE_OK=sha256:observed\n"
+                "__CHANGE_TIMER_preflight_START=1\n__CHANGE_TIMER_preflight_END=2\n",  # pragma: allowlist secret
+                "",
+            )
+        return mcp.CommandResult(
+            0,
+            "__CHANGE_TIMER_apply_START=3\n__CHANGE_TIMER_apply_END=5\n"
+            "__CHANGE_TIMER_verify_START=6\n__CHANGE_TIMER_verify_END=7\n",
+            "",
+        )
+
+    monkeypatch.setattr(mcp, "sqlcl_result", sqlcl_result)
+
+    result = mcp.execute_change_bundle_artifact("change.json", "test")
+
+    assert result["ok"] is True
+    assert result["phase_durations_ms"] == {"apply": 20, "verify": 10}
+    audit_text = (tmp_path / "audit.jsonl").read_text(encoding="utf-8")
+    audit = json.loads(audit_text)
+    assert audit["bundle_id"] == "fix-live-change"
+    assert audit["artifact_sha256"]["apply"]
+    assert "prompt apply" not in audit_text
+
+
+def test_execute_change_bundle_does_not_apply_when_baseline_marker_is_missing(monkeypatch, tmp_path):
+    artifacts = {}
+    for phase in ("preflight", "apply", "verify", "rollback"):
+        source = tmp_path / f"{phase}.sql"
+        source.write_text(f"prompt {phase}\n", encoding="utf-8")
+        artifacts[phase] = source.name
+    (tmp_path / "change.json").write_text(
+        json.dumps(
+            {
+                "version": 1,
+                "id": "refuse-baseline-mismatch",
+                "kind": "oracle_ddl",
+                "target": {"type": "view", "name": "data.v_example"},
+                "baseline": {"fingerprint": "sha256:expected"},
+                "artifacts": artifacts,
+            }
+        ),
+        encoding="utf-8",
+    )
+    calls = []
+    monkeypatch.setattr(mcp, "ROOT", tmp_path)
+    monkeypatch.setattr(mcp, "AUDIT_PATH", tmp_path / "audit.jsonl")
+    monkeypatch.setattr(mcp, "doctor_report", lambda: {"ready": True, "code": "READY"})
+    monkeypatch.setattr(mcp, "load_profile", lambda environment: ({"user": "x"}, None))
+    monkeypatch.setattr(
+        mcp,
+        "sqlcl_result",
+        lambda profile, statements: calls.append(statements) or mcp.CommandResult(0, "SELECT completed", ""),
+    )
+
+    result = mcp.execute_change_bundle_artifact("change.json", "test")
+
+    assert result["ok"] is False
+    assert result["code"] == "BASELINE_MISMATCH"
+    assert len(calls) == 1
+    assert "CHANGE_PHASE=apply" not in calls[0]
+
+
 def test_inspect_privileges_returns_observed_groups(monkeypatch):
     monkeypatch.setattr(mcp, "doctor_report", lambda: {"ready": True, "code": "READY"})
     monkeypatch.setattr(mcp, "load_profile", lambda environment: ({"user": "x"}, None))

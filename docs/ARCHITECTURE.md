@@ -7,6 +7,14 @@ apex.skills is a canonical framework for Oracle APEX work with 31 skills:
 1 retired compatibility entry. It also
 provides security hooks and an audit trail.
 
+## Live-change bundles
+
+The controlled MCP accepts a reviewed `change.json` package for a focused,
+already diagnosed Oracle or APEX correction. It keeps snapshot, preflight,
+apply, verify and rollback artifacts together, proves the baseline in a first
+bounded SQLcl phase, then runs apply/verify in a second phase, and records
+hashes and timing in the ignored audit trail.
+
 ### Components
 
 ```

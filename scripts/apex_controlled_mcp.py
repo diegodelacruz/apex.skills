@@ -15,6 +15,7 @@ import os
 import re
 import subprocess
 import tempfile
+import time
 from dataclasses import dataclass
 from datetime import datetime, timezone
 from pathlib import Path
@@ -23,8 +24,22 @@ from typing import Any
 from fastmcp import FastMCP
 
 if __package__ in (None, ""):
+    from change_bundle import (
+        ChangeBundleError,
+        artifact_hashes,
+        baseline_success_marker,
+        load_bundle,
+        render_execution_sql,
+    )
     from env_credentials import parse_env
 else:
+    from scripts.change_bundle import (
+        ChangeBundleError,
+        artifact_hashes,
+        baseline_success_marker,
+        load_bundle,
+        render_execution_sql,
+    )
     from scripts.env_credentials import parse_env
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -324,6 +339,50 @@ def write_readonly_query_audit(
         handle.write(json.dumps(entry, ensure_ascii=False) + "\n")
 
 
+def change_phase_durations(output: str) -> dict[str, int]:
+    """Extract DBMS_UTILITY timer values emitted by a rendered bundle."""
+    values: dict[str, int] = {}
+    for phase, marker, value in re.findall(r"__CHANGE_TIMER_(\w+)_(START|END)=(-?\d+)", output):
+        values[f"{phase}_{marker.lower()}"] = int(value)
+    durations: dict[str, int] = {}
+    for phase in ("preflight", "apply", "verify"):
+        start = values.get(f"{phase}_start")
+        end = values.get(f"{phase}_end")
+        if start is not None and end is not None:
+            durations[phase] = max(0, (end - start) * 10)
+    return durations
+
+
+def write_change_bundle_audit(
+    environment: str,
+    bundle: dict[str, Any],
+    result: dict[str, Any],
+    elapsed_ms: int,
+) -> None:
+    """Append bundle metadata and timings without recording SQL or credentials."""
+    source = bundle["_source"]
+    entry = {
+        "timestamp_utc": datetime.now(timezone.utc).isoformat(),
+        "environment": environment,
+        "operation": "oracle_apex_change_bundle",
+        "source": str(source.relative_to(ROOT)),
+        "source_sha256": hashlib.sha256(source.read_bytes()).hexdigest(),
+        "bundle_id": bundle["id"],
+        "kind": bundle["kind"],
+        "target": bundle["target"],
+        "baseline_fingerprint": bundle["baseline"]["fingerprint"],
+        "artifact_sha256": artifact_hashes(bundle, ROOT),
+        "phase_durations_ms": change_phase_durations(result.get("output", "")),
+        "elapsed_ms": elapsed_ms,
+        "retry_count": 0,
+        "result": result["code"],
+        "exit_code": result["exit_code"],
+    }
+    AUDIT_PATH.parent.mkdir(parents=True, exist_ok=True)
+    with AUDIT_PATH.open("a", encoding="utf-8") as handle:
+        handle.write(json.dumps(entry, ensure_ascii=False) + "\n")
+
+
 def execute_artifact(relative_path: str, environment: str | None, operation: str) -> dict[str, Any]:
     """Execute one reviewed SQL artifact using the profile for an explicit environment."""
     environment, environment_error = resolve_environment(environment)
@@ -347,6 +406,67 @@ def execute_artifact(relative_path: str, environment: str | None, operation: str
     return {**result, "environment": environment, "source": str(source.relative_to(ROOT))}
 
 
+def execute_change_bundle_artifact(relative_path: str, environment: str | None) -> dict[str, Any]:
+    """Run preflight, then apply/verify only after its baseline proof is observed."""
+    environment, environment_error = resolve_environment(environment)
+    if environment_error is not None:
+        return {"ok": False, **environment_error}
+    assert environment is not None
+    readiness = doctor_report()
+    if not readiness["ready"]:
+        return readiness
+    try:
+        manifest = (ROOT / relative_path).resolve()
+        manifest.relative_to(ROOT)
+        if manifest.suffix.lower() != ".json" or not manifest.is_file():
+            raise ChangeBundleError("change.json debe existir dentro del checkout.")
+        bundle = load_bundle(manifest, ROOT)
+        preflight_statements = render_execution_sql(bundle, ("preflight",))
+        apply_verify_statements = render_execution_sql(bundle, ("apply", "verify"))
+    except (ValueError, ChangeBundleError) as exc:
+        return {"ok": False, "code": "INVALID_CHANGE_BUNDLE", "message": str(exc)}
+    profile, error = load_profile(environment)
+    if error is not None:
+        return {"ok": False, **error}
+    if profile is None:
+        return {"ok": False, "code": "PROFILE_MISSING", "message": "No se encontró un perfil utilizable."}
+    started = time.perf_counter()
+    preflight_result = classify_result(sqlcl_result(profile, preflight_statements))
+    expected_marker = baseline_success_marker(bundle)
+    if not preflight_result["ok"] or expected_marker not in preflight_result.get("output", ""):
+        elapsed_ms = round((time.perf_counter() - started) * 1000)
+        result = {
+            **preflight_result,
+            "ok": False,
+            "code": "BASELINE_MISMATCH" if preflight_result["ok"] else preflight_result["code"],
+            "message": (
+                "El preflight no confirmó la fingerprint diagnosticada; apply no fue ejecutado."
+                if preflight_result["ok"]
+                else preflight_result["message"]
+            ),
+        }
+        write_change_bundle_audit(environment, bundle, result, elapsed_ms)
+        return {
+            **result,
+            "environment": environment,
+            "source": str(manifest.relative_to(ROOT)),
+            "bundle_id": bundle["id"],
+            "elapsed_ms": elapsed_ms,
+            "phase_durations_ms": change_phase_durations(result.get("output", "")),
+        }
+    result = classify_result(sqlcl_result(profile, apply_verify_statements))
+    elapsed_ms = round((time.perf_counter() - started) * 1000)
+    write_change_bundle_audit(environment, bundle, result, elapsed_ms)
+    return {
+        **result,
+        "environment": environment,
+        "source": str(manifest.relative_to(ROOT)),
+        "bundle_id": bundle["id"],
+        "elapsed_ms": elapsed_ms,
+        "phase_durations_ms": change_phase_durations(result.get("output", "")),
+    }
+
+
 mcp = FastMCP(
     "apex-controlled-mcp",
     instructions=(
@@ -355,7 +475,9 @@ mcp = FastMCP(
         "Inspect the session and target environment at the start when read-only tools are available. Do not hardcode a "
         "user or environment permission matrix. Use execute_readonly_query for one SELECT when metadata inspection "
         "does not require a repository artifact; it starts an Oracle read-only transaction and records only a hash. "
-        "Use execute_sql_file for requested DDL/DML/PLSQL artifacts. Report observed errors accurately."
+        "Use execute_sql_file for requested DDL/DML/PLSQL artifacts, or execute_change_bundle when a reviewed "
+        "change.json includes preflight, apply, verification, and rollback artifacts. "
+        "Report observed errors accurately."
     ),
 )
 
@@ -640,6 +762,18 @@ def inspect_oracle_privileges(environment: str | None = None) -> dict[str, Any]:
 def execute_sql_file(path: str, environment: str | None = None) -> dict[str, Any]:
     """Execute any versioned database SQL permitted to the connected account."""
     return execute_artifact(path, environment, "oracle_sql_file")
+
+
+@mcp.tool(
+    description=(
+        "Ejecuta un paquete de cambio Oracle/APEX revisado: valida change.json, ejecuta preflight, aplicación y "
+        "verificación en fases SQLcl acotadas, y registra huellas y tiempos sin secretos."
+    ),
+    annotations={"readOnlyHint": False, "destructiveHint": True},
+)
+def execute_change_bundle(path: str, environment: str | None = None) -> dict[str, Any]:
+    """Execute a prepared, bounded live-change bundle."""
+    return execute_change_bundle_artifact(path, environment)
 
 
 @mcp.tool(

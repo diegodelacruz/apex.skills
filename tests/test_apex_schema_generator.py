@@ -42,6 +42,7 @@ class TestApexSchemaSpec:
         for content in (coordinator, agent_prompt, schema_skill, orchestrator, routing):
             assert "DATA" in content
             assert "explicit" in content.lower()
+        assert "Existing-object fast path" in schema_skill
         assert "connected user's schema" in coordinator.lower()
         assert "connected user's schema" in agent_prompt.lower()
         assert "backup" in coordinator.lower()

@@ -43,9 +43,9 @@ ruta y el resultado con las credenciales configuradas para esta solicitud.
 | Operación | Ruta preferida | Credencial y alcance |
 | --- | --- | --- |
 | Oracle: inspeccionar objetos, columnas, errores y datos | `apex-controlled-mcp.execute_readonly_query` (SELECT de metadata con binds enteros); `inspect_oracle_session`, `inspect_oracle_privileges`, `inspect_environment`; MCP Oracle de lectura; `scripts/Execute-OracleSql.ps1 -Sql/-SqlFile` | Perfil Oracle seleccionado para el ambiente. La transacción de solo lectura bloquea DML directo; esta ruta se reserva a consultas de metadata conocidas porque un SELECT puede invocar funciones con efectos laterales. |
-| Oracle: ejecutar DDL, DML o PL/SQL solicitado | `apex-controlled-mcp.execute_sql_file`; SQLcl con el perfil seleccionado; MCP Oracle que exponga ejecución SQL | Se envía la operación a Oracle con la credencial de ese ambiente. Oracle determina grants y resultado; el agente mantiene el alcance solicitado. |
+| Oracle: ejecutar DDL, DML o PL/SQL solicitado | `apex-controlled-mcp.execute_sql_file`; para cambio diagnosticado `execute_change_bundle`; SQLcl con el perfil seleccionado | Se envía la operación a Oracle con la credencial de ese ambiente. El bundle verifica preflight y registra huellas, tiempos y resultado. |
 | APEX: listar aplicaciones, inspeccionar páginas/componentes y comparar metadata | Herramientas de lectura del MCP APEX configurado; `inspect_apex_context` / `inspect_environment`; export nativo o App Builder si la cuenta lo permite | Perfil APEX/App Builder configurado para el ambiente, o la sesión Oracle elegida cuando se leen vistas de metadata. Confirmar identidad y destino observados; el rótulo del MCP no basta. |
-| APEX: crear, modificar, importar o eliminar componentes | Herramienta APEX de escritura disponible o `deploy_apex_page` con export nativo vía SQLcl | Usar únicamente la credencial configurada para el ambiente pedido. APEX/Oracle y los privilegios concedidos a esa cuenta deciden si la operación procede. No aplicar un bloqueo local fijo por ambiente. |
+| APEX: crear, modificar, importar o eliminar componentes | Herramienta APEX de escritura disponible, `deploy_apex_page` o `execute_change_bundle` con export nativo | Usar únicamente la credencial configurada para el ambiente pedido. El export del componente aporta rollback, no una aprobación adicional. |
 | APEX: diagnóstico de error funcional | Metadata de solo lectura, export existente, logs/herramientas APEX configuradas; `apex-environment-alignment-complete` para comparación cuando aporte evidencia | No modificar durante diagnóstico salvo que el usuario también pidió la corrección. |
 
 Los nombres `DB_TESTING_*` y `DB_PRODUCTION_*` son las claves de configuración
@@ -62,6 +62,13 @@ llamadas desde SELECT aunque la transacción sea de solo lectura.
 archivo `.sql` dentro del checkout que sirve al MCP; úsalo para DDL/DML/PLSQL.
 No convertir una limitación de ruta del archivo en una limitación de acceso a
 Oracle.
+
+## Cambios en vivo
+
+Cuando un diagnóstico ya explicó causa, impacto y propuesta, el usuario puede
+confirmar el cambio en la misma conversación. El agente conserva ese contexto
+y usa un `change.json` con preflight, apply, verify y rollback. El preflight
+debe detener el cambio si la definición observada ya no coincide.
 
 Para diagnóstico de páginas, no exigir que el `SESSION_USER` de SQLcl sea igual
 al esquema de parsing del workspace. Si el chequeo de asociación muestra una

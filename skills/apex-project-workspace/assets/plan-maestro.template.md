@@ -24,7 +24,7 @@
 
 | ID | Descripción | Estado | Decisiones | Plan de implementación | Evidencia |
 | --- | --- | --- | --- | --- | --- |
-| <id-cambio> | <descripción> | pendiente | `cambios/<id>/decisions.md` | `cambios/<id>/implementation-plan.md` | |
+| <id-cambio> | <descripción> | pendiente | `cambios/<id>/change.json` o `decisions.md` | `implementation-plan.md` si aplica | |
 
 ## Hitos
 

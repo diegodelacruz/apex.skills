@@ -47,6 +47,16 @@ class TestOrchestratorExistence:
         assert "not evidence that the same condition" in diagnostics
 
     @pytest.mark.unit
+    def test_live_changes_reuse_diagnosis_context_with_a_fingerprint(self):
+        root = Path(__file__).resolve().parent.parent
+        coordinator = (root / "skills" / "apex" / "SKILL.md").read_text(encoding="utf-8")
+        protocol = (root / "skills" / "apex" / "references" / "live-change-protocol.md").read_text(encoding="utf-8")
+
+        assert "live-change protocol" in coordinator
+        assert "fingerprint" in protocol
+        assert "preflight" in protocol
+
+    @pytest.mark.unit
     def test_delivery_lifecycle_complete_exists(self):
         """apex-delivery-lifecycle-complete orchestrator exists."""
         skill_path = Path(__file__).resolve().parent.parent / "skills" / "apex-delivery-lifecycle-complete" / "SKILL.md"

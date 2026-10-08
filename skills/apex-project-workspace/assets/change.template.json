@@ -1,0 +1,20 @@
+{
+  "version": 1,
+  "id": "replace-with-change-id",
+  "kind": "oracle_ddl",
+  "target": {
+    "type": "view",
+    "name": "data.object_name"
+  },
+  "baseline": {
+    "fingerprint": "replace-with-observed-fingerprint",
+    "observed_at": "YYYY-MM-DDTHH:MM:SSZ"
+  },
+  "artifacts": {
+    "snapshot": "snapshot.sql",
+    "preflight": "preflight.sql",
+    "apply": "apply.sql",
+    "verify": "verify.sql",
+    "rollback": "rollback.sql"
+  }
+}

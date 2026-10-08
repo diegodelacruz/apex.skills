@@ -33,6 +33,11 @@
 | **Import APEX component artifacts** | `apex-page-automation-safe` using the configured native import route | ◎ Specialist; separate from Oracle data migration |
 | DATA object change (governance guidance) | `oracle-data-change-governance-final` | ⊳ Advisory |
 | Create/modify database schema (owner defaults to DATA) | `apex-schema-automation-safe` | ⊳ Advisory |
+
+For a request that follows a completed diagnosis with an explicit change
+confirmation, retain the diagnostic context and use the common
+`live-change-protocol.md`; route only the implementation to the matching
+specialist. A fingerprint mismatch returns to diagnosis before any apply step.
 | Migrate data between environments | `apex-data-migration-safe` | ⊳ Advisory |
 
 For requested Oracle schema object creation or changes, default the owner to

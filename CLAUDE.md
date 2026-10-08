@@ -269,6 +269,10 @@ staged changes locally before each commit:
 - Files changed (count + list)
 - Stored in: `control-proyecto/.bitacora.json`
 
+Los paquetes `change.json` de cambios Oracle/APEX en vivo agregan huellas de
+artefacto, duración y resultado a la misma bitácora, sin incluir SQL ni
+credenciales.
+
 **View audit trail:**
 ```bash
 /apex-audit-decisions-log

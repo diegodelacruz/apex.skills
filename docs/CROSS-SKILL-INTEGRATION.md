@@ -22,6 +22,8 @@ removed from active dependent workflows; its row below is historical only.
 
 ### Entry Point
 - **`apex`** → Receives all user requests, routes to appropriate skills
+- **Live change** → retains a completed diagnostic context and routes one
+  confirmed object/component mutation to the relevant specialist
 
 ### Coordinators
 - **`apex-delivery-lifecycle-complete`** → Coordinates 7 skills for full cycle
@@ -80,6 +82,10 @@ apex-schema-automation-safe
 ├─ Integrates with: apex-page-automation-safe (pages using objects)
 ├─ Integrates with: apex-code-generation-safe (code using schema)
 └─ Output: DDL statements, object definitions
+
+For a diagnosed correction, the coordinator, schema skill and page skill share
+the same `change.json` protocol. It is not a new specialist edge and does not
+replace the complete delivery workflows above.
 
 apex-code-generation-safe
 ├─ Requires: apex-schema-automation-safe (schema exists)

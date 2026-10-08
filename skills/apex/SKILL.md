@@ -57,6 +57,16 @@ version control.
 - For a diagnostic request, inspect without making unrequested changes. For a
   requested write, perform that write and report its result.
 
+## Live changes
+
+For a conversation that moves from inspection to an explicitly confirmed
+change, follow [the live-change protocol](references/live-change-protocol.md).
+Keep the verified target, observed definition, impact explanation, proposed
+change, rollback and validation context alive for this request. Do not restart
+discovery, reload broad guidance, or create a formal project plan merely
+because the user confirmed a narrow change. Use the fast path only while the
+preflight proves the object remains the one diagnosed.
+
 ## Environment Policy
 
 Use the environment named by the user. When omitted, infer it from the current

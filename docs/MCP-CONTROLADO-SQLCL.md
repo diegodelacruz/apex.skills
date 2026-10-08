@@ -24,7 +24,8 @@ iniciales no limitan operaciones posteriores.
 
 El servidor incluye `doctor`, inspección de entorno, sesión Oracle, contexto
 APEX, privilegios, ejecución de consultas SELECT en transacción de solo lectura,
-ejecución SQL desde un archivo del checkout y despliegue de export SQL nativo.
+ejecución SQL desde un archivo del checkout, paquetes de cambio en vivo y
+despliegue de export SQL nativo.
 Para una lectura simple, reutiliza la identidad ya verificada en la conexión
 activa; si no existe, haz una sonda mínima de identidad/destino y consulta
 enseguida. No leas contenido antes de confirmar el destino. No agregues inventarios
@@ -35,9 +36,9 @@ aportar contexto, pero no reemplaza la respuesta real del servidor.
 | Operación | Herramientas/ruta | Fuente de identidad y permiso |
 | --- | --- | --- |
 | Oracle lectura/diagnóstico | `inspect_oracle_session`, `inspect_environment`, `inspect_oracle_privileges`, `execute_readonly_query` (SELECT inline con binds enteros) | Perfil Oracle del ambiente elegido en `.env`; grants y roles observados/efectivos en Oracle |
-| Oracle DDL/DML/PLSQL | `execute_sql_file` o SQLcl (`Execute-OracleSql.ps1`) | Mismo perfil seleccionado; Oracle aplica los permisos otorgados |
+| Oracle DDL/DML/PLSQL | `execute_sql_file`, `execute_change_bundle` o SQLcl | Mismo perfil seleccionado; Oracle aplica los permisos otorgados |
 | APEX lectura/contexto | `inspect_apex_context`, `inspect_environment`, `apex_get_page_details`; si el adaptador falla, `apex_run_sql` con binds sobre `APEX_APPLICATION_*` | Credencial del canal elegido; verificar el destino real y el contexto/app/workspace |
-| APEX escritura/import | `deploy_apex_page` o herramienta APEX de escritura disponible | Credencial del ambiente configurado; permisos efectivos decididos por Oracle/APEX al ejecutar |
+| APEX escritura/import | `deploy_apex_page`, `execute_change_bundle` o herramienta APEX de escritura disponible | Credencial del ambiente configurado; permisos efectivos decididos por Oracle/APEX al ejecutar |
 
 El conector determina la superficie que puede intentarse; no concede los
 privilegios. La etiqueta/nombre del MCP tampoco demuestra cuál base o instancia
@@ -96,3 +97,11 @@ procesos, items, acciones dinámicas, validaciones y botones con IDs enlazados.
 Si `apex_get_page_details` devuelve una columna inválida, usa esta lectura
 directa de vistas públicas; no abandones el diagnóstico ni cambies a otro
 ambiente.
+
+## Paquetes de cambio
+
+`execute_change_bundle` recibe un `change.json` dentro del checkout. Valida sus
+rutas y ejecuta preflight, comprueba su marcador de fingerprint y solo entonces
+ejecuta apply y verify en una secuencia acotada de SQLcl; registra hashes,
+duración y resultado sin guardar SQL ni secretos. El rollback no es automático:
+Oracle DDL puede confirmar implícitamente. Si preflight falla, apply no corre.

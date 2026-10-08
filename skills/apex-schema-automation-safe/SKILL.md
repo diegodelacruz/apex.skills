@@ -35,6 +35,22 @@ Follow the credential authorization principle from the APEX Coordinator
 environment. Do not add confirmation or permission gates. Verify through
 available data dictionary queries and report Oracle's result.
 
+### Existing-object fast path
+
+When a user confirms a change immediately after a focused diagnosis, use the
+live-change protocol instead of rebuilding a full specification. Capture the
+current definition, express the preflight fingerprint, apply one reviewed
+artifact, verify the object and its relevant dependents, and preserve explicit
+rollback SQL. `scripts/Invoke-OracleApexChange.ps1` and
+`apex-controlled-mcp.execute_change_bundle` execute a prepared `change.json`.
+If the preflight no longer matches the diagnosed object, stop before `apply`
+and return to diagnosis.
+
+For a compatible view replacement prefer `create or replace view` with a
+captured prior definition. Do not use `force` as a workaround for an invalid
+definition; validate the resulting view and dependencies. Use a full change
+record for multi-object DDL, table recreation, migrations, or material risk.
+
 ## Modes
 
 Choose the smallest mode that fits the request:
@@ -80,10 +96,12 @@ Infer these from the conversation and the database — do not interview the user
    - **Create objects**: Tables → Indexes → Views → Sequences → Procedures → Functions → Packages.
    - **Modify objects**: ALTER TABLE (add/drop columns), ALTER CONSTRAINT, etc.; preserve existing data unless explicitly dropping.
    - **Drop objects**: Sequences → Packages → Functions → Procedures → Views → Indexes → Tables (reverse order, handle FK dependencies).
-4. Execute each SQL file via SQLcl:
+4. Execute each SQL file via SQLcl, or one prepared change bundle when the
+   change is a confirmed existing-object correction:
    ```powershell
    .\scripts\Execute-OracleSql.ps1 -SqlFile "ddl\001_create_table_employees.sql"
    .\scripts\Execute-OracleSql.ps1 -SqlFile "ddl\002_create_pkg_body.sql" -ShowErrors
+    .\scripts\Invoke-OracleApexChange.ps1 -Bundle "control-proyecto\cambios\<id>\change.json" -Environment test
    ```
 5. Capture audit trail: timestamp, connected user, target owner, object names, DDL executed.
 6. Verify execution: query data dictionary via SQLcl to confirm objects exist under the requested owner and are VALID.

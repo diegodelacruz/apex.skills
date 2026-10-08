@@ -61,6 +61,10 @@ Complete guide to all configuration files in apex.skills.
 - **audit.enabled**: Enable/disable automatic audit trail capture
 - **audit.auto_capture**: Automatically capture on commit (zero-token)
 - **audit.smart_analysis**: Enable on-demand Claude analysis via skill
+
+Live-change bundle events use the same ignored audit storage. They contain
+bundle/artifact hashes, environment, elapsed time and result; never SQL text,
+bind values or credentials.
 - **skills_organization.format**: "apex_prefix" (current standard)
 - **skills_organization.use_emojis**: User preference (false = no emojis)
 

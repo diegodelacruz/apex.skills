@@ -71,6 +71,13 @@ Infer these from the conversation and the database — do not interview the user
 2. If modifying or deleting an existing page, capture current state for rollback.
 3. **For existing applications:** call `apex_open_app(app_id)` instead of `apex_create_app()`.
 
+For a confirmed correction to an existing page, LOV, region, process,
+validation or dynamic action, preserve the smallest native component export
+that contains the affected component. Build a live-change bundle with that
+export as rollback evidence; do not regenerate unrelated pages or the complete
+application. If component identity or export fingerprint changed after the
+diagnosis, return to inspection before importing.
+
 ### Specification generation (Assistant Mode)
 
 1. Infer from context: regions, items, buttons, processes, validations, dynamic actions.
@@ -98,6 +105,8 @@ Infer these from the conversation and the database — do not interview the user
    Or for inline SQL and DDL:
    ```powershell
    .\scripts\Execute-OracleSql.ps1 -SqlFile "ddl\create_table.sql"
+   # For a reviewed live change, execute its bounded change.json bundle.
+   .\scripts\Invoke-OracleApexChange.ps1 -Bundle "control-proyecto\cambios\<id>\change.json" -Environment test
    ```
 5. Capture audit trail: timestamp, user, page ID, changes made.
 6. Verify deployment: confirm exit code 0 and verify via database metadata query.

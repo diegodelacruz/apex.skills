@@ -65,6 +65,8 @@ The following scripts support development infrastructure and do not require auto
 | validate-config.py | Configuration file validation | Active |
 | run_apex_mcp_with_profile.py | Runner del upstream completo; sin registro automático por superficie insegura | Blocked |
 | apex_controlled_mcp.py | MCP STDIO propio sobre SQLcl administrado | Active |
+| change_bundle.py | Validador y renderizador de paquetes Oracle/APEX en vivo | Active |
+| Invoke-OracleApexChange.ps1 | Ejecutor SQLcl de un paquete `change.json` | Active |
 | Setup-ApexControlledMcp.ps1 | Setup autónomo de Python, Java y SQLcl | Active |
 | Register-ApexControlledMcp.ps1 | Registro del MCP propio en Codex | Manual |
 | validate_apex_controlled_mcp_handshake.py | Handshake local del MCP propio, sin Oracle | Active |
