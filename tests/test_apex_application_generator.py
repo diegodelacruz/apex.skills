@@ -127,7 +127,7 @@ class TestApplicationGenerationOrchestrator:
 
         orchestrator.execute_full_generation(config)
 
-        assert "rollback_point" in orchestrator.generated_artifacts
+        assert "simulated_rollback_marker" in orchestrator.generated_artifacts
         assert "deployment" in orchestrator.generated_artifacts
         assert orchestrator.generated_artifacts["deployment"]["environment"] == "production"
 

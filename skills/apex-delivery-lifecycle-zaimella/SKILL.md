@@ -29,7 +29,7 @@ Execute APEX projects under GPZ (Zaimella) methodology:
 - **GPZ Setup** - Establish project governance framework
 - **APEX Delivery** - Execute technical workflow (lifecycle-complete)
 - **GPZ Close-out** - Complete project with methodology compliance
-- **Full Audit Trail** - Git-backed audit trail + GPZ governance records
+- **Audit Evidence** - Local events from controlled routes + Git history + GPZ governance records
 
 ## Architecture
 
@@ -199,7 +199,7 @@ Delegate to `apex-zaimella-gestion-proyectos`:
 | **Phase 2** | `apex-delivery-lifecycle-complete` | APEX technical workflow |
 | **Phase 3** | `apex-zaimella-gestion-proyectos` | GPZ close-out |
 | **Governance** | `oracle-data-change-governance-final` | All DATA changes reviewed by GPZ |
-| **Audit Trail** | Git (.bitacora.json) + GPZ portal | Combined audit trail |
+| **Audit Trail** | Local `.bitacora.json` + Git history + GPZ portal | Combined view of controlled executor events, committed files and methodology records |
 
 ## Features
 
@@ -212,7 +212,7 @@ Delegate to `apex-zaimella-gestion-proyectos`:
 
 ### Audit Trail
 
-- **Git-backed** - Immutable .bitacora.json
+- **Local execution log** - Controlled adapters append JSON Lines to `.bitacora.json`; it is ignored by Git and is not tamper-proof.
 - **GPZ records** - Methodology-level audit
 - **Combined reports** - Technical + methodological view
 - **Compliance ready** - Full traceability

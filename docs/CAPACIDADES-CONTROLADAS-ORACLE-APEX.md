@@ -10,15 +10,14 @@ una lista fija de permisos por ambiente ni un usuario hardcodeado en las skills.
 La presencia de un perfil, el nombre del MCP, el nombre de una cuenta o un
 resultado histórico no demuestra privilegios actuales.
 
-En trabajos donde el privilegio sea pertinente, el coordinador puede usar
-consultas/herramientas de solo lectura para identificar la cuenta conectada y
-el destino real (base, servicio/contenedor y, para APEX, aplicación/workspace)
-y `inspect_oracle_privileges` para informar grants visibles y roles habilitados.
-Para una lectura puntual aplica la ruta rápida descrita abajo; no se requiere
-inventario de privilegios como preflight. Si se inspeccionan, los grants son
-evidencia útil, no garantía de éxito: Oracle/APEX resuelve el permiso efectivo
-al ejecutar la operación solicitada. No realizar una mutación de prueba para
-averiguar permisos. No pedir al usuario que repita una consulta que el agente
+Para identificar un destino cuando sea necesario, el coordinador puede hacer
+una comprobación mínima de cuenta y ambiente. No inspeccione grants como
+validación previa, intermedia o final de una operación solicitada: ejecútela con
+la credencial configurada y reporte el resultado real de Oracle/APEX. Use
+`inspect_oracle_privileges` solo si el usuario pide ver grants/roles o solicita
+diagnosticar un error de acceso observado. Los grants visibles son informativos
+y no garantizan que la operación vaya a tener éxito. No realizar mutaciones de
+prueba para averiguar permisos ni pedir al usuario consultas que el agente
 puede ejecutar.
 
 Si la identidad o destino observado no corresponde al ambiente solicitado, no
@@ -42,10 +41,11 @@ ruta y el resultado con las credenciales configuradas para esta solicitud.
 
 | Operación | Ruta preferida | Credencial y alcance |
 | --- | --- | --- |
-| Oracle: inspeccionar objetos, columnas, errores y datos | `apex-controlled-mcp.execute_readonly_query` (SELECT de metadata con binds enteros); `inspect_oracle_session`, `inspect_oracle_privileges`, `inspect_environment`; MCP Oracle de lectura; `scripts/Execute-OracleSql.ps1 -Sql/-SqlFile` | Perfil Oracle seleccionado para el ambiente. La transacción de solo lectura bloquea DML directo; esta ruta se reserva a consultas de metadata conocidas porque un SELECT puede invocar funciones con efectos laterales. |
-| Oracle: ejecutar DDL, DML o PL/SQL solicitado | `apex-controlled-mcp.execute_sql_file`; para cambio diagnosticado `execute_change_bundle`; SQLcl con el perfil seleccionado | Se envía la operación a Oracle con la credencial de ese ambiente. El bundle verifica preflight y registra huellas, tiempos y resultado. |
+| Oracle: inspeccionar objetos, columnas, errores y datos | `apex-controlled-mcp.execute_readonly_query` (SELECT de metadata con binds enteros); `inspect_oracle_session`, `inspect_oracle_privileges`, `inspect_environment`; MCP Oracle de lectura; `scripts/Execute-OracleSql.ps1 -ReadOnly` | Perfil Oracle seleccionado para el ambiente. La transacción de solo lectura bloquea DML directo; la ruta se reserva a consultas conocidas porque un SELECT puede invocar funciones con efectos laterales. |
+| Oracle: ejecutar un DML puntual confirmado | `apex-controlled-mcp.execute_sql_file` o `Execute-OracleSql.ps1` | Las rutas controladas exigen `confirmed=true` y `backup_choice=yes/no`. Con sí, requieren y ejecutan un SQL de backup dedicado antes; si falta o falla, bloquean el DML. Registran inicio/resultado y hashes en `.bitacora.json`, sin SQL ni credenciales. No requiere conteo previo, bundle ni plan por defecto. |
+| Oracle: ejecutar DDL/PLSQL o cambio coordinado | `execute_sql_file`, SQLcl; `execute_change_bundle` cuando se necesita comprobar una fingerprint o coordinar objetos | Usar la credencial seleccionada. Bundle/preflight es condicional al alcance. Con backup afirmativo, `execute_change_bundle` requiere `snapshot.sql` y lo ejecuta tras preflight y antes de apply; ante falla detiene apply. |
 | APEX: listar aplicaciones, inspeccionar páginas/componentes y comparar metadata | Herramientas de lectura del MCP APEX configurado; `inspect_apex_context` / `inspect_environment`; export nativo o App Builder si la cuenta lo permite | Perfil APEX/App Builder configurado para el ambiente, o la sesión Oracle elegida cuando se leen vistas de metadata. Confirmar identidad y destino observados; el rótulo del MCP no basta. |
-| APEX: crear, modificar, importar o eliminar componentes | Herramienta APEX de escritura disponible, `deploy_apex_page` o `execute_change_bundle` con export nativo | Usar únicamente la credencial configurada para el ambiente pedido. El export del componente aporta rollback, no una aprobación adicional. |
+| APEX: crear, modificar, importar o eliminar componentes | Herramienta APEX de escritura disponible, `deploy_apex_page`, `Deploy-ApexPage.ps1` o bundle cuando aporta fingerprint/coordination | Las rutas controladas exigen ambas decisiones. Si backup=yes, requieren un export nativo previo; la validación sintáctica no prueba que refleje el estado vivo exacto. Los ejecutores MCP y PowerShell registran inicio/resultado correlacionados y hashes para escrituras en `.bitacora.json`; las consultas de solo lectura guardan un hash posterior al resultado. Herramientas externas no están cubiertas por esa garantía. |
 | APEX: diagnóstico de error funcional | Metadata de solo lectura, export existente, logs/herramientas APEX configuradas; `apex-environment-alignment-complete` para comparación cuando aporte evidencia | No modificar durante diagnóstico salvo que el usuario también pidió la corrección. |
 
 Los nombres `DB_TESTING_*` y `DB_PRODUCTION_*` son las claves de configuración
@@ -60,15 +60,32 @@ para SQL arbitrario: Oracle permite ciertos efectos laterales de funciones
 llamadas desde SELECT aunque la transacción sea de solo lectura.
 `execute_sql_file` requiere un
 archivo `.sql` dentro del checkout que sirve al MCP; úsalo para DDL/DML/PLSQL.
+Las herramientas mutativas bloquean la llamada si falta la confirmación o la
+decisión explícita sí/no de backup. Estos campos reflejan la respuesta que el
+agente recibió; no constituyen autenticación criptográfica del usuario. Cuando
+backup=yes, usa un `backup_sql_path` dedicado que capture el alcance exacto y
+verifica que termine correctamente antes de ejecutar el SQL principal.
 No convertir una limitación de ruta del archivo en una limitación de acceso a
 Oracle.
 
-## Cambios en vivo
+## Lecturas y cambios en vivo
 
-Cuando un diagnóstico ya explicó causa, impacto y propuesta, el usuario puede
-confirmar el cambio en la misma conversación. El agente conserva ese contexto
-y usa un `change.json` con preflight, apply, verify y rollback. El preflight
-debe detener el cambio si la definición observada ya no coincide.
+Revisar o mostrar datos/especificaciones es read-only: verifica el destino una
+vez si hace falta y consulta de inmediato. No inicies QA, inventarios ni el
+flujo de cambios para una lectura simple.
+
+Antes de una mutación, pide una sola confirmación que identifique ambiente,
+objeto, operación, confirmación de ejecución y respuesta sí/no sobre backup. No
+se ejecuta si falta una respuesta. Los argumentos del MCP bloquean campos
+ausentes, pero no autentican criptográficamente a quien respondió. No se crea
+backup, snapshot ni conteo previo por defecto. Si el usuario acepta backup,
+prepara un SQL de backup específico, ejecútalo y verifica primero; si falta o
+falla, detén la operación y reporta el bloqueo.
+
+Cuando una corrección existente requiera comparar la huella base, o el cambio
+coordine varios objetos, usa un `change.json` con preflight, apply, verify y
+rollback. Si la huella cambió, detén ese bundle y vuelve a inspeccionar. Añade
+snapshot únicamente cuando el usuario pidió backup.
 
 Para diagnóstico de páginas, no exigir que el `SESSION_USER` de SQLcl sea igual
 al esquema de parsing del workspace. Si el chequeo de asociación muestra una

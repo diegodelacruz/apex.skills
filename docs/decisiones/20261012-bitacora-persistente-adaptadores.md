@@ -1,0 +1,10 @@
+# Decisión: registro persistente en adaptadores controlados
+
+- **Fecha:** 2026-10-12
+- **Estado:** vigente
+- **Objetivo:** registrar eventos de inicio y resultado de las rutas controladas de escritura para que las ejecuciones PowerShell tengan evidencia persistente equivalente a la ruta MCP.
+- **Decisión:** las rutas MCP y `Execute-OracleSql.ps1`, `Deploy-ApexPage.ps1` e `Invoke-OracleApexChange.ps1` que ejecutan escrituras anexan eventos JSON Lines correlacionados por ID. Guardan ambiente, operación, origen y hash, resultado, código de salida, duración y decisión/resultado del backup cuando aplica. No guardan SQL, credenciales, cadenas de conexión ni salida del servidor. Si falla el registro inicial de escritura, la ruta bloquea la ejecución; si falla el registro final después de ejecutar, informa que la acción pudo aplicarse y que no debe repetirse automáticamente. Las consultas de solo lectura MCP y `Execute-OracleSql.ps1 -ReadOnly` conservan un único evento con hash después del resultado; no bloquean la lectura si no se puede persistir ese evento.
+- **Hook Git:** `.hooks/pre-commit.sh` conserva el formato JSON Lines y puede añadir metadatos de archivos staged cuando se invoca manualmente. No está configurado en `.pre-commit-config.yaml`; `pre-commit install` no lo instala.
+- **Límite:** `control-proyecto/.bitacora.json` está ignorado por Git y es un archivo local mutable que puede editarse o borrarse. No es inmutable ni prueba la captura de operaciones hechas con herramientas externas o manuales. Git registra por separado los cambios confirmados del repositorio.
+- **Alternativa descartada:** afirmar que Git vuelve inmutable la bitácora o configurar el hook de metadatos staged como parte de cada commit. Ninguna de esas decisiones se deduce de la necesidad de persistir eventos de las rutas ejecutoras.
+- **Validación:** helper PowerShell escribe eventos correlacionados; tests cubren las tres rutas de escritura, el fallo de escritura del helper, el modo `-ReadOnly` sin bloqueo por evento inicial, retención de líneas existentes, decisión de backup y bundles MCP; análisis sintáctico de PowerShell y Bash, enlaces y CI.

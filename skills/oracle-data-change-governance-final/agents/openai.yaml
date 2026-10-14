@@ -1,4 +1,4 @@
 interface:
   display_name: "Final Oracle DATA Change Governance"
   short_description: "Control DATA changes with rollback and SQL style validation."
-  default_prompt: "Prepare a documented Oracle DATA change using the final project policies and validate the SQL style."
+  default_prompt: "Follow the global Oracle/APEX flow. For a mutation, ask once to confirm the exact operation and explicitly choose yes/no for backup. Do not execute until both action confirmation and backup choice are answered; if either is missing, ask only for the missing decision and wait. Silence is not a no-backup answer. Create no backup unless the user explicitly answers yes. Do not require preliminary row counts; do not require a project plan or change bundle for one-off DML. Reserve formal governance artifacts for migration planning or coordinated multi-object changes."

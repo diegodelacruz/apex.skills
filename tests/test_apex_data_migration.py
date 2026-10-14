@@ -242,13 +242,14 @@ class TestETLPipeline:
 
     @pytest.mark.unit
     def test_load(self):
-        """Load data into target."""
+        """Load data without creating a rollback point by default."""
         pipeline = ETLPipeline("source_db", "target_db")
         data = [{"id": 1, "name": "John"}]
 
         result = pipeline.load(data, "NEW_USERS")
 
         assert result is True
+        assert pipeline.get_operation_log()[-1]["status"] == "LOADED"
 
     @pytest.mark.unit
     def test_load_with_rollback(self):

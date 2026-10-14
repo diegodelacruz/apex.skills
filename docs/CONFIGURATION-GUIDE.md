@@ -6,7 +6,7 @@ Complete guide to all configuration files in apex.skills.
 
 | File | Purpose | Location |
 |------|---------|----------|
-| `.claude/settings.json` | Audit & skills config | `./.claude/settings.json` |
+| `.claude/settings.json` | Skills and documentation config | `./.claude/settings.json` |
 | `.pre-commit-config.yaml` | Git hooks setup | `./.pre-commit-config.yaml` |
 | `.bandit.yaml` | Security checks | `./.bandit.yaml` |
 | `.mcp.json.example` | MCP servers | `./.mcp.json.example` |
@@ -20,7 +20,7 @@ Complete guide to all configuration files in apex.skills.
 
 ## .claude/settings.json
 
-**Purpose:** Central configuration for audit system, hooks, and skills organization
+**Purpose:** Repository-specific Claude settings and skills organization
 
 **Location:** `./.claude/settings.json`
 
@@ -28,20 +28,6 @@ Complete guide to all configuration files in apex.skills.
 
 ```json
 {
-  "audit": {
-    "enabled": true,
-    "auto_capture": true,
-    "smart_analysis": true,
-    "storage_location": "control-proyecto/.bitacora.json",
-    "description": "Automatic decision and audit trail capture"
-  },
-  "hooks": {
-    "pre_commit": {
-      "enabled": true,
-      "script": ".hooks/pre-commit.sh",
-      "description": "Captures audit trail on each commit"
-    }
-  },
   "skills_organization": {
     "format": "apex_prefix",
     "use_emojis": false,
@@ -56,15 +42,15 @@ Complete guide to all configuration files in apex.skills.
 }
 ```
 
-### Configuration Options
+The audit log is written by the controlled MCP and PowerShell adapters, not by
+these settings. `.hooks/pre-commit.sh` is an optional manual script and is not
+registered in `.pre-commit-config.yaml`. Controlled events use the ignored local
+JSON Lines file `control-proyecto/.bitacora.json`; it can be edited or deleted.
+Events contain operation metadata and hashes, not SQL text, credentials, or
+server output.
 
-- **audit.enabled**: Enable/disable automatic audit trail capture
-- **audit.auto_capture**: Automatically capture on commit (zero-token)
-- **audit.smart_analysis**: Enable on-demand Claude analysis via skill
-
-Live-change bundle events use the same ignored audit storage. They contain
-bundle/artifact hashes, environment, elapsed time and result; never SQL text,
-bind values or credentials.
+The checked-in `.claude/settings.json` configures skills/documentation only; it
+does not enable audit capture.
 - **skills_organization.format**: "apex_prefix" (current standard)
 - **skills_organization.use_emojis**: User preference (false = no emojis)
 
@@ -133,12 +119,10 @@ except Exception as e:
     logger.error(f"Error: {e}")
 ```
 
-#### 8. Audit Trail Capture (Custom)
-Records every commit:
-- Timestamp (ISO 8601)
-- Author and email
-- Branch name
-- Files changed (count + names)
+#### 8. Optional audit metadata script
+`.hooks/pre-commit.sh` is not registered as a pre-commit hook. When run manually,
+it appends timestamp, author, branch, and staged file names to the local JSON
+Lines log. Git records commits separately.
 
 ### How to Run Hooks Manually
 

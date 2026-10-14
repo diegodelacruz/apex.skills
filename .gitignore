@@ -13,6 +13,7 @@ auth.json
 
 # Local environments and caches
 .venv/
+.codex-tmp/
 __pycache__/
 *.py[cod]
 .pytest_cache/
@@ -38,5 +39,5 @@ control-proyecto/**/traces/
 control-proyecto/**/screenshots/
 control-proyecto/**/auth/
 
-# Audit trail (auto-generated, not committed to git)
+# Local execution audit log (mutable and not committed to Git)
 control-proyecto/.bitacora.json

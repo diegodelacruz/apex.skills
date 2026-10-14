@@ -33,19 +33,22 @@ Use the credential configured for the named environment. Effective Oracle/APEX
 privileges granted to that account by the DBA/APEX administrator determine
 available operations; do not hardcode a permission matrix or user identity.
 Verify the connected account and actual destination with read-only checks when
-available. Do not add approval steps or ask the user to run work the agent can
-perform.
+available. Preserve the single global confirmation for live mutations,
+including the explicit backup choice; do not add further approvals or ask the
+user to run work the agent can perform.
 
 Development prototype describing how code generation, data migration, testing, and APEX import could be coordinated. The full pipeline is not executable as documented.
 
 ## Overview
 
-Generate complete APEX applications end-to-end with intelligent orchestration:
+Describe a possible APEX application workflow; this prototype is not an
+end-to-end executor, and its data-migration phase cannot load or restore Oracle
+data. The migration skill provides mapping/validation helpers only.
 - Generate application code (forms, reports, validations)
 - Define database schema and data mappings
 - Describe an APEX import phase; use the configured native route separately
 - Execute automated tests
-- Migrate data safely
+- Describe data-migration mapping and validation; live Oracle migration is not implemented
 - Track changes and verify integrity
 
 ## Architecture
@@ -152,7 +155,7 @@ following call is historical prototype pseudocode, not an operational API:
 ```python
 orchestrator.deploy_to_environment(
     target_env='test',
-    create_rollback=True
+    create_rollback=True  # historical pseudocode; not a database backup/rollback
 )
 ```
 
@@ -181,38 +184,38 @@ Integrates all previous HITOs:
 | 1 | apex-code-generation-safe | Generate forms, reports, validations |
 | 2 | `apex-page-automation-safe` and configured APEX import route | Import artifacts when the requested environment exposes that capability; this prototype does not deploy them itself |
 | 3 | apex-automated-testing-safe | Execute UI and performance tests |
-| 4 | apex-data-migration-safe | Migrate data with validation |
+| 4 | apex-data-migration-safe | Mapping and validation prototype; no live Oracle migration |
 | 0 | Foundation | Credential management, path setup |
 
 ## Features
 
-### Orchestration
+### Proposed orchestration behavior (prototype only)
 
-- **Pipeline coordination** - Sequential phase execution
-- **Error handling** - Automatic rollback on failure
-- **Progress tracking** - Real-time phase status
-- **Estimated completion** - Time predictions per phase
+- **Pipeline coordination** - Describes a possible sequence; full execution is not implemented
+- **Error handling** - Prototype status reporting; no automatic database recovery
+- **Progress tracking** - Simulated phase status
+- **Estimated completion** - Prototype estimates, not live operation timings
 
-### Validation
+### Proposed validation (not live environment checks)
 
-- **Pre-flight checks** - Verify prerequisites
-- **Schema validation** - Ensure database readiness
-- **Credential validation** - Test APEX connectivity
-- **Data validation** - Comprehensive quality checks
+- **Pre-flight checks** - Describe prerequisites; no complete live pipeline preflight
+- **Schema validation** - Not performed against an Oracle environment by this generator
+- **Credential validation** - No APEX connectivity test in the application-generation prototype
+- **Data validation** - Prototype mapping/validation helpers only
 
 ### Reporting
 
 - **Execution report** - Detailed pipeline log
 - **Performance metrics** - Timing and resource usage
 - **Test results** - Coverage and pass rates
-- **Change audit** - Complete audit trail
+- **Change audit** - Pipeline log available for this run; not a persisted complete audit trail
 
 ### Recovery
 
-- **Rollback points** - Automatic savepoints
-- **Error recovery** - Retry with backoff
-- **Transaction safety** - ACID compliance
-- **Data integrity** - Checksum verification
+- **Recovery** - Requires a separately available operational recovery route; this prototype creates no savepoints or backups
+- **Error recovery** - No automatic retry or data restore is implemented
+- **Transaction safety** - Not guaranteed by this non-operational prototype
+- **Data integrity** - No live Oracle checksum verification is implemented
 
 ## Configuration
 
@@ -247,13 +250,14 @@ phases:
 Comprehensive error recovery:
 
 - Validation failures → Stop before deployment
-- Deployment errors → Automatic rollback
+- Deployment errors → Report actual import-route result; no automatic rollback is implemented here
 - Test failures → Detailed error reports
-- Migration errors → Data rollback
+- Migration errors → Report validation/helper results; no Oracle data rollback is implemented here
 
 ## Logging
 
-Complete audit trail of all operations:
+Illustrative in-memory operation log for the current run (not the persistent
+audit log from controlled Oracle/APEX adapters):
 
 ```
 2026-09-17 10:00:00 - PHASE_START - CodeGeneration

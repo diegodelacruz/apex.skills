@@ -43,7 +43,7 @@ instructions.
    behavior.
 4. Match the requested work: audit requests inspect; implementation requests make the requested
    change, including CSS/JavaScript, template overrides, plug-ins, imports, or production work.
-   Do not add approval or environment gates beyond the user's request.
+   Do not invent extra approvals; preserve the global confirmation for any live mutation and use only the environment requested by the user.
 5. Honor `prefers-reduced-motion`; preserve non-motion feedback where it aids comprehension. Test
    keyboard-only, touch, narrow viewport, contrast, screen-reader-relevant semantics, and reduced
    motion before approving implementation.

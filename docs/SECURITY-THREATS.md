@@ -191,16 +191,21 @@ SELECT * FROM customers WHERE name = ''' || user_input || '''';
 - Compliance violation
 - Concealed unauthorized access
 
-**Probability:** LOW (git-backed, tamper-evident)
+**Probability:** Not assessed. The local log is editable and deletable.
 
 **Current Controls:**
-- ✅ Git history is immutable (cryptographic hashing)
-- ✅ `.bitacora.json` stored in git history
-- ⏳ Commit signatures are not enforced yet
+- ✅ Controlled adapters append structured events and avoid recording SQL text,
+  credentials, connection strings, and server output
+- ⚠️ `.bitacora.json` is ignored by Git and is not tamper-proof
+- ✅ Git records committed source changes separately; it does not protect the
+  local execution log
 
-**Residual Risk:** LOW (git provides protection)
+**Residual Risk:** Material if compliance depends on the local log as an
+immutable record; this repository does not provide remote or tamper-evident
+storage for it.
 
-**Enhancement:** Implement commit signing (GPG keys)
+**Enhancement:** Use a separately governed remote audit sink if immutable audit
+evidence is required.
 
 ---
 
@@ -348,9 +353,9 @@ SELECT * FROM customers WHERE name = ''' || user_input || '''';
 
 ### Audit Trail
 
-- ✅ Automatic capture via `.bitacora.json`
-- ✅ Git immutability provides tamper-evidence
-- ✅ All commits logged with author/timestamp
+- ✅ Controlled MCP and PowerShell adapters append execution events locally
+- ⚠️ Local events are mutable and not all external/manual operations are captured
+- ✅ Git records committed repository changes separately
 
 ### Incident Response
 

@@ -19,11 +19,11 @@ This table is derived from every `skills/*/SKILL.md` frontmatter. The source fil
 | apex | apex | Apex Coordinator | 14 | active | coordinator, routing, governance | Route Oracle and APEX requests to the smallest useful specialist workflow. |
 | apex-api-client-safe | apex-api-client-safe | Apex Integration | 22 | retired | retired, compatibility, historical | Retired simulated REST adapter; it must not be used for Oracle APEX deployment. |
 | apex-application-generator-complete | apex-application-generator-complete | Apex Application Development | 23 | development | application-generation, orchestration, end-to-end, automation, deployment, testing, migration | Development prototype for an end-to-end APEX application workflow; its API deployment phase is non-operational |
-| apex-audit-decisions-log | apex-audit-decisions-log | Apex Audit & Decisions | 0 | active | audit, documentation, decisions, governance, read-only | Review and export project decisions and the Git-backed audit trail. |
+| apex-audit-decisions-log | apex-audit-decisions-log | Apex Audit & Decisions | 0 | active | audit, documentation, decisions, governance, read-only | Review local controlled-operation events and Git history. |
 | apex-automated-testing-safe | apex-automated-testing-safe | Apex Testing & QA | 21 | development | testing, automation, selenium, performance, regression, qa | Selenium test generation, performance testing, and regression validation framework |
 | apex-blueprint-design-safe | apex-blueprint-design-safe | Apex Engineering & Design | 15 | active | blueprint, design, scaffolding, read-only | Create reviewable APEX blueprints from user requirements and available metadata. |
 | apex-code-generation-safe | apex-code-generation-safe | Apex Engineering & Design | 24 | development | code-generation, apex, forms, reports, automation, read-only | Generate APEX components automatically from schema and metadata |
-| apex-data-migration-safe | apex-data-migration-safe | Apex Data Integration | 25 | development | data-migration, etl, schema-mapping, validation, rollback, data-sync | Schema mapping, data validation, ETL pipeline, and rollback management framework |
+| apex-data-migration-safe | apex-data-migration-safe | Apex Data Integration | 25 | development | data-migration, prototype, schema-mapping, validation, data-sync | Development prototype for migration mapping and in-memory validation; no live Oracle executor |
 | apex-data-orchestrator-safe | apex-data-orchestrator-safe | Apex Data Integration | 13.5 | development | orchestration, data-integration, schema, etl, migration, automation | Development outline for schema and data migration workflows; APEX artifact import is separate |
 | apex-database-diagnostics | apex-database-diagnostics | Apex Database & Diagnostics | 1 | active | diagnostics, inspection, oracle | Diagnose Oracle and APEX requests in the user-selected environment through available authenticated routes. |
 | apex-delivery-lifecycle-complete | apex-delivery-lifecycle-complete | Apex Delivery & Lifecycle | 2 | active | lifecycle, workflow, release, governance | Run the complete APEX lifecycle with environment and DATA governance. |
@@ -51,7 +51,7 @@ This table is derived from every `skills/*/SKILL.md` frontmatter. The source fil
 ## 🎯 Quick Navigation
 
 ### Apex Audit & Decisions Log
-- **[apex-audit-decisions-log](./apex-audit-decisions-log)** - Review and export project decisions and the Git-backed audit trail.
+- **[apex-audit-decisions-log](./apex-audit-decisions-log)** - Review local controlled-operation events and Git history.
   - *Tags: audit, documentation, decisions, governance, read-only*
 
 ### Apex Database & Diagnostics
@@ -150,8 +150,8 @@ This table is derived from every `skills/*/SKILL.md` frontmatter. The source fil
   - *Tags: design, review, orchestration*
 
 ### Apex Data Migration
-- **[apex-data-migration-safe](./apex-data-migration-safe)** - Schema mapping, data validation, ETL pipeline, and rollback management framework
-  - *Tags: data-migration, etl, schema-mapping, validation, rollback, data-sync*
+- **[apex-data-migration-safe](./apex-data-migration-safe)** - Development prototype for migration mapping and in-memory validation; no live Oracle executor
+  - *Tags: data-migration, prototype, schema-mapping, validation, data-sync*
 
 ### Oracle Data Governance
 - **[oracle-data-change-governance-final](./oracle-data-change-governance-final)** - Govern DATA changes with decisions, rollback, validation, and audit evidence.

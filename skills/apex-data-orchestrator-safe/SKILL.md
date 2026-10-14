@@ -31,26 +31,25 @@ status: active
 
 Use the credential configured for the requested environment. The effective
 Oracle/APEX privileges granted to that account by the DBA determine which
-operations succeed; do not hardcode a user or permission matrix. Verify the
-connected account and actual destination with read-only checks when available.
-Follow the requested environment, do not add approvals or ask the user to
-execute work available to the agent, and use another configured route for the
-same environment when a channel fails. Run relevant quality checks and report
-their actual outcome without turning a successful check or plan into an
-approval prerequisite.
+operations succeed; do not hardcode a user or permission matrix. Follow the
+global rules in `skills/apex/SKILL.md`: simple reads are immediate, and every
+mutation gets one confirmation including the backup choice. This development
+outline is for multi-step schema/data migration only; do not route one-off DML
+or ordinary object reads through it. A row count is not a routine prerequisite
+for a transaction.
 
 **Development workflow outline:** schema automation → validation → data migration. APEX artifact import is separate.
 
-Outline database schema and data migration work with validation and rollback guidance; the full APEX synchronization pipeline is not implemented.
+Plan database schema and data migration work; this outline and its referenced migration helpers do not execute an end-to-end Oracle migration or create operational backups/restores.
 
 ## Overview
 
-Execute full data pipeline safely:
+This non-operational outline describes a possible full data pipeline:
 - **Schema Automation** - Create/modify database objects under governance
 - **Data Validation** - Comprehensive data quality checks
 - **ETL Migration** - Extract, transform, validate, load data
 - **APEX artifact import** - Separate operation through a configured native route; not data synchronization
-- **Rollback Ready** - Automatic rollback points at each phase
+- **Recovery** - Define recovery only for a migration that actually requires it; this prototype does not create operational database backups
 
 ## Architecture
 
@@ -82,7 +81,7 @@ Execute full data pipeline safely:
 │ │ - Transform per mapping                    │  │
 │ │ - Validate quality                         │  │
 │ │ - Load to target                           │  │
-│ │ - Create rollback point                    │  │
+│ │ - Optional in-memory status marker only    │  │
 │ └────────────────────────────────────────────┘  │
 │                      ↓                           │
 │ ┌────────────────────────────────────────────┐  │
@@ -97,7 +96,7 @@ Execute full data pipeline safely:
 │ │ - Schema created in target environment    │  │
 │ │ - Data migrated safely                     │  │
 │ │ - Optional native APEX import verified     │  │
-│ │ - Rollback points created                  │  │
+│ │ - No database backup or restore performed  │  │
 │ │ - Audit trail recorded                     │  │
 │ └────────────────────────────────────────────┘  │
 │                                                   │
@@ -143,7 +142,7 @@ result = orchestrator.execute_migration(
 # Optional APEX component import is a separate operation using the configured native route.
 # This prototype does not implement data or application sync to APEX.
 
-# Get complete audit trail
+# Read this prototype's in-memory operation log for the current run
 audit = orchestrator.get_operation_log()
 ```
 
@@ -168,10 +167,7 @@ Delegate to `apex-schema-automation-safe`:
    - Object dependencies
    - Naming conventions
 
-4. Create rollback point:
-   - Save schema snapshot
-   - Record DDL statements
-   - Store rollback procedure
+4. If the user requested a backup, create only the scoped backup they accepted. Otherwise do not create a snapshot or backup artifact.
 ```
 
 ### Phase 2: Data Validation
@@ -189,10 +185,9 @@ Execute internal validation:
    - Constraints properly defined
    - Indexes created
 
-3. Source data assessment:
-   - Row count by table
-   - NULL value distribution
-   - Data type alignment
+3. Source data assessment, only when needed for the requested migration:
+   - Validate the requested mappings and relevant data conditions
+   - Do not require a pre-migration row count; count only when explicitly requested or required to resolve a concrete ambiguity
 ```
 
 ### Phase 3: Data Migration (ETL)
@@ -200,30 +195,20 @@ Execute internal validation:
 Delegate to `apex-data-migration-safe`:
 
 ```
-1. Extract phase:
-   - Read from source (legacy_db)
-   - Batch size optimization
-   - Source data logging
+1. Proposed extract phase (not implemented):
+   - Define the source and data selection; this outline does not read it
 
-2. Transform phase:
-   - Apply column mappings
-   - Execute transformation rules
-   - Handle data type conversions
+2. Proposed transform phase (prototype only):
+   - Define column mappings and transformations over supplied in-memory data
 
-3. Validate phase:
-   - Run validation rules
-   - Flag violations
-   - Generate error report
+3. Validation phase (supplied in-memory data only):
+   - Apply available prototype validation rules
 
-4. Load phase:
-   - Insert into target tables
-   - Verify row counts
-   - Create rollback savepoint
+4. Proposed load phase (not implemented):
+   - No insert into target tables is performed by these migration helpers
 
-5. Verify integrity:
-   - Checksum validation
-   - Foreign key validation
-   - Business rule checks
+5. Proposed integrity verification (not implemented against Oracle):
+   - Define applicable checks; no database checksum or constraint queries are run
 ```
 
 ### Phase 4: APEX artifact import (separate operation)
@@ -248,16 +233,16 @@ the separate Phase 3 operation. Do not route this phase through
 | **Setup** | `oracle-data-change-governance-final` | Defaults, standards, and audit guidance for DDL |
 | **Phase 1** | `apex-schema-automation-safe` | Schema creation |
 | **Phase 2** | Internal validation | Pre-migration health check |
-| **Phase 3** | `apex-data-migration-safe` | ETL with rollback |
+| **Phase 3** | `apex-data-migration-safe` | Mapping/validation prototype; no live ETL or rollback |
 | **Phase 4** | `apex-page-automation-safe` + configured native route | Optional APEX artifact import; separate from data migration |
-| **Audit** | Git (.bitacora.json) | Complete audit trail |
+| **Audit** | Local `.bitacora.json` plus Git history | Controlled executor events and committed file history; not a complete or tamper-proof record of all external changes |
 
 ## Features
 
 ### Safety
 
 - **Governance guidance** - Apply DDL standards without requiring additional approval
-- **Rollback points** - Savepoint at each phase
+- **Recovery** - Document an operational recovery plan separately when required; this outline creates no savepoints or backups
 - **Validation gates** - Data quality checks before load
 - **Pre-migration checks** - Health verification
 
@@ -328,9 +313,9 @@ phase_3_migration:
 
 ## Error Handling
 
-- **Phase 1 (Schema) failure** → Rollback using stored DDL, retry with fixes
+- **Phase 1 (Schema) failure** → Report the operation error; this outline does not store executable DDL for restoration
 - **Phase 2 (Validation) failure** → Stop before migration, report issues, retry
-- **Phase 3 (Migration) failure** → Rollback to savepoint, investigate, retry
+- **Phase 3 (Migration) failure** → The migration helper has no live load/rollback; report actual route evidence and investigate
 - **Phase 4 (Import) failure** → Report the configured route's error; use its documented recovery and rollback procedure
 
 ## Logging
@@ -342,7 +327,7 @@ Complete operation log:
 2026-09-17 10:05:00 - CREATE_TABLE - EMPLOYEES (500ms)
 2026-09-17 10:10:00 - CREATE_TABLE - DEPARTMENTS (300ms)
 2026-09-17 10:15:00 - CREATE_INDEX - IDX_EMP_EMAIL (200ms)
-2026-09-17 10:20:00 - ROLLBACK_POINT_CREATED - rp_schema_20260917
+2026-09-17 10:20:00 - PROTOTYPE_MARKER - schema phase (no database backup)
 2026-09-17 10:25:00 - PHASE_COMPLETE - Schema Automation (25s)
 
 2026-09-17 10:30:00 - PHASE_START - Data Validation
@@ -358,7 +343,7 @@ Complete operation log:
 2026-09-17 11:25:00 - VALIDATE_COMPLETE - 50000 valid, 0 violations (5s)
 2026-09-17 11:30:00 - LOAD_START - Insert into target
 2026-09-17 11:45:00 - LOAD_COMPLETE - 50000 rows loaded (15s)
-2026-09-17 11:50:00 - ROLLBACK_POINT_CREATED - rp_migration_20260917
+2026-09-17 11:50:00 - PROTOTYPE_MARKER - migration phase (no database backup)
 2026-09-17 11:55:00 - PHASE_COMPLETE - Data Migration (70s)
 
 2026-09-17 12:00:00 - PHASE_START - APEX Sync
@@ -393,5 +378,5 @@ Typical end-to-end timing:
 **Upstream Skills:**
 - `oracle-data-change-governance-final` (governance and audit guidance)
 - `apex-schema-automation-safe` (schema creation)
-- `apex-data-migration-safe` (ETL)
+- `apex-data-migration-safe` (mapping/validation prototype; no live ETL)
 - `apex-page-automation-safe` (optional APEX component work through configured native routes)

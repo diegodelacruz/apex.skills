@@ -16,6 +16,7 @@ import re
 import subprocess
 import tempfile
 import time
+import uuid
 from dataclasses import dataclass
 from datetime import datetime, timezone
 from pathlib import Path
@@ -190,8 +191,12 @@ def sqlcl_result(
     state = runtime_state()
     if state is None:
         return CommandResult(1, "", "RUNTIME_NOT_INSTALLED")
+    java_home = state.get("java_home")
+    sqlcl_path = state.get("sqlcl_path")
+    if not java_home or not sqlcl_path:
+        return CommandResult(1, "", "RUNTIME_INTEGRITY_FAILED: runtime state is missing java_home or sqlcl_path")
     environment = os.environ.copy()
-    environment["JAVA_HOME"] = str(state["java_home"])
+    environment["JAVA_HOME"] = str(java_home)
     connection = "{user}/{password}@{host}:{port}/{service}".format(**profile)
     bind_setup: list[str] = []
     for name, value in (bind_variables or {}).items():
@@ -220,7 +225,7 @@ def sqlcl_result(
     )
     try:
         process = subprocess.run(
-            [str(state["sqlcl_path"]), "-S", "/nolog"],
+            [str(sqlcl_path), "-S", "/nolog"],
             capture_output=True,
             check=False,
             env=environment,
@@ -249,7 +254,13 @@ def classify_result(result: CommandResult) -> dict[str, Any]:
     technical = match.group(0) if match else combined.strip()[:500] or "SQLcl terminó con error sin detalle Oracle."
     code = "EXECUTION_ERROR"
     clear = "Oracle rechazó o no pudo completar la operación; no se declara éxito."
-    if match and match.group(1) == "01031":
+    if "RUNTIME_NOT_INSTALLED" in technical:
+        code = "RUNTIME_NOT_INSTALLED"
+        clear = "El runtime administrado no está instalado; solicite doctor() si necesita revisar su estado."
+    elif "RUNTIME_INTEGRITY_FAILED" in technical or "SQLCL_RUNTIME_ERROR" in technical:
+        code = "RUNTIME_INTEGRITY_FAILED"
+        clear = "SQLcl no pudo arrancar con el runtime configurado; solicite doctor() para revisar el runtime."
+    elif match and match.group(1) == "01031":
         code = "AUTHORIZATION_DENIED"
         clear = "La cuenta conectada no tiene el privilegio requerido para esta operación."
     elif match and match.group(1) in {"00942", "04043"}:
@@ -280,6 +291,35 @@ def workspace_sql_file(relative_path: str) -> Path:
     return candidate
 
 
+def validate_mutation_decisions(confirmed: bool | None, backup_choice: str | None) -> dict[str, Any] | None:
+    """Fail closed unless the caller supplies both explicit mutation decisions."""
+    if confirmed is not True:
+        return {
+            "ok": False,
+            "code": "USER_CONFIRMATION_REQUIRED",
+            "message": "Falta la confirmación explícita del usuario para ejecutar el cambio.",
+        }
+    if backup_choice not in {"yes", "no"}:
+        return {
+            "ok": False,
+            "code": "BACKUP_CHOICE_REQUIRED",
+            "message": "Indique explícitamente backup_choice='yes' o backup_choice='no'.",
+        }
+    return None
+
+
+def apex_export_page_identity(content: str) -> tuple[str, str] | None:
+    """Extract application/page identity from a native page export when present."""
+    app_match = re.search(r"(?i)\bp_default_application_id\s*=>\s*(\d+)", content)
+    create_page = re.search(r"(?i)\.create_page\s*\(", content)
+    if not app_match or not create_page:
+        return None
+    page_match = re.search(r"(?i)\bp_id\s*=>\s*(\d+)", content[create_page.end() :])
+    if not page_match:
+        return None
+    return app_match.group(1), page_match.group(1)
+
+
 def validate_read_only_query(statement: str) -> str:
     """Accept one single-line SELECT so SQLcl cannot parse injected client commands."""
     query = statement.strip()
@@ -296,20 +336,98 @@ def validate_read_only_query(statement: str) -> str:
     return query + ";"
 
 
-def write_audit_event(environment: str, operation: str, source: Path, result: dict[str, Any]) -> None:
-    """Append non-secret execution evidence for a versioned SQL artifact."""
-    AUDIT_PATH.parent.mkdir(parents=True, exist_ok=True)
+def append_audit_entry(entry: dict[str, Any]) -> str | None:
+    """Durably append one JSON Lines event, returning an error without hiding it."""
+    try:
+        AUDIT_PATH.parent.mkdir(parents=True, exist_ok=True)
+        with AUDIT_PATH.open("a", encoding="utf-8") as handle:
+            handle.write(json.dumps(entry, ensure_ascii=False) + "\n")
+            handle.flush()
+            os.fsync(handle.fileno())
+    except Exception as exc:
+        return f"{type(exc).__name__}: {exc}"
+    return None
+
+
+def begin_mutation_audit(
+    environment: str,
+    operation: str,
+    source: Path,
+    metadata: dict[str, Any] | None = None,
+) -> tuple[dict[str, Any] | None, str | None]:
+    """Persist a write-ahead event before a controlled mutation is submitted."""
     entry = {
+        **(metadata or {}),
         "timestamp_utc": datetime.now(timezone.utc).isoformat(),
+        "event_id": str(uuid.uuid4()),
+        "event_phase": "started",
         "environment": environment,
         "operation": operation,
         "source": str(source.relative_to(ROOT)),
         "source_sha256": hashlib.sha256(source.read_bytes()).hexdigest(),
-        "result": result["code"],
-        "exit_code": result["exit_code"],
+        "result": "STARTED",
+        "exit_code": None,
     }
-    with AUDIT_PATH.open("a", encoding="utf-8") as handle:
-        handle.write(json.dumps(entry, ensure_ascii=False) + "\n")
+    error = append_audit_entry(entry)
+    return (entry, None) if error is None else (None, error)
+
+
+def finish_mutation_audit(
+    started_event: dict[str, Any],
+    result: dict[str, Any],
+    timings_ms: dict[str, Any],
+    metadata: dict[str, Any] | None = None,
+) -> dict[str, Any]:
+    """Persist the correlated outcome or return an explicit no-retry warning."""
+    completed_event = {
+        **started_event,
+        "timestamp_utc": datetime.now(timezone.utc).isoformat(),
+        "event_phase": "completed",
+        "result": result.get("code", "UNKNOWN"),
+        "exit_code": result.get("exit_code"),
+        "timings_ms": timings_ms,
+        **(metadata or {}),
+    }
+    error = append_audit_entry(completed_event)
+    if error is not None:
+        operation_result = result.get("code", "UNKNOWN")
+        return {
+            **result,
+            "ok": False,
+            "code": "AUDIT_COMPLETION_FAILED",
+            "operation_result": operation_result,
+            "audit_event_id": started_event["event_id"],
+            "message": (
+                f"La operación terminó con resultado {operation_result}, pero no se pudo guardar su resultado "
+                f"en la bitácora ({error}). La acción pudo haberse aplicado; no la reintente automáticamente."
+            ),
+        }
+    return {**result, "audit_event_id": started_event["event_id"], "audit_persisted": True}
+
+
+def audit_start_failure(error: str) -> dict[str, Any]:
+    """Report that a mutation did not start because its write-ahead event failed."""
+    return {
+        "ok": False,
+        "code": "AUDIT_START_FAILED",
+        "message": f"No se pudo registrar el inicio en la bitácora; la operación no se ejecutó: {error}",
+    }
+
+
+def execute_mutation_statements(profile: dict[str, str], statements: str) -> dict[str, Any]:
+    """Run one SQLcl mutation phase and convert adapter exceptions to explicit outcomes."""
+    try:
+        return classify_result(sqlcl_result(profile, statements))
+    except Exception as exc:
+        return {
+            "ok": False,
+            "code": "ADAPTER_EXECUTION_FAILED",
+            "exit_code": None,
+            "message": (
+                f"El adaptador falló durante la ejecución ({type(exc).__name__}: {exc}); "
+                "la acción pudo haberse aplicado y no debe repetirse automáticamente."
+            ),
+        }
 
 
 def write_readonly_query_audit(
@@ -317,6 +435,7 @@ def write_readonly_query_audit(
     statement: str,
     bind_variables: dict[str, int] | None,
     result: dict[str, Any],
+    timings_ms: dict[str, int] | None = None,
 ) -> None:
     """Record a digest of the query and binds, never their raw contents."""
     AUDIT_PATH.parent.mkdir(parents=True, exist_ok=True)
@@ -334,6 +453,7 @@ def write_readonly_query_audit(
         "source_sha256": hashlib.sha256(fingerprint.encode("utf-8")).hexdigest(),
         "result": result["code"],
         "exit_code": result["exit_code"],
+        "timings_ms": timings_ms or {},
     }
     with AUDIT_PATH.open("a", encoding="utf-8") as handle:
         handle.write(json.dumps(entry, ensure_ascii=False) + "\n")
@@ -345,7 +465,7 @@ def change_phase_durations(output: str) -> dict[str, int]:
     for phase, marker, value in re.findall(r"__CHANGE_TIMER_(\w+)_(START|END)=(-?\d+)", output):
         values[f"{phase}_{marker.lower()}"] = int(value)
     durations: dict[str, int] = {}
-    for phase in ("preflight", "apply", "verify"):
+    for phase in ("preflight", "snapshot", "apply", "verify"):
         start = values.get(f"{phase}_start")
         end = values.get(f"{phase}_end")
         if start is not None and end is not None:
@@ -353,75 +473,83 @@ def change_phase_durations(output: str) -> dict[str, int]:
     return durations
 
 
-def write_change_bundle_audit(
-    environment: str,
-    bundle: dict[str, Any],
-    result: dict[str, Any],
-    elapsed_ms: int,
-) -> None:
-    """Append bundle metadata and timings without recording SQL or credentials."""
-    source = bundle["_source"]
-    entry = {
-        "timestamp_utc": datetime.now(timezone.utc).isoformat(),
-        "environment": environment,
-        "operation": "oracle_apex_change_bundle",
-        "source": str(source.relative_to(ROOT)),
-        "source_sha256": hashlib.sha256(source.read_bytes()).hexdigest(),
-        "bundle_id": bundle["id"],
-        "kind": bundle["kind"],
-        "target": bundle["target"],
-        "baseline_fingerprint": bundle["baseline"]["fingerprint"],
-        "artifact_sha256": artifact_hashes(bundle, ROOT),
-        "phase_durations_ms": change_phase_durations(result.get("output", "")),
-        "elapsed_ms": elapsed_ms,
-        "retry_count": 0,
-        "result": result["code"],
-        "exit_code": result["exit_code"],
-    }
-    AUDIT_PATH.parent.mkdir(parents=True, exist_ok=True)
-    with AUDIT_PATH.open("a", encoding="utf-8") as handle:
-        handle.write(json.dumps(entry, ensure_ascii=False) + "\n")
-
-
-def execute_artifact(relative_path: str, environment: str | None, operation: str) -> dict[str, Any]:
+def execute_artifact(
+    relative_path: str,
+    environment: str | None,
+    operation: str,
+    decision_metadata: dict[str, Any] | None = None,
+) -> dict[str, Any]:
     """Execute one reviewed SQL artifact using the profile for an explicit environment."""
+    route_started = time.perf_counter()
     environment, environment_error = resolve_environment(environment)
     if environment_error is not None:
         return {"ok": False, **environment_error}
     assert environment is not None
-    readiness = doctor_report()
-    if not readiness["ready"]:
-        return readiness
     try:
         source = workspace_sql_file(relative_path)
     except ValueError as exc:
         return {"ok": False, "code": "INVALID_ARTIFACT", "message": str(exc)}
+    profile_started = time.perf_counter()
     profile, error = load_profile(environment)
+    profile_load_ms = round((time.perf_counter() - profile_started) * 1000)
     if error is not None:
         return {"ok": False, **error}
     if profile is None:
         return {"ok": False, "code": "PROFILE_MISSING", "message": "No se encontró un perfil utilizable."}
-    result = classify_result(sqlcl_result(profile, source.read_text(encoding="utf-8")))
-    write_audit_event(environment, operation, source, result)
-    return {**result, "environment": environment, "source": str(source.relative_to(ROOT))}
+    audit_start, audit_error = begin_mutation_audit(environment, operation, source, decision_metadata)
+    if audit_error is not None or audit_start is None:
+        return audit_start_failure(audit_error or "No se obtuvo el evento inicial.")
+    sqlcl_started = time.perf_counter()
+    result = execute_mutation_statements(profile, source.read_text(encoding="utf-8"))
+    sqlcl_process_ms = round((time.perf_counter() - sqlcl_started) * 1000)
+    timings_ms = {
+        "profile_load": profile_load_ms,
+        "sqlcl_process": sqlcl_process_ms,
+        "route_total": round((time.perf_counter() - route_started) * 1000),
+    }
+    result = finish_mutation_audit(audit_start, result, timings_ms)
+    return {
+        **result,
+        "environment": environment,
+        "source": str(source.relative_to(ROOT)),
+        "timings_ms": timings_ms,
+    }
 
 
-def execute_change_bundle_artifact(relative_path: str, environment: str | None) -> dict[str, Any]:
+def execute_change_bundle_artifact(
+    relative_path: str,
+    environment: str | None,
+    confirmed: bool | None,
+    backup_choice: str | None,
+) -> dict[str, Any]:
     """Run preflight, then apply/verify only after its baseline proof is observed."""
+    decision_error = validate_mutation_decisions(confirmed, backup_choice)
+    if decision_error is not None:
+        return decision_error
     environment, environment_error = resolve_environment(environment)
     if environment_error is not None:
         return {"ok": False, **environment_error}
     assert environment is not None
-    readiness = doctor_report()
-    if not readiness["ready"]:
-        return readiness
     try:
         manifest = (ROOT / relative_path).resolve()
         manifest.relative_to(ROOT)
         if manifest.suffix.lower() != ".json" or not manifest.is_file():
             raise ChangeBundleError("change.json debe existir dentro del checkout.")
         bundle = load_bundle(manifest, ROOT)
+        if backup_choice == "no" and "snapshot" in bundle["artifacts"]:
+            return {
+                "ok": False,
+                "code": "UNEXPECTED_BACKUP_ARTIFACT",
+                "message": "El usuario rechazó el backup; quite snapshot del manifiesto. No se ejecutó el cambio.",
+            }
+        if backup_choice == "yes" and "snapshot" not in bundle["_resolved_artifacts"]:
+            return {
+                "ok": False,
+                "code": "BACKUP_ARTIFACT_REQUIRED",
+                "message": "El usuario aceptó backup, pero el bundle no declara snapshot.sql; no se ejecutó el cambio.",
+            }
         preflight_statements = render_execution_sql(bundle, ("preflight",))
+        snapshot_statements = render_execution_sql(bundle, ("snapshot",)) if backup_choice == "yes" else None
         apply_verify_statements = render_execution_sql(bundle, ("apply", "verify"))
     except (ValueError, ChangeBundleError) as exc:
         return {"ok": False, "code": "INVALID_CHANGE_BUNDLE", "message": str(exc)}
@@ -431,13 +559,31 @@ def execute_change_bundle_artifact(relative_path: str, environment: str | None) 
     if profile is None:
         return {"ok": False, "code": "PROFILE_MISSING", "message": "No se encontró un perfil utilizable."}
     started = time.perf_counter()
-    preflight_result = classify_result(sqlcl_result(profile, preflight_statements))
+    bundle_audit_metadata = {
+        "bundle_id": bundle["id"],
+        "kind": bundle["kind"],
+        "target": bundle["target"],
+        "baseline_fingerprint": bundle["baseline"]["fingerprint"],
+        "artifact_sha256": artifact_hashes(bundle, ROOT),
+        "backup_choice": backup_choice,
+    }
+    audit_start, audit_error = begin_mutation_audit(
+        environment,
+        "oracle_apex_change_bundle",
+        manifest,
+        bundle_audit_metadata,
+    )
+    if audit_error is not None or audit_start is None:
+        return audit_start_failure(audit_error or "No se obtuvo el evento inicial.")
+    preflight_result = execute_mutation_statements(profile, preflight_statements)
     expected_marker = baseline_success_marker(bundle)
     if not preflight_result["ok"] or expected_marker not in preflight_result.get("output", ""):
         elapsed_ms = round((time.perf_counter() - started) * 1000)
         result = {
             **preflight_result,
             "ok": False,
+            "backup_choice": backup_choice,
+            "backup_result": "NOT_RUN",
             "code": "BASELINE_MISMATCH" if preflight_result["ok"] else preflight_result["code"],
             "message": (
                 "El preflight no confirmó la fingerprint diagnosticada; apply no fue ejecutado."
@@ -445,7 +591,12 @@ def execute_change_bundle_artifact(relative_path: str, environment: str | None) 
                 else preflight_result["message"]
             ),
         }
-        write_change_bundle_audit(environment, bundle, result, elapsed_ms)
+        result = finish_mutation_audit(
+            audit_start,
+            result,
+            {"elapsed_ms": elapsed_ms, "phase_durations_ms": change_phase_durations(result.get("output", ""))},
+            {"backup_choice": backup_choice, "backup_result": "NOT_RUN"},
+        )
         return {
             **result,
             "environment": environment,
@@ -453,10 +604,45 @@ def execute_change_bundle_artifact(relative_path: str, environment: str | None) 
             "bundle_id": bundle["id"],
             "elapsed_ms": elapsed_ms,
             "phase_durations_ms": change_phase_durations(result.get("output", "")),
+            "backup_choice": backup_choice,
         }
-    result = classify_result(sqlcl_result(profile, apply_verify_statements))
+    backup_result = None
+    if snapshot_statements is not None:
+        backup_result = execute_mutation_statements(profile, snapshot_statements)
+        if not backup_result["ok"]:
+            elapsed_ms = round((time.perf_counter() - started) * 1000)
+            failed = {
+                **backup_result,
+                "ok": False,
+                "code": "BACKUP_FAILED",
+                "message": "El snapshot falló; apply no fue ejecutado.",
+                "backup_choice": backup_choice,
+                "backup_result": backup_result["code"],
+            }
+            failed = finish_mutation_audit(
+                audit_start,
+                failed,
+                {"elapsed_ms": elapsed_ms, "phase_durations_ms": change_phase_durations(failed.get("output", ""))},
+                {"backup_choice": backup_choice, "backup_result": backup_result["code"]},
+            )
+            return {
+                **failed,
+                "environment": environment,
+                "source": str(manifest.relative_to(ROOT)),
+                "bundle_id": bundle["id"],
+                "elapsed_ms": elapsed_ms,
+                "phase_durations_ms": change_phase_durations(failed.get("output", "")),
+            }
+    result = execute_mutation_statements(profile, apply_verify_statements)
     elapsed_ms = round((time.perf_counter() - started) * 1000)
-    write_change_bundle_audit(environment, bundle, result, elapsed_ms)
+    result["backup_choice"] = backup_choice
+    result["backup_result"] = backup_result["code"] if backup_result else "NOT_REQUESTED"
+    result = finish_mutation_audit(
+        audit_start,
+        result,
+        {"elapsed_ms": elapsed_ms, "phase_durations_ms": change_phase_durations(result.get("output", ""))},
+        {"backup_choice": backup_choice, "backup_result": result["backup_result"]},
+    )
     return {
         **result,
         "environment": environment,
@@ -464,6 +650,8 @@ def execute_change_bundle_artifact(relative_path: str, environment: str | None) 
         "bundle_id": bundle["id"],
         "elapsed_ms": elapsed_ms,
         "phase_durations_ms": change_phase_durations(result.get("output", "")),
+        "backup_choice": backup_choice,
+        "backup_result": result["backup_result"],
     }
 
 
@@ -472,11 +660,14 @@ mcp = FastMCP(
     instructions=(
         "The user's request defines the operation, scope, and environment. Select that environment's configured "
         "credential; effective Oracle/APEX privileges granted to that credential determine which operations succeed. "
-        "Inspect the session and target environment at the start when read-only tools are available. Do not hardcode a "
-        "user or environment permission matrix. Use execute_readonly_query for one SELECT when metadata inspection "
-        "does not require a repository artifact; it starts an Oracle read-only transaction and records only a hash. "
-        "Use execute_sql_file for requested DDL/DML/PLSQL artifacts, or execute_change_bundle when a reviewed "
-        "change.json includes preflight, apply, verification, and rollback artifacts. "
+        "Treat review/show-data/specification requests as read-only: make one minimal destination check only when "
+        "needed, then query immediately. Do not run routine inventories, privilege scans, workspace checks, QA, or "
+        "preliminary row counts. Before a mutation, the agent asks once to confirm the exact environment/object/action "
+        "and whether the user wants a backup; do not create a backup when declined. Use execute_readonly_query for "
+        "one SELECT when metadata inspection does not require a repository artifact; it starts an Oracle read-only "
+        "transaction and records only a hash. Use execute_sql_file for a confirmed one-off DML/DDL/PLSQL operation. "
+        "Use execute_change_bundle only when a fingerprint preflight or coordinated object change materially needs it. "
+        "Do not hardcode a user or environment permission matrix. "
         "Report observed errors accurately."
     ),
 )
@@ -500,9 +691,6 @@ def inspect_oracle_session(environment: str | None = None) -> dict[str, Any]:
     environment, environment_error = resolve_environment(environment)
     if environment_error is not None:
         return {"ok": False, **environment_error}
-    readiness = doctor_report()
-    if not readiness["ready"]:
-        return readiness
     profile, error = load_profile(environment)
     if error is not None:
         return {"ok": False, **error}
@@ -553,9 +741,6 @@ def inspect_environment(environment: str | None = None) -> dict[str, Any]:
     environment, environment_error = resolve_environment(environment)
     if environment_error is not None:
         return {"ok": False, **environment_error}
-    readiness = doctor_report()
-    if not readiness["ready"]:
-        return readiness
     profile, error = load_profile(environment)
     if error is not None:
         return {"ok": False, **error}
@@ -634,9 +819,6 @@ def inspect_apex_context(application_id: int, environment: str | None = None) ->
         return {"ok": False, **environment_error}
     if not isinstance(application_id, int) or application_id <= 0:
         return {"ok": False, "code": "INVALID_APPLICATION", "message": "application_id debe ser un entero positivo."}
-    readiness = doctor_report()
-    if not readiness["ready"]:
-        return readiness
     profile, error = load_profile(environment)
     if error is not None:
         return {"ok": False, **error}
@@ -731,9 +913,6 @@ def inspect_oracle_privileges(environment: str | None = None) -> dict[str, Any]:
     environment, environment_error = resolve_environment(environment)
     if environment_error is not None:
         return {"ok": False, **environment_error}
-    readiness = doctor_report()
-    if not readiness["ready"]:
-        return readiness
     profile, error = load_profile(environment)
     if error is not None:
         return {"ok": False, **error}
@@ -756,24 +935,85 @@ def inspect_oracle_privileges(environment: str | None = None) -> dict[str, Any]:
 
 
 @mcp.tool(
-    description="Ejecuta un archivo SQL revisado dentro del repositorio usando el ambiente indicado.",
+    description=(
+        "Ejecuta un archivo SQL del repositorio. Requiere confirmed=true y backup_choice='yes' o 'no'. "
+        "Si backup_choice='yes', backup_sql_path es obligatorio y se ejecuta antes del cambio; si falla, el cambio "
+        "se detiene. La elección declarada es una señal del cliente, no una prueba criptográfica de identidad humana."
+    ),
     annotations={"readOnlyHint": False, "destructiveHint": True},
 )
-def execute_sql_file(path: str, environment: str | None = None) -> dict[str, Any]:
-    """Execute any versioned database SQL permitted to the connected account."""
-    return execute_artifact(path, environment, "oracle_sql_file")
+def execute_sql_file(
+    path: str,
+    confirmed: bool | None = None,
+    backup_choice: str | None = None,
+    backup_sql_path: str | None = None,
+    environment: str | None = None,
+) -> dict[str, Any]:
+    """Execute a SQL artifact directly using the connected account's effective privileges."""
+    decision_error = validate_mutation_decisions(confirmed, backup_choice)
+    if decision_error is not None:
+        return decision_error
+    if backup_choice == "yes":
+        if not backup_sql_path:
+            return {
+                "ok": False,
+                "code": "BACKUP_ARTIFACT_REQUIRED",
+                "message": "El usuario aceptó backup; indique backup_sql_path. No se ejecutó el cambio.",
+            }
+        try:
+            backup_source = workspace_sql_file(backup_sql_path)
+            change_source = workspace_sql_file(path)
+        except ValueError as exc:
+            return {"ok": False, "code": "INVALID_ARTIFACT", "message": str(exc)}
+        if backup_source == change_source:
+            return {
+                "ok": False,
+                "code": "INVALID_BACKUP_ARTIFACT",
+                "message": "El archivo de backup debe ser distinto del archivo del cambio.",
+            }
+        decision_metadata = {"confirmed": True, "backup_choice": "yes"}
+        backup_result = execute_artifact(backup_sql_path, environment, "oracle_sql_backup", decision_metadata)
+        if not backup_result["ok"]:
+            return {
+                **backup_result,
+                "ok": False,
+                "code": "BACKUP_FAILED",
+                "message": "El SQL de backup falló; el cambio no fue ejecutado.",
+                "backup_result": backup_result["code"],
+            }
+    else:
+        if backup_sql_path is not None:
+            return {
+                "ok": False,
+                "code": "UNEXPECTED_BACKUP_ARTIFACT",
+                "message": "No proporcione backup_sql_path cuando backup_choice='no'.",
+            }
+        backup_result = None
+        decision_metadata = {"confirmed": True, "backup_choice": "no"}
+    result = execute_artifact(path, environment, "oracle_sql_file", decision_metadata)
+    result["backup_choice"] = backup_choice
+    result["backup_result"] = backup_result["code"] if backup_result else "NOT_REQUESTED"
+    if backup_result is not None:
+        result["backup_source"] = backup_sql_path
+    return result
 
 
 @mcp.tool(
     description=(
-        "Ejecuta un paquete de cambio Oracle/APEX revisado: valida change.json, ejecuta preflight, aplicación y "
-        "verificación en fases SQLcl acotadas, y registra huellas y tiempos sin secretos."
+        "Requiere confirmed=true y backup_choice='yes' o 'no'. Valida change.json y preflight. Si se acepta backup, "
+        "exige y ejecuta snapshot.sql antes de apply; si falla, no aplica el cambio. "
+        "Registra huellas y tiempos sin secretos."
     ),
     annotations={"readOnlyHint": False, "destructiveHint": True},
 )
-def execute_change_bundle(path: str, environment: str | None = None) -> dict[str, Any]:
+def execute_change_bundle(
+    path: str,
+    confirmed: bool | None = None,
+    backup_choice: str | None = None,
+    environment: str | None = None,
+) -> dict[str, Any]:
     """Execute a prepared, bounded live-change bundle."""
-    return execute_change_bundle_artifact(path, environment)
+    return execute_change_bundle_artifact(path, environment, confirmed, backup_choice)
 
 
 @mcp.tool(
@@ -789,6 +1029,7 @@ def execute_readonly_query(
     bind_variables: dict[str, int] | None = None,
 ) -> dict[str, Any]:
     """Run one single-line SELECT through SQLcl without requiring a file artifact."""
+    route_started = time.perf_counter()
     environment, environment_error = resolve_environment(environment)
     if environment_error is not None:
         return {"ok": False, **environment_error}
@@ -805,31 +1046,55 @@ def execute_readonly_query(
             "code": "INVALID_BIND_VARIABLE",
             "message": "Los binds deben tener nombres simples en minúsculas y valores enteros.",
         }
-    readiness = doctor_report()
-    if not readiness["ready"]:
-        return readiness
+    profile_started = time.perf_counter()
     profile, error = load_profile(environment)
+    profile_load_ms = round((time.perf_counter() - profile_started) * 1000)
     if error is not None:
         return {"ok": False, **error}
     if profile is None:
         return {"ok": False, "code": "PROFILE_MISSING", "message": "No se encontró un perfil utilizable."}
+    sqlcl_started = time.perf_counter()
     command = sqlcl_result(
         profile,
         normalized_query,
         bind_variables=bind_variables,
         read_only_transaction=True,
     )
+    sqlcl_process_ms = round((time.perf_counter() - sqlcl_started) * 1000)
     result = classify_result(command)
-    write_readonly_query_audit(environment, query, bind_variables, result)
-    return {**result, "environment": environment, "source": "inline_readonly_query"}
+    timings_ms = {
+        "profile_load": profile_load_ms,
+        "sqlcl_process": sqlcl_process_ms,
+        "route_total": round((time.perf_counter() - route_started) * 1000),
+    }
+    write_readonly_query_audit(environment, query, bind_variables, result, timings_ms)
+    return {
+        **result,
+        "environment": environment,
+        "source": "inline_readonly_query",
+        "timings_ms": timings_ms,
+    }
 
 
 @mcp.tool(
-    description="Importa un export nativo de página APEX desde un archivo SQL del repositorio.",
+    description=(
+        "Importa un export nativo APEX. Requiere confirmed=true y backup_choice='yes' o 'no'. "
+        "Si se acepta backup, requiere backup_path con un export previo de la página; el adaptador valida el archivo "
+        "pero no puede comprobar que corresponda al estado vivo exacto."
+    ),
     annotations={"readOnlyHint": False, "destructiveHint": True},
 )
-def deploy_apex_page(path: str, environment: str | None = None) -> dict[str, Any]:
+def deploy_apex_page(
+    path: str,
+    confirmed: bool | None = None,
+    backup_choice: str | None = None,
+    backup_path: str | None = None,
+    environment: str | None = None,
+) -> dict[str, Any]:
     """Submit a native APEX export using the selected Oracle profile's privileges."""
+    decision_error = validate_mutation_decisions(confirmed, backup_choice)
+    if decision_error is not None:
+        return decision_error
     try:
         source = workspace_sql_file(path)
     except ValueError as exc:
@@ -842,7 +1107,58 @@ def deploy_apex_page(path: str, environment: str | None = None) -> dict[str, Any
             "code": "INVALID_APEX_EXPORT",
             "message": "El archivo no contiene un export APEX nativo completo.",
         }
-    return execute_artifact(path, environment, "apex_native_import")
+    if backup_choice == "yes":
+        if not backup_path:
+            return {
+                "ok": False,
+                "code": "BACKUP_ARTIFACT_REQUIRED",
+                "message": (
+                    "El usuario aceptó backup; indique el export previo en backup_path. " "No se ejecutó el cambio."
+                ),
+            }
+        try:
+            backup_source = workspace_sql_file(backup_path)
+        except ValueError as exc:
+            return {"ok": False, "code": "INVALID_BACKUP_ARTIFACT", "message": str(exc)}
+        backup_content = backup_source.read_text(encoding="utf-8").lower()
+        if not all(token in backup_content for token in required):
+            return {
+                "ok": False,
+                "code": "INVALID_BACKUP_ARTIFACT",
+                "message": "backup_path no contiene un export APEX nativo reconocible.",
+            }
+        deployment_identity = apex_export_page_identity(content)
+        backup_identity = apex_export_page_identity(backup_content)
+        if deployment_identity is None or backup_identity != deployment_identity:
+            return {
+                "ok": False,
+                "code": "BACKUP_SCOPE_MISMATCH",
+                "message": (
+                    "No se pudo verificar que backup_path y el export a desplegar correspondan "
+                    "a la misma aplicación y página."
+                ),
+            }
+        if backup_source == source:
+            return {
+                "ok": False,
+                "code": "INVALID_BACKUP_ARTIFACT",
+                "message": "El export de backup debe ser distinto del export a desplegar.",
+            }
+        decision_metadata = {
+            "confirmed": True,
+            "backup_choice": "yes",
+            "backup_source": str(backup_source.relative_to(ROOT)),
+            "backup_source_sha256": hashlib.sha256(backup_source.read_bytes()).hexdigest(),
+        }
+    else:
+        if backup_path is not None:
+            return {
+                "ok": False,
+                "code": "UNEXPECTED_BACKUP_ARTIFACT",
+                "message": "No proporcione backup_path cuando backup_choice='no'.",
+            }
+        decision_metadata = {"confirmed": True, "backup_choice": "no"}
+    return execute_artifact(path, environment, "apex_native_import", decision_metadata)
 
 
 def main() -> None:

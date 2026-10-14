@@ -40,11 +40,17 @@ class TestOrchestratorExistence:
         root = Path(__file__).resolve().parent.parent
         coordinator = (root / "skills" / "apex" / "SKILL.md").read_text(encoding="utf-8")
         diagnostics = (root / "skills" / "apex-database-diagnostics" / "SKILL.md").read_text(encoding="utf-8")
+        normalized_diagnostics = " ".join(diagnostics.split())
 
         assert "one minimal check, confirm the target" in coordinator
         assert "A historical failure alone never blocks" in coordinator
         assert "query the requested object immediately" in diagnostics
         assert "not evidence that the same condition" in diagnostics
+        assert "implicitly read-only" in coordinator
+        assert (
+            "Treat requests to review, inspect, or show data or specifications as read-only" in normalized_diagnostics
+        )
+        assert "do not run a change, QA, inventory" in normalized_diagnostics
 
     @pytest.mark.unit
     def test_live_changes_reuse_diagnosis_context_with_a_fingerprint(self):
@@ -53,8 +59,36 @@ class TestOrchestratorExistence:
         protocol = (root / "skills" / "apex" / "references" / "live-change-protocol.md").read_text(encoding="utf-8")
 
         assert "live-change protocol" in coordinator
+        assert "do not add a preflight when the target and intended operation are" in coordinator
+        assert "fingerprint materially protects an existing correction" in coordinator
         assert "fingerprint" in protocol
         assert "preflight" in protocol
+
+    @pytest.mark.unit
+    def test_mutations_use_one_confirmation_optional_backup_and_no_routine_count(self):
+        root = Path(__file__).resolve().parent.parent
+        coordinator = " ".join((root / "skills/apex/SKILL.md").read_text(encoding="utf-8").split())
+        protocol = " ".join(
+            (root / "skills/apex/references/live-change-protocol.md").read_text(encoding="utf-8").split()
+        )
+        governance = " ".join(
+            (root / "skills/oracle-data-change-governance-final/SKILL.md").read_text(encoding="utf-8").split()
+        )
+        mcp_guide = " ".join((root / "docs/MCP-CONTROLADO-SQLCL.md").read_text(encoding="utf-8").split())
+
+        assert "ask whether to proceed and whether a backup is wanted" in coordinator
+        assert "explicitly answered both decisions" in coordinator
+        assert 'never infer "no backup" from silence' in coordinator
+        assert "Do not make a preliminary row-count query a standard prerequisite for any transaction" in coordinator
+        assert "do not precheck or recheck grants before, during, or after the operation" in coordinator
+        assert "report the actual service response, including privilege errors" in governance
+        assert (
+            "Inspecciona grants solo si el usuario lo pide o para diagnosticar un error de acceso ya observado"
+            in mcp_guide
+        )
+        assert "ruta directa `execute_sql_file` o SQLcl" in protocol
+        assert "El bundle requiere" in protocol
+        assert "does not require a versioned project folder, `change.json`, snapshot" in governance
 
     @pytest.mark.unit
     def test_delivery_lifecycle_complete_exists(self):
@@ -403,6 +437,28 @@ class TestRoutingConfiguration:
             found_any = any(orch in content for orch in orchestrators)
             assert found_any, "Routing should mention new orchestrators"
 
+    @pytest.mark.unit
+    def test_database_routing_rows_stay_inside_their_markdown_table(self):
+        """Keep database routing entries in the table, before its explanatory text."""
+        routing_path = Path(__file__).resolve().parent.parent / "skills" / "apex" / "references" / "routing.md"
+        lines = routing_path.read_text(encoding="utf-8").splitlines()
+        start = lines.index("### Database & Data")
+        end = lines.index("### QA & Testing", start)
+        section = lines[start:end]
+        migration_rows = [
+            (i, line)
+            for i, line in enumerate(section)
+            if line.startswith("| ") and ("migration" in line.lower() or "migración" in line.lower())
+        ]
+        assert len(migration_rows) >= 2
+        for row_index, row in migration_rows:
+            previous_content = next(line for line in reversed(section[:row_index]) if line.strip())
+            assert row.startswith("| ") and row.endswith(" |")
+            assert previous_content.startswith("| ")
+
+        assert any("no live Oracle ETL" in line for _, line in migration_rows)
+        assert any("no end-to-end Oracle executor" in line for _, line in migration_rows)
+
 
 class TestDependencyMatrix:
     """Verify dependency matrix documentation exists and is complete."""
@@ -412,6 +468,39 @@ class TestDependencyMatrix:
         """Dependency matrix documentation exists."""
         matrix_path = Path(__file__).resolve().parent.parent / "docs" / "SKILL-DEPENDENCY-MATRIX.md"
         assert matrix_path.exists(), "SKILL-DEPENDENCY-MATRIX.md must exist"
+
+    @pytest.mark.unit
+    def test_independent_audit_policy_requires_report_only_contradiction_review(self):
+        """Audits report contradictions and provenance without repairing them."""
+        policy_path = Path(__file__).resolve().parent.parent / "docs" / "POLITICA-EVOLUCION-ECOSISTEMA.md"
+        content = policy_path.read_text(encoding="utf-8")
+
+        assert "auditoría independiente debe buscar contradicciones" in content
+        assert "la razón e historial que pudo verificarse" in content
+        assert "La auditoría es de solo lectura" in content
+        assert "no corrige ni armoniza los hallazgos" in content
+        assert "se revisan con la persona usuaria" in content
+
+    @pytest.mark.unit
+    def test_sqlcl_context_request_limits_inventory_and_preflight_to_initial_provisioning(self):
+        guide_path = Path(__file__).resolve().parent.parent / "docs" / "SOLICITUD-CONTEXTO-APEX-SQLCL.md"
+        content = " ".join(guide_path.read_text(encoding="utf-8").split())
+
+        assert "Este inventario aplica a la solicitud inicial" in content
+        assert "No es un preflight por operación" in content
+        assert "No se repite por cada petición" in content
+        assert "No exige repetir el inventario o el preflight para cada importación posterior" in content
+
+    @pytest.mark.unit
+    def test_changelog_timing_names_match_the_controlled_sql_documentation(self):
+        root = Path(__file__).resolve().parent.parent
+        changelog = (root / "CHANGELOG.md").read_text(encoding="utf-8")
+        sqlcl_guide = (root / "docs" / "MCP-CONTROLADO-SQLCL.md").read_text(encoding="utf-8")
+
+        for metric in ("profile_load", "sqlcl_process", "route_total"):
+            assert metric in changelog
+            assert metric in sqlcl_guide
+        assert "runtime-check" not in changelog
 
     @pytest.mark.unit
     def test_dependency_matrix_includes_all_orchestrators(self):

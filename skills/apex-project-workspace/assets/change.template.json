@@ -11,10 +11,8 @@
     "observed_at": "YYYY-MM-DDTHH:MM:SSZ"
   },
   "artifacts": {
-    "snapshot": "snapshot.sql",
     "preflight": "preflight.sql",
     "apply": "apply.sql",
-    "verify": "verify.sql",
-    "rollback": "rollback.sql"
+    "verify": "verify.sql"
   }
 }

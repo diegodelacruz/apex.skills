@@ -10,20 +10,22 @@ remaining tables are a legacy map and do not prove full graph or cycle
 compatibility. Direct edges assigning work to the retired adapter have been
 removed from active dependent workflows; its row below is historical only.
 
-> **Policy update (2026-09-28):** Direct requests define action, environment, and scope. Use the
-> credential configured for that environment; effective Oracle/APEX grants determine available
-> operations. Skills do not hardcode users or per-environment permission matrices, add approval
-> steps, or ask the user to run work available to the agent. A connector's surface does not grant
-> privileges, and its label does not prove the connected target.
+> **Policy update (2026-10-12):** Requests to review or show Oracle/APEX object data/specifications
+> are implicitly read-only: verify the destination once if needed, then query immediately. For a
+> mutation, ask once to confirm environment, target, exact action, and whether the user wants a
+> backup. The controlled MCP write tools require both decisions in their arguments. Do not execute until the user explicitly answers both whether to proceed and backup yes/no;
+> if one is missing, ask only for it and wait. Silence is not a no-backup answer. No backup or preliminary row count is required by default. Skills must not add another
+> approval or route a one-off transaction through a migration/QA chain. Credentials and effective
+> Oracle/APEX grants still determine which operations succeed.
 
 ---
 
 ## Quick Reference: Who Calls Whom
 
 ### Entry Point
-- **`apex`** → Receives all user requests, routes to appropriate skills
-- **Live change** → retains a completed diagnostic context and routes one
-  confirmed object/component mutation to the relevant specialist
+- **`apex`** → Receives requests; simple reads go straight to the reader
+- **Live change** → retains existing diagnosis context, asks one confirmation
+  including backup choice, then routes only the necessary mutation
 
 ### Coordinators
 - **`apex-delivery-lifecycle-complete`** → Coordinates 7 skills for full cycle
@@ -83,9 +85,10 @@ apex-schema-automation-safe
 ├─ Integrates with: apex-code-generation-safe (code using schema)
 └─ Output: DDL statements, object definitions
 
-For a diagnosed correction, the coordinator, schema skill and page skill share
-the same `change.json` protocol. It is not a new specialist edge and does not
-replace the complete delivery workflows above.
+For a diagnosed correction that needs a fingerprint guard, the coordinator,
+schema skill and page skill share the `change.json` protocol. A one-off DML
+request uses the direct SQL execution route after confirmation; no bundle or
+migration workflow is added by default.
 
 apex-code-generation-safe
 ├─ Requires: apex-schema-automation-safe (schema exists)
@@ -124,13 +127,13 @@ oracle-data-change-governance-final
 ├─ Provides: DATA change governance guidance and validation resources
 ├─ Related skills: apex-schema-automation-safe, apex-data-migration-safe
 ├─ Uses: validate_sql_style.py for applicable SQL style checks
-└─ Does not add a user approval gate or replace the requested Oracle route
+└─ Does not add a second approval, routine backup, pre-count, or routing chain
 
 apex-data-migration-safe
 ├─ Related: oracle-data-change-governance-final and apex-schema-automation-safe
 ├─ Uses the target schema when the requested migration requires one
-├─ Provides: ETL pipeline, validation, rollback
-├─ Components: SchemaMappingGenerator, DataValidator, ETLPipeline, RollbackManager
+├─ Provides: migration mapping and in-memory validation prototypes
+├─ Components: mapping/validation helpers and in-memory status markers; no Oracle connections or restore behavior
 └─ Output: Migrated data with audit trail
 
 Optional APEX artifact import
@@ -207,8 +210,8 @@ oracle-data-change-governance-final
 ├─ Does not gate direct user-requested Oracle execution
 
 apex-audit-decisions-log
-├─ Reads: .bitacora.json (git-backed audit trail)
-├─ Shows: Decision history for all skills
+├─ Reads: local JSON Lines from .bitacora.json and Git history separately
+├─ Shows: Events from supported controlled routes; external/manual operations may be absent
 ├─ Output: Audit trail visualization, reports
 
 apex-zaimella-gestion-proyectos
@@ -251,7 +254,7 @@ When creating a new skill, verify it:
 
 | Skill | Provides | Requires | Calls |
 |-------|----------|----------|-------|
-| apex-data-migration-safe | ETL pipeline, data migration | oracle-data-change-governance-final, apex-schema-automation-safe | None; APEX import is separate |
+| apex-data-migration-safe | Migration mapping and in-memory validation prototype; no live Oracle executor | oracle-data-change-governance-final, apex-schema-automation-safe | None; APEX import is separate |
 | apex-api-client-safe | Retired simulated REST adapter; non-operational | None | Historical compatibility references only |
 | oracle-data-change-governance-final | DATA change governance guidance | None | apex-schema-automation-safe, apex-data-migration-safe |
 

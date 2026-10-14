@@ -14,8 +14,9 @@ Use the credential configured for the named environment. Effective Oracle/APEX
 privileges granted to that account by the DBA/APEX administrator determine
 available operations; do not hardcode a permission matrix or user identity.
 Verify the connected account and actual destination with read-only checks when
-available. Do not add approval steps or ask the user to execute work available
-to the agent. Use the relevant specialist directly for a focused request; run
+available. Preserve the single global confirmation for every live mutation,
+including the explicit backup choice; do not add further approval steps or ask
+the user to execute work available to the agent. Use the relevant specialist directly for a focused request; run
 the full lifecycle only when the requested scope needs it.
 
 ## Workflow
@@ -23,7 +24,7 @@ the full lifecycle only when the requested scope needs it.
 1. Start with `apex-project-bootstrap-final` and create `control-proyecto/`.
 2. Use `apex-environment-alignment-complete` for environment evidence when useful; it is not a prerequisite to an edit.
 3. Mine patterns, design, govern DATA changes, and engineer APEX under the user's stated requirements and observed project baseline.
-4. Validate in the requested environment and package release SQL and manifest when useful. A direct user request authorizes the named environment.
+4. Validate in the requested environment and package release SQL and manifest when useful. A direct user request selects the environment; live mutations still require the single global confirmation and backup choice.
 5. Create the Word manual when requested; report QA and rendering evidence accurately.
 
 ## Boundaries

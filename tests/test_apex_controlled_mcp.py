@@ -25,6 +25,33 @@ def test_doctor_reports_registered_missing_binary(monkeypatch, tmp_path):
     assert result["code"] == "RUNTIME_INTEGRITY_FAILED"
 
 
+def test_explicit_doctor_probes_sqlcl_version(monkeypatch, tmp_path):
+    java_home = tmp_path / "java"
+    java_exe = java_home / "bin" / "java.exe"
+    sqlcl_path = tmp_path / "sqlcl.exe"
+    java_exe.parent.mkdir(parents=True)
+    java_exe.write_text("", encoding="utf-8")
+    sqlcl_path.write_text("", encoding="utf-8")
+    (tmp_path / "runtime-state.json").write_text(
+        json.dumps({"java_home": str(java_home), "sqlcl_path": str(sqlcl_path)}), encoding="utf-8"
+    )
+    monkeypatch.setenv(mcp.RUNTIME_ENV, str(tmp_path))
+    captured = {}
+
+    def fake_run(args, **kwargs):
+        captured["args"] = args
+        captured.update(kwargs)
+        return type("Process", (), {"returncode": 0, "stdout": "SQLcl: Release 24", "stderr": ""})()
+
+    monkeypatch.setattr(mcp.subprocess, "run", fake_run)
+
+    result = mcp.doctor_report()
+
+    assert result["ready"] is True
+    assert captured["args"] == [str(sqlcl_path), "-version"]
+    assert captured["timeout"] == 30
+
+
 def test_profile_missing_does_not_expose_or_connect(monkeypatch, tmp_path):
     monkeypatch.setattr(mcp, "ROOT", Path(tmp_path))
 
@@ -88,7 +115,11 @@ def test_execute_readonly_query_bypasses_context_helper_and_audits_hash(monkeypa
     captured = {}
     monkeypatch.setattr(mcp, "ROOT", tmp_path)
     monkeypatch.setattr(mcp, "AUDIT_PATH", tmp_path / "audit.jsonl")
-    monkeypatch.setattr(mcp, "doctor_report", lambda: {"ready": True, "code": "READY"})
+    monkeypatch.setattr(
+        mcp,
+        "doctor_report",
+        lambda: (_ for _ in ()).throw(AssertionError("read-only query must not run the runtime doctor")),
+    )
     monkeypatch.setattr(mcp, "load_profile", lambda environment: ({"user": "configured"}, None))
 
     def reject_context_helper(*args, **kwargs):
@@ -113,11 +144,14 @@ def test_execute_readonly_query_bypasses_context_helper_and_audits_hash(monkeypa
     )
 
     assert result["ok"] is True
+    assert set(result["timings_ms"]) == {"profile_load", "sqlcl_process", "route_total"}
+    assert all(isinstance(value, int) and value >= 0 for value in result["timings_ms"].values())
     assert captured["read_only_transaction"] is True
     assert captured["bind_variables"] == {"app": 130, "page": 100}
     audit = json.loads((tmp_path / "audit.jsonl").read_text(encoding="utf-8"))
     assert audit["source"] == "inline_readonly_query"
     assert audit["source_sha256"]
+    assert audit["timings_ms"] == result["timings_ms"]
     audit_text = (tmp_path / "audit.jsonl").read_text(encoding="utf-8")
     assert '"app":' not in audit_text
     assert '"page":' not in audit_text
@@ -160,6 +194,52 @@ def test_sqlcl_read_only_transaction_starts_after_connect(monkeypatch):
     assert script.index("set transaction read only") < script.index("select 1 from dual")
 
 
+def test_sqlcl_runtime_failure_is_reported_without_preflight(monkeypatch):
+    monkeypatch.setattr(mcp, "runtime_state", lambda: None)
+
+    result = mcp.classify_result(
+        mcp.sqlcl_result(
+            {"user": "u", "password": "p", "host": "db", "port": "1521", "service": "test"},
+            "select 1 from dual;",
+        )
+    )
+
+    assert result["code"] == "RUNTIME_NOT_INSTALLED"
+    assert "doctor()" in result["message"]
+
+
+def test_sqlcl_runtime_state_failure_is_reported_without_starting_process(monkeypatch):
+    monkeypatch.setattr(mcp, "runtime_state", lambda: {"sqlcl_path": "sqlcl.exe"})
+    monkeypatch.setattr(
+        mcp.subprocess,
+        "run",
+        lambda *args, **kwargs: (_ for _ in ()).throw(AssertionError("SQLcl should not start without JAVA_HOME")),
+    )
+
+    result = mcp.classify_result(
+        mcp.sqlcl_result(
+            {"user": "u", "password": "p", "host": "db", "port": "1521", "service": "test"},
+            "select 1 from dual;",
+        )
+    )
+
+    assert result["code"] == "RUNTIME_INTEGRITY_FAILED"
+    assert "doctor()" in result["message"]
+
+
+def test_doctor_report_is_only_called_by_explicit_doctor_tool():
+    import ast
+
+    tree = ast.parse(Path(mcp.__file__).read_text(encoding="utf-8"))
+    doctor_calls = [
+        node
+        for node in ast.walk(tree)
+        if isinstance(node, ast.Call) and isinstance(node.func, ast.Name) and node.func.id == "doctor_report"
+    ]
+
+    assert len(doctor_calls) == 1
+
+
 def test_execute_artifact_preserves_oracle_authority(monkeypatch, tmp_path):
     artifact = tmp_path / "change.sql"
     artifact.write_text("create table data.tmp_test (id number);", encoding="utf-8")
@@ -173,9 +253,74 @@ def test_execute_artifact_preserves_oracle_authority(monkeypatch, tmp_path):
 
     assert result["ok"] is True
     assert result["code"] == "SUCCESS"
-    audit = json.loads((tmp_path / "audit.jsonl").read_text(encoding="utf-8"))
-    assert audit["source"] == "change.sql"
-    assert "tmp_test" not in (tmp_path / "audit.jsonl").read_text(encoding="utf-8")
+    audit_text = (tmp_path / "audit.jsonl").read_text(encoding="utf-8")
+    events = [json.loads(line) for line in audit_text.splitlines()]
+    assert [event["event_phase"] for event in events] == ["started", "completed"]
+    assert events[0]["event_id"] == events[1]["event_id"] == result["audit_event_id"]
+    assert events[0]["source"] == "change.sql"
+    assert events[1]["timings_ms"]["sqlcl_process"] >= 0
+    assert result["timings_ms"] == events[1]["timings_ms"]
+    assert "tmp_test" not in audit_text
+
+
+def test_execute_artifact_fails_closed_when_start_event_cannot_be_saved(monkeypatch, tmp_path):
+    artifact = tmp_path / "change.sql"
+    artifact.write_text("delete from data.t;", encoding="utf-8")
+    monkeypatch.setattr(mcp, "ROOT", tmp_path)
+    monkeypatch.setattr(mcp, "load_profile", lambda environment: ({"user": "x"}, None))
+    monkeypatch.setattr(mcp, "append_audit_entry", lambda entry: "OSError: disk unavailable")
+    monkeypatch.setattr(mcp, "sqlcl_result", lambda *args, **kwargs: (_ for _ in ()).throw(AssertionError("SQL ran")))
+
+    result = mcp.execute_artifact("change.sql", "test", "oracle_sql_file")
+
+    assert result["code"] == "AUDIT_START_FAILED"
+    assert "no se ejecutó" in result["message"]
+
+
+def test_execute_artifact_warns_not_to_retry_when_completion_event_fails(monkeypatch, tmp_path):
+    artifact = tmp_path / "change.sql"
+    artifact.write_text("delete from data.t;", encoding="utf-8")
+    appended = []
+
+    def append(entry):
+        appended.append(entry)
+        return None if len(appended) == 1 else "OSError: disk unavailable"
+
+    monkeypatch.setattr(mcp, "ROOT", tmp_path)
+    monkeypatch.setattr(mcp, "load_profile", lambda environment: ({"user": "x"}, None))
+    monkeypatch.setattr(mcp, "append_audit_entry", append)
+    monkeypatch.setattr(mcp, "sqlcl_result", lambda *args, **kwargs: mcp.CommandResult(0, "", ""))
+
+    result = mcp.execute_artifact("change.sql", "test", "oracle_sql_file")
+
+    assert result["code"] == "AUDIT_COMPLETION_FAILED"
+    assert result["operation_result"] == "SUCCESS"
+    assert "no la reintente automáticamente" in result["message"]
+    assert appended[0]["event_id"] == appended[1]["event_id"]
+    assert appended[0]["event_phase"] == "started"
+    assert appended[1]["event_phase"] == "completed"
+
+
+def test_execute_artifact_closes_audit_when_adapter_raises(monkeypatch, tmp_path):
+    artifact = tmp_path / "change.sql"
+    artifact.write_text("delete from data.t;", encoding="utf-8")
+    monkeypatch.setattr(mcp, "ROOT", tmp_path)
+    monkeypatch.setattr(mcp, "AUDIT_PATH", tmp_path / "audit.jsonl")
+    monkeypatch.setattr(mcp, "load_profile", lambda environment: ({"user": "x"}, None))
+    monkeypatch.setattr(
+        mcp,
+        "sqlcl_result",
+        lambda *args, **kwargs: (_ for _ in ()).throw(TimeoutError("connection ended unexpectedly")),
+    )
+
+    result = mcp.execute_artifact("change.sql", "test", "oracle_sql_file")
+    events = [json.loads(line) for line in (tmp_path / "audit.jsonl").read_text(encoding="utf-8").splitlines()]
+
+    assert result["code"] == "ADAPTER_EXECUTION_FAILED"
+    assert "no debe repetirse automáticamente" in result["message"]
+    assert [event["event_phase"] for event in events] == ["started", "completed"]
+    assert events[0]["event_id"] == events[1]["event_id"]
+    assert events[1]["result"] == "ADAPTER_EXECUTION_FAILED"
 
 
 def test_execute_change_bundle_requires_valid_preflight_artifacts(monkeypatch, tmp_path):
@@ -184,7 +329,7 @@ def test_execute_change_bundle_requires_valid_preflight_artifacts(monkeypatch, t
     monkeypatch.setattr(mcp, "ROOT", tmp_path)
     monkeypatch.setattr(mcp, "doctor_report", lambda: {"ready": True, "code": "READY"})
 
-    result = mcp.execute_change_bundle_artifact("change.json", "test")
+    result = mcp.execute_change_bundle_artifact("change.json", "test", True, "no")
 
     assert result["ok"] is False
     assert result["code"] == "INVALID_CHANGE_BUNDLE"
@@ -232,14 +377,16 @@ def test_execute_change_bundle_records_hashes_and_phase_timings(monkeypatch, tmp
 
     monkeypatch.setattr(mcp, "sqlcl_result", sqlcl_result)
 
-    result = mcp.execute_change_bundle_artifact("change.json", "test")
+    result = mcp.execute_change_bundle_artifact("change.json", "test", True, "no")
 
     assert result["ok"] is True
     assert result["phase_durations_ms"] == {"apply": 20, "verify": 10}
     audit_text = (tmp_path / "audit.jsonl").read_text(encoding="utf-8")
-    audit = json.loads(audit_text)
-    assert audit["bundle_id"] == "fix-live-change"
-    assert audit["artifact_sha256"]["apply"]
+    events = [json.loads(line) for line in audit_text.splitlines()]
+    assert [event["event_phase"] for event in events] == ["started", "completed"]
+    assert events[0]["event_id"] == events[1]["event_id"]
+    assert events[0]["bundle_id"] == "fix-live-change"
+    assert events[1]["artifact_sha256"]["apply"]
     assert "prompt apply" not in audit_text
 
 
@@ -273,12 +420,286 @@ def test_execute_change_bundle_does_not_apply_when_baseline_marker_is_missing(mo
         lambda profile, statements: calls.append(statements) or mcp.CommandResult(0, "SELECT completed", ""),
     )
 
-    result = mcp.execute_change_bundle_artifact("change.json", "test")
+    result = mcp.execute_change_bundle_artifact("change.json", "test", True, "no")
 
     assert result["ok"] is False
     assert result["code"] == "BASELINE_MISMATCH"
     assert len(calls) == 1
     assert "CHANGE_PHASE=apply" not in calls[0]
+
+
+def _create_audited_bundle(tmp_path):
+    artifacts = {}
+    for phase in ("preflight", "apply", "verify"):
+        source = tmp_path / f"{phase}.sql"
+        source.write_text(f"prompt {phase}\n", encoding="utf-8")
+        artifacts[phase] = source.name
+    manifest = tmp_path / "change.json"
+    manifest.write_text(
+        json.dumps(
+            {
+                "version": 1,
+                "id": "audit-failure-bundle",
+                "kind": "oracle_ddl",
+                "target": {"type": "view", "name": "data.v_example"},
+                "baseline": {"fingerprint": "sha256:observed"},
+                "artifacts": artifacts,
+            }
+        ),
+        encoding="utf-8",
+    )
+    return manifest
+
+
+def test_change_bundle_fails_closed_when_start_audit_cannot_be_saved(monkeypatch, tmp_path):
+    _create_audited_bundle(tmp_path)
+    calls = []
+    monkeypatch.setattr(mcp, "ROOT", tmp_path)
+    monkeypatch.setattr(mcp, "load_profile", lambda environment: ({"user": "x"}, None))
+    monkeypatch.setattr(mcp, "append_audit_entry", lambda entry: "OSError: disk unavailable")
+    monkeypatch.setattr(mcp, "sqlcl_result", lambda *args: calls.append(args))
+
+    result = mcp.execute_change_bundle_artifact("change.json", "test", True, "no")
+
+    assert result["code"] == "AUDIT_START_FAILED"
+    assert calls == []
+
+
+def test_change_bundle_warns_not_to_retry_when_completion_audit_fails(monkeypatch, tmp_path):
+    _create_audited_bundle(tmp_path)
+    appended = []
+
+    def append(entry):
+        appended.append(entry)
+        return None if len(appended) == 1 else "OSError: disk unavailable"
+
+    monkeypatch.setattr(mcp, "ROOT", tmp_path)
+    monkeypatch.setattr(mcp, "load_profile", lambda environment: ({"user": "x"}, None))
+    monkeypatch.setattr(mcp, "append_audit_entry", append)
+    monkeypatch.setattr(
+        mcp,
+        "sqlcl_result",
+        lambda profile, statements: mcp.CommandResult(
+            0,
+            "__CHANGE_BASELINE_OK=sha256:observed\n" if "CHANGE_PHASE=preflight" in statements else "",
+            "",
+        ),
+    )
+
+    result = mcp.execute_change_bundle_artifact("change.json", "test", True, "no")
+
+    assert result["code"] == "AUDIT_COMPLETION_FAILED"
+    assert result["operation_result"] == "SUCCESS"
+    assert "no la reintente automáticamente" in result["message"]
+    assert [event["event_phase"] for event in appended] == ["started", "completed"]
+    assert appended[0]["event_id"] == appended[1]["event_id"]
+
+
+def test_mutation_tools_require_explicit_action_and_backup_answers():
+    missing_action = mcp.execute_sql_file("change.sql", backup_choice="no")
+    missing_backup = mcp.execute_change_bundle("change.json", confirmed=True)
+    missing_both = mcp.deploy_apex_page("page.sql")
+
+    assert missing_action["code"] == "USER_CONFIRMATION_REQUIRED"
+    assert missing_backup["code"] == "BACKUP_CHOICE_REQUIRED"
+    assert missing_both["code"] == "USER_CONFIRMATION_REQUIRED"
+
+
+def test_execute_sql_file_runs_requested_backup_before_change(monkeypatch, tmp_path):
+    (tmp_path / "backup.sql").write_text("create table backup_data as select * from data.t;", encoding="utf-8")
+    (tmp_path / "change.sql").write_text("delete from data.t;", encoding="utf-8")
+    monkeypatch.setattr(mcp, "ROOT", tmp_path)
+    calls = []
+
+    def execute_artifact(path, environment, operation, decision_metadata=None):
+        calls.append((path, operation, decision_metadata))
+        return {"ok": True, "code": "SUCCESS", "source": path}
+
+    monkeypatch.setattr(mcp, "execute_artifact", execute_artifact)
+
+    result = mcp.execute_sql_file(
+        "change.sql",
+        confirmed=True,
+        backup_choice="yes",
+        backup_sql_path="backup.sql",
+        environment="test",
+    )
+
+    assert [call[0] for call in calls] == ["backup.sql", "change.sql"]
+    assert result["backup_choice"] == "yes"
+    assert result["backup_result"] == "SUCCESS"
+
+
+def test_execute_sql_file_stops_when_requested_backup_fails(monkeypatch, tmp_path):
+    (tmp_path / "backup.sql").write_text("create table backup_data as select * from data.t;", encoding="utf-8")
+    (tmp_path / "change.sql").write_text("delete from data.t;", encoding="utf-8")
+    monkeypatch.setattr(mcp, "ROOT", tmp_path)
+    calls = []
+
+    def execute_artifact(path, environment, operation, decision_metadata=None):
+        calls.append(path)
+        return {"ok": False, "code": "EXECUTION_ERROR", "message": "backup failed"}
+
+    monkeypatch.setattr(mcp, "execute_artifact", execute_artifact)
+
+    result = mcp.execute_sql_file(
+        "change.sql",
+        confirmed=True,
+        backup_choice="yes",
+        backup_sql_path="backup.sql",
+        environment="test",
+    )
+
+    assert calls == ["backup.sql"]
+    assert result["code"] == "BACKUP_FAILED"
+
+
+def test_execute_sql_file_does_not_accept_backup_artifact_when_declined():
+    result = mcp.execute_sql_file("change.sql", confirmed=True, backup_choice="no", backup_sql_path="backup.sql")
+
+    assert result["code"] == "UNEXPECTED_BACKUP_ARTIFACT"
+
+
+def test_execute_change_bundle_requires_snapshot_when_backup_accepted(monkeypatch, tmp_path):
+    artifacts = {}
+    for phase in ("preflight", "apply", "verify", "rollback"):
+        (tmp_path / f"{phase}.sql").write_text("select 1 from dual;", encoding="utf-8")
+        artifacts[phase] = f"{phase}.sql"
+    manifest = tmp_path / "change.json"
+    manifest.write_text(
+        json.dumps(
+            {
+                "version": 1,
+                "id": "require-backup",
+                "kind": "oracle_data",
+                "target": {"type": "table", "name": "DATA.T"},
+                "baseline": {"fingerprint": "sha256:observed"},
+                "artifacts": artifacts,
+            }
+        ),
+        encoding="utf-8",
+    )
+    monkeypatch.setattr(mcp, "ROOT", tmp_path)
+    monkeypatch.setattr(mcp, "doctor_report", lambda: {"ready": True, "code": "READY"})
+
+    result = mcp.execute_change_bundle_artifact("change.json", "test", True, "yes")
+
+    assert result["code"] == "BACKUP_ARTIFACT_REQUIRED"
+
+
+def test_execute_change_bundle_rejects_snapshot_when_backup_declined(monkeypatch, tmp_path):
+    artifacts = {}
+    for phase in ("preflight", "apply", "verify", "snapshot"):
+        (tmp_path / f"{phase}.sql").write_text("select 1 from dual;", encoding="utf-8")
+        artifacts[phase] = f"{phase}.sql"
+    manifest = tmp_path / "change.json"
+    manifest.write_text(
+        json.dumps(
+            {
+                "version": 1,
+                "id": "declined-backup",
+                "kind": "oracle_data",
+                "target": {"type": "table", "name": "DATA.T"},
+                "baseline": {"fingerprint": "sha256:observed"},
+                "artifacts": artifacts,
+            }
+        ),
+        encoding="utf-8",
+    )
+    calls = []
+    monkeypatch.setattr(mcp, "ROOT", tmp_path)
+    monkeypatch.setattr(mcp, "doctor_report", lambda: calls.append("doctor") or {"ready": True, "code": "READY"})
+    monkeypatch.setattr(mcp, "sqlcl_result", lambda *args: calls.append(args))
+
+    result = mcp.execute_change_bundle_artifact("change.json", "test", True, "no")
+
+    assert result["code"] == "UNEXPECTED_BACKUP_ARTIFACT"
+    assert calls == []
+
+
+def test_execute_change_bundle_runs_accepted_snapshot_before_apply(monkeypatch, tmp_path):
+    artifacts = {}
+    for phase in ("preflight", "snapshot", "apply", "verify", "rollback"):
+        (tmp_path / f"{phase}.sql").write_text(f"prompt {phase}\n", encoding="utf-8")
+        artifacts[phase] = f"{phase}.sql"
+    (tmp_path / "change.json").write_text(
+        json.dumps(
+            {
+                "version": 1,
+                "id": "backup-before-change",
+                "kind": "oracle_data",
+                "target": {"type": "table", "name": "DATA.T"},
+                "baseline": {"fingerprint": "sha256:observed"},
+                "artifacts": artifacts,
+            }
+        ),
+        encoding="utf-8",
+    )
+    calls = []
+    monkeypatch.setattr(mcp, "ROOT", tmp_path)
+    monkeypatch.setattr(mcp, "AUDIT_PATH", tmp_path / "audit.jsonl")
+    monkeypatch.setattr(mcp, "doctor_report", lambda: {"ready": True, "code": "READY"})
+    monkeypatch.setattr(mcp, "load_profile", lambda environment: ({"user": "x"}, None))
+
+    def sqlcl_result(profile, statements):
+        calls.append(statements)
+        if "CHANGE_PHASE=preflight" in statements:
+            return mcp.CommandResult(0, "__CHANGE_BASELINE_OK=sha256:observed\n", "")
+        return mcp.CommandResult(0, "completed", "")
+
+    monkeypatch.setattr(mcp, "sqlcl_result", sqlcl_result)
+
+    result = mcp.execute_change_bundle_artifact("change.json", "test", True, "yes")
+
+    assert len(calls) == 3
+    assert "CHANGE_PHASE=preflight" in calls[0]
+    assert "CHANGE_PHASE=snapshot" in calls[1]
+    assert "CHANGE_PHASE=apply" in calls[2]
+    assert result["backup_result"] == "SUCCESS"
+    events = [json.loads(line) for line in (tmp_path / "audit.jsonl").read_text(encoding="utf-8").splitlines()]
+    assert [event["event_phase"] for event in events] == ["started", "completed"]
+    assert events[0]["event_id"] == events[1]["event_id"]
+    assert events[1]["backup_choice"] == "yes"
+
+
+def test_execute_change_bundle_stops_when_snapshot_fails(monkeypatch, tmp_path):
+    artifacts = {}
+    for phase in ("preflight", "snapshot", "apply", "verify", "rollback"):
+        (tmp_path / f"{phase}.sql").write_text(f"prompt {phase}\n", encoding="utf-8")
+        artifacts[phase] = f"{phase}.sql"
+    (tmp_path / "change.json").write_text(
+        json.dumps(
+            {
+                "version": 1,
+                "id": "stop-on-backup-error",
+                "kind": "oracle_data",
+                "target": {"type": "table", "name": "DATA.T"},
+                "baseline": {"fingerprint": "sha256:observed"},
+                "artifacts": artifacts,
+            }
+        ),
+        encoding="utf-8",
+    )
+    calls = []
+    monkeypatch.setattr(mcp, "ROOT", tmp_path)
+    monkeypatch.setattr(mcp, "AUDIT_PATH", tmp_path / "audit.jsonl")
+    monkeypatch.setattr(mcp, "doctor_report", lambda: {"ready": True, "code": "READY"})
+    monkeypatch.setattr(mcp, "load_profile", lambda environment: ({"user": "x"}, None))
+
+    def sqlcl_result(profile, statements):
+        calls.append(statements)
+        if "CHANGE_PHASE=preflight" in statements:
+            return mcp.CommandResult(0, "__CHANGE_BASELINE_OK=sha256:observed\n", "")
+        return mcp.CommandResult(1, "", "ORA-01031: insufficient privileges")
+
+    monkeypatch.setattr(mcp, "sqlcl_result", sqlcl_result)
+
+    result = mcp.execute_change_bundle_artifact("change.json", "test", True, "yes")
+
+    assert result["code"] == "BACKUP_FAILED"
+    assert len(calls) == 2
+    assert "CHANGE_PHASE=snapshot" in calls[1]
+    assert "CHANGE_PHASE=apply" not in calls[1]
 
 
 def test_inspect_privileges_returns_observed_groups(monkeypatch):

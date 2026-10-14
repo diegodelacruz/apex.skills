@@ -320,13 +320,13 @@ class ETLPipeline:
         self._log_operation("VALIDATE", "dataset", "SUCCESS")
         return {"total_rows": len(data), "valid_rows": len(data), "invalid_rows": 0}
 
-    def load(self, data: List[Dict[str, Any]], target_table: str, create_rollback: bool = True) -> bool:
-        """Load data into target with rollback point.
+    def load(self, data: List[Dict[str, Any]], target_table: str, create_rollback: bool = False) -> bool:
+        """Load data into target; only record a rollback point when requested.
 
         Args:
             data: Data to load
             target_table: Target table name
-            create_rollback: Create rollback point
+            create_rollback: Explicitly create a rollback point
 
         Returns:
             True if successful

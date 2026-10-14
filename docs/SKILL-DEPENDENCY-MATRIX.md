@@ -129,17 +129,17 @@ SEQUENCE:
 ```
 DEPENDENCIES:
   D ▶ apex-code-generation-safe (generation phase)
-  D ▶ apex-data-migration-safe (migration phase)
+  D ▶ apex-data-migration-safe (mapping/validation prototype; no live migration)
   D ▶ apex-automated-testing-safe (testing phase)
 
 COORDINATES:
   - apex-code-generation-safe (code gen)
-  - apex-data-migration-safe (data mapping/migration)
+  - apex-data-migration-safe (data mapping/validation prototype)
   - apex-automated-testing-safe (testing)
 
 SEQUENCE:
   1. Code Generation Phase (apex-code-generation-safe)
-  2. Data Migration Phase (apex-data-migration-safe)
+  2. Migration mapping/validation prototype (not live data migration)
   3. Testing Phase (apex-automated-testing-safe)
   4. Verification & Reporting (design outline, not an executable full pipeline)
 ```
@@ -155,17 +155,19 @@ does not deploy through an API client.
 ### oracle-data-change-governance-final
 ```
 DEPENDENCIES:
-  I ⊳ apex-database-diagnostics (validate before change)
+  None required for a one-off confirmed DML request. Diagnosis may be reused when it already exists.
 
 COORDINATES:
   - apex-schema-automation-safe (DDL governance)
   - apex-data-migration-safe (DATA governance)
   - SQL style validator: `skills/oracle-data-change-governance-final/scripts/validate_sql_style.py`
-  - Bounded diagnosed changes use the shared `change.json` protocol; multi-object
-    and migration work retains the full governance record.
+  - One-off DML uses the direct execution route after the single global confirmation;
+    it does not require a bundle, backup, preliminary row count, or project plan.
+  - Bundles and formal records are used when fingerprint checks, migration scope,
+    or coordinated multi-object work materially require them.
 
-This governance skill documents controls; it does not prohibit the user-requested
-direct Oracle route or require an orchestrator.
+This governance skill documents applicable controls; it does not add a routing
+chain or approval beyond the single global mutation confirmation.
 ```
 
 ### apex-data-orchestrator-safe (L2 Focused Workflow Outline; not operational end-to-end)
@@ -175,13 +177,12 @@ DEPENDENCIES:
 
 COORDINATES:
   - apex-schema-automation-safe (create schema)
-  - apex-data-migration-safe (migrate data)
+  - apex-data-migration-safe (mapping/validation prototype; no live migration executor)
 
 SEQUENCE:
-  1. apex-schema-automation-safe (DDL)
-  2. oracle-data-change-governance-final (validate)
-  3. apex-data-migration-safe (ETL)
-  4. Optional APEX artifact import via `apex-page-automation-safe` and the configured native route; this is not data synchronization and is not implemented by this prototype.
+  Migration planning only: select relevant schema work and prototype mapping/validation guidance.
+  This outline is not a prerequisite for one-off DML or object reads.
+  APEX artifact import remains a separate operation via `apex-page-automation-safe` and the configured native route.
 ```
 
 ### apex-data-migration-safe (specialist)
@@ -227,12 +228,12 @@ PRODUCES:
 ### apex-page-automation-safe
 ```
 DEPENDENCIES:
-  D ▶ apex-blueprint-design-safe (design input, not an approval gate)
-  D ▶ apex-export-qa-safe (QA before edit)
+  I ⊳ apex-blueprint-design-safe (optional design input)
+  I ⊳ apex-export-qa-safe (optional static review when requested/useful)
 
 COORDINATES:
-  - apex-export-qa-safe (validation)
-  - oracle-data-change-governance-final (if DML)
+  - oracle-data-change-governance-final for applicable DATA conventions, without a routing chain
+  - Native export QA only when requested or materially useful; it is not a prerequisite to a direct edit
 
 OPERATIONS:
   - Create new pages
@@ -433,8 +434,8 @@ DEPENDENCIES:
   None (read-only)
 
 COORDINATES:
-  - .bitacora.json (git-backed audit)
-  - All skills (generate audit entries)
+  - .bitacora.json (local JSON Lines from controlled adapters; mutable and ignored by Git)
+  - Git history (committed repository changes, separately)
 
 OUTPUTS:
   - Audit trail visualization

@@ -6,7 +6,7 @@ El coordinador se activa por contexto: APEX, Oracle, Application Express/App Exp
 
 ## Alcance y acceso
 
-La solicitud directa define acción, alcance y ambiente. Use la credencial configurada para ese ambiente; los permisos efectivos otorgados por el DBA/APEX administrator determinan qué puede ejecutar. Verifique al inicio la sesión y destino reales con herramientas de solo lectura cuando estén disponibles. Perfil/bootstrap y comparación no son gates; no agregue aprobaciones ni pida al usuario ejecutar consultas que el agente puede realizar. Si una ruta falla, pruebe otra configurada para el mismo ambiente.
+La solicitud directa define acción, alcance y ambiente. Use la credencial configurada para ese ambiente; los permisos efectivos otorgados por el DBA/APEX administrator determinan qué puede ejecutar. Verifique al inicio la sesión y destino reales con herramientas de solo lectura cuando estén disponibles. Perfil/bootstrap y comparación no son gates para una lectura. Para mutaciones, conserve la única confirmación global, incluida la decisión explícita de backup; no agregue aprobaciones adicionales ni pida al usuario ejecutar consultas que el agente puede realizar. Si una ruta falla, pruebe otra configurada para el mismo ambiente.
 
 ## 1. Reservar páginas por proyecto
 
@@ -44,17 +44,18 @@ La solicitud directa define acción, alcance y ambiente. Use la credencial confi
 4. Registre diferencias, causa, alcance, plan TEST y rollback recomendado. No haga cambios durante diagnóstico.
 
 Si el usuario confirma una corrección propuesta, conserve objeto, impacto,
-baseline y validaciones en un paquete de cambio; no repita el inventario
-completo antes de aplicar.
+baseline y validaciones. Use paquete de cambio solo cuando una huella o la
+coordinación materialmente lo requiera; una operación puntual usa la ruta
+directa y no repite inventario completo.
 
 ## 6. Copiar páginas de Producción a TEST
 
 1. Use aplicación, páginas y ambiente indicados en la solicitud.
 2. Valide ambos perfiles y cualquier rango reservado.
-3. Explique páginas/componentes, impacto y riesgo; recomiende backup, diff y rollback.
-4. Aplique sólo lo autorizado en TEST; no modifique Producción.
+3. Identifique páginas/componentes, impacto y riesgo; pregunte una sola vez si procede y si desea backup. Genere un export previo solo si respondió sí y la ruta lo permite; no recomiende backup de rutina.
+4. Aplique sólo lo confirmado en TEST; no modifique Producción. Si falta una decisión, pregunte únicamente la faltante y espere.
 
 ## 7. Copiar TEST a Producción o liberar un cambio
 
-1. Ejecute el cambio de Producción indicado en la solicitud por la ruta disponible.
+1. Ejecute el cambio de Producción indicado solo después de la confirmación global y la decisión explícita de backup.
 2. Informe impacto, riesgo, resultado y contingencia; Oracle/APEX reportará cualquier falta de privilegio.

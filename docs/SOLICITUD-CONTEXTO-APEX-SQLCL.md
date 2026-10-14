@@ -59,9 +59,12 @@ en `DATA`, no se solicitan privilegios Oracle adicionales. Cualquier `ORA-01031`
 que aparezca en una operación concreta se documenta y se solicita de forma
 puntual, con objeto, operación, ambiente y justificación.
 
-## Inventario automatizado del MCP
+## Inventario para habilitación inicial del MCP
 
-Al iniciar el trabajo en un ambiente, el MCP realiza una lectura única de:
+Este inventario aplica a la solicitud inicial para habilitar SQLcl en un ambiente
+o workspace. No es un preflight por operación ni forma parte de una lectura
+rutinaria de objetos. Durante esa habilitación explícita, el MCP puede realizar
+una lectura única de:
 
 1. Identidad de sesión SQLcl.
 2. Para una aplicación existente: aplicación, workspace, esquema de parsing y
@@ -70,18 +73,25 @@ Al iniciar el trabajo en un ambiente, el MCP realiza una lectura única de:
    habilitar la importación del export nativo completo.
 4. Aplicaciones disponibles por workspace.
 
-El inventario informa diferencias entre ambientes, pero no se repite por cada
-petición ni bloquea la operación solicitada. Cada operación se ejecuta con las
-credenciales del ambiente elegido y Oracle/APEX devuelve la autorización real.
+El inventario informa diferencias entre ambientes. No se repite por cada
+petición ni bloquea operaciones ordinarias. Las lecturas siguen la regla de
+lectura inmediata y las operaciones posteriores siguen el protocolo vigente de
+cambios en vivo; Oracle/APEX devuelve la autorización real al ejecutar.
 
 ## Secuencia de habilitación por ambiente
 
 1. Solicitar y comprobar la asociación en TEST.
-2. Ejecutar el preflight automático y una operación controlada en TEST.
+2. Durante esta habilitación inicial, ejecutar una operación controlada en TEST
+   para confirmar el contexto APEX.
 3. Conservar la evidencia del resultado y corregir cualquier error de contexto
    o privilegios específicos.
 4. Solo si TEST fue comprobado, solicitar la misma asociación para Production.
-5. El MCP repite el preflight en Production antes de cualquier importación.
+5. Durante la habilitación inicial de Production, comprobar el contexto para la
+   importación controlada solicitada.
+
+Esta secuencia es de aprovisionamiento inicial. No exige repetir el inventario o
+el preflight para cada importación posterior; esas operaciones siguen el
+protocolo vigente de cambios en vivo y las comprobaciones que su ruta requiera.
 
 La asociación se solicita por workspace, no por aplicación individual. Una vez
 asociada la cuenta Oracle a un workspace autorizado, la comprobación dinámica

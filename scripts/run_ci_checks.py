@@ -68,19 +68,21 @@ def main() -> int:
     return 0
 
 
+SECRET_SCAN_EXCLUSIONS = (
+    r"(^|[\\/])\.claude[\\/]worktrees([\\/]|$)|"
+    r"(^|[\\/])(\.git|\.env|\.mypy_cache|\.pytest_cache|\.venv|\.codex-tmp|\.upstreams|\.upstream-backups|"
+    r"htmlcov|\.secrets\.baseline(\.scan\.[^\\/]+)?|"
+    r"control-proyecto[\\/]\.bitacora\.json|runtime[\\/]sqlcl-runtime\.json)([\\/]|$)|"
+    r"(^|[\\/])vendor[\\/]upstreams[\\/][^\\/]+\.zip$"
+)
+
+
 def run_secret_scan() -> int:
     """Compare a fresh detect-secrets scan to the checked-in baseline safely."""
     root = Path(__file__).resolve().parent.parent
     baseline_path = root / ".secrets.baseline"
     original = json.loads(baseline_path.read_text(encoding="utf-8"))
     temp_path: Path | None = None
-    exclude_files = (
-        r"(^|[\\/])\.claude[\\/]worktrees([\\/]|$)|"
-        r"(^|[\\/])(\.git|\.env|\.mypy_cache|\.pytest_cache|\.venv|\.upstreams|\.upstream-backups|"
-        r"htmlcov|\.secrets\.baseline(\.scan\.[^\\/]+)?|"
-        r"control-proyecto[\\/]\.bitacora\.json|runtime[\\/]sqlcl-runtime\.json)([\\/]|$)|"
-        r"(^|[\\/])vendor[\\/]upstreams[\\/][^\\/]+\.zip$"
-    )
     try:
         with tempfile.NamedTemporaryFile(
             mode="w",
@@ -102,7 +104,7 @@ def run_secret_scan() -> int:
             "--all-files",
             "--force-use-all-plugins",
             "--exclude-files",
-            exclude_files,
+            SECRET_SCAN_EXCLUSIONS,
         ]
         print(f"\n$ {' '.join(command)}", flush=True)
         result = subprocess.run(command, check=False, capture_output=True, text=True)

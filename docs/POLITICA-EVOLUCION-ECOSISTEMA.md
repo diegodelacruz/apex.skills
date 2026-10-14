@@ -98,6 +98,15 @@ ejecuta una auditoría integral del repositorio, incluyendo funcionalidad,
 técnica, seguridad, dependencias, compatibilidad, routing, documentación,
 upstreams, hooks, CI y rollback.
 
+La auditoría independiente debe buscar contradicciones entre instrucciones,
+skills, metadatos, adaptadores, rutas, código, pruebas y documentación. Para
+cada contradicción debe reportar las afirmaciones enfrentadas, sus fuentes,
+la razón e historial que pudo verificarse, el alcance y las implicaciones.
+La auditoría es de solo lectura: no corrige ni armoniza los hallazgos. La causa
+y la decisión de reparar se revisan con la persona usuaria antes de aplicar una
+corrección. Si no se puede determinar la razón con evidencia disponible, se
+debe decir explícitamente en el informe, sin convertir una hipótesis en hecho.
+
 Todo `FAIL` bloquea la publicación. Todo `N/A` debe incluir una justificación
 concreta. No se puede declarar una validación completa si una prueba obligatoria
 no pudo ejecutarse.

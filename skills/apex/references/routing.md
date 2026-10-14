@@ -31,14 +31,22 @@
 | --- | --- | --- |
 | **Plan schema and Oracle data migration work** | `apex-data-orchestrator-safe` | △ Development outline; no end-to-end executor |
 | **Import APEX component artifacts** | `apex-page-automation-safe` using the configured native import route | ◎ Specialist; separate from Oracle data migration |
-| DATA object change (governance guidance) | `oracle-data-change-governance-final` | ⊳ Advisory |
-| Create/modify database schema (owner defaults to DATA) | `apex-schema-automation-safe` | ⊳ Advisory |
+| One-off Oracle data transaction (INSERT/UPDATE/DELETE/MERGE) | Coordinator confirmation → direct `execute_sql_file`/SQLcl route; consult `oracle-data-change-governance-final` only for relevant conventions | ◎ Direct specialist guidance; no migration chain, bundle, backup, or row-count prerequisite |
+| Create/modify database schema (owner defaults to DATA) | `apex-schema-automation-safe` | ⊳ Advisory; one global mutation confirmation; use bundle only when fingerprint/coordination warrants it |
+| Plan a schema/data migration | `apex-data-orchestrator-safe` | △ Advisory outline; no end-to-end Oracle executor |
+| Design mappings and validate migration input | `apex-data-migration-safe` | △ In-memory development prototype; no live Oracle ETL, backup, or restore |
+| Coordinated multi-object Oracle schema change | `apex-schema-automation-safe`; use a change bundle only when coordination or a meaningful fingerprint requires it | ⊳ Schema specialist; no data-migration workflow |
 
-For a request that follows a completed diagnosis with an explicit change
-confirmation, retain the diagnostic context and use the common
-`live-change-protocol.md`; route only the implementation to the matching
-specialist. A fingerprint mismatch returns to diagnosis before any apply step.
-| Migrate data between environments | `apex-data-migration-safe` | ⊳ Advisory |
+Requests to review, inspect, or show object data/specifications are immediate
+read-only operations; route directly to the focused reader and do not start a
+change or QA workflow. For a mutation, require explicit answers to both the
+action confirmation and backup yes/no choice before execution; if one is
+missing, ask only for it and wait. If the request follows a diagnosis, retain its context. Use the
+common `live-change-protocol.md`; route only the needed implementation to the
+matching specialist. A fingerprint mismatch matters only when a bundle is used.
+Do not route a live data migration to the non-operational migration prototype
+as an executor; identify an available operational route or report the capability
+limit.
 
 For requested Oracle schema object creation or changes, default the owner to
 `DATA` unless the user explicitly names another schema. Qualify
@@ -57,7 +65,8 @@ backup objects in the connected user's schema.
 | User intent | Specialist workflow | Coordination |
 | --- | --- | --- |
 | TEST/production copy, release, or environment alignment | `apex-environment-alignment-complete` → `apex-delivery-lifecycle-complete`; use native import/App Builder instead of the retired simulated REST adapter | ⊳ Recommended |
-| Inspect APEX/Oracle, diagnose an error, or investigate slowness/performance | `apex-database-diagnostics`; add `apex-environment-alignment-complete` for existing-page changes | ◎ Optional |
+| Inspect/show Oracle/APEX object data or specifications | `apex-database-diagnostics` direct read | ◎ No routine inventory, QA, or environment-alignment workflow |
+| Diagnose an error or investigate slowness/performance | `apex-database-diagnostics`; use comparison/alignment only when it adds evidence | ◎ Optional |
 | Optimize an Oracle object, query, or PL/SQL execution | `apex-database-diagnostics`; add `oracle-data-change-governance-final` only when a change is requested | ⊳ Recommended |
 
 ### Integration & Documentation
@@ -131,4 +140,6 @@ native route; this outline does not implement end-to-end synchronization.
 
 ## Explicitly named specialist skills
 
-Route by the user's requested outcome and available evidence. Skills do not add approval gates.
+Route by the user's requested outcome and available evidence. Skills do not add
+approval gates beyond the one global mutation confirmation in
+`skills/apex/SKILL.md`.

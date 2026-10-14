@@ -9,11 +9,15 @@ provides security hooks and an audit trail.
 
 ## Live-change bundles
 
-The controlled MCP accepts a reviewed `change.json` package for a focused,
-already diagnosed Oracle or APEX correction. It keeps snapshot, preflight,
-apply, verify and rollback artifacts together, proves the baseline in a first
-bounded SQLcl phase, then runs apply/verify in a second phase, and records
-hashes and timing in the ignored audit trail.
+The controlled MCP accepts a reviewed `change.json` package when a fingerprint
+preflight or coordinated Oracle/APEX change materially needs it. Every exposed
+write tool requires explicit action confirmation and a yes/no backup choice. It
+proves the baseline first; when backup is accepted, it then runs `snapshot.sql`
+and stops if that fails before it applies/verifies the change. Direct SQL
+execution similarly requires and runs a separate backup SQL artifact first when
+backup is accepted. APEX page import requires a prior native export artifact;
+the adapter validates its syntax but cannot prove that it matches the live page.
+Reads and one-off DML use direct routes and do not inherit bundle workflow.
 
 ### Components
 
@@ -112,15 +116,15 @@ Security Linting (Bandit)
 Exception Validation (custom)
   └─ Rejects bare except: blocks (must handle exceptions)
 
-Audit Trail Capture (.hooks/pre-commit.sh)
-  └─ Records timestamp, author, files changed to JSON
+Optional local audit metadata (.hooks/pre-commit.sh)
+  └─ Appends staged-file metadata as JSON Lines only when invoked manually
 ```
 
 ### 5. Storage Layer
 
 **control-proyecto/**
 - Project-level decisions and master plans
-- `.bitacora.json` - Auto-generated audit trail (NOT committed)
+- `.bitacora.json` - Local ignored JSON Lines log from controlled adapters and optional hook
 - `.bitacora.template.md` - Audit report template
 
 **tests/fixtures/apex-exports/**
@@ -159,21 +163,17 @@ Output (Document/Report)
     ▼
 Git Commit
     │
-    ├─ Pre-commit hooks run:
+    ├─ Configured pre-commit checks run:
     │  • Formatting check (Black)
     │  • Import sorting (isort)
     │  • Security check (Bandit)
     │  • Secrets scan (detect-secrets)
-    │  • Audit capture (.hooks/pre-commit.sh)
     │
     ▼
 Commit Created
     │
-    └─ .bitacora.json updated with:
-       • Timestamp
-       • Author
-       • Files changed
-       • Branch name
+    └─ Git records the committed change and author; the optional
+       .hooks/pre-commit.sh can append staged-file metadata when invoked manually
 ```
 
 ## Extensibility: Adding a New Skill
@@ -214,7 +214,8 @@ not covered by reproducible validation and rollback evidence.
 3. **Pre-commit Hooks Enforcement**
    - All developers must use hooks
    - Exceptions are logged in audit trail
-   - Audit trail is tamper-proof (git-backed)
+   - The local `.bitacora.json` is ignored by Git and can be edited or deleted;
+     it is not tamper-proof. Git separately records committed changes.
 
 4. **Access Control**
    - Oracle/APEX environments: effective access follows the authenticated account's privileges and the user's requested scope

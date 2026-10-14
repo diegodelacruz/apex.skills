@@ -10,6 +10,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 ## [Unreleased]
 
 ### Changed
+- Make `rollback.sql` optional in coordinated change bundles and clarify that a declared rollback script is not executed automatically.
+- Reject a bundle that declares `snapshot` when the user declines a backup.
+- Update `Deploy-ApexPage.ps1` help examples to include the required action confirmation and backup choice.
+- Make object reviews, data reads, and specification requests immediate and read-only, with only a minimal destination check when needed.
+- Require one mutation confirmation covering environment, target, exact operation, and backup choice; backups and preliminary row counts are no longer routine prerequisites.
+- Route isolated DML and one-object DDL directly, reserving change bundles for coordination or meaningful fingerprint checks.
+- Record `profile_load`, `sqlcl_process`, and `route_total` timings for controlled SQL execution so profile loading, SQLcl process time, and total route time can be distinguished.
+- Align Oracle/APEX skills, adapters, project templates, capability documentation, and tests with these rules; clarify that migration rollback markers are in-memory prototype metadata, not backups or database restoration, and route migration planning separately from coordinated schema changes.
+- Require independent repository audits to report contradictions with source, rationale/history, scope, and implications, without changing findings before they are reviewed with the user.
+- Require explicit action confirmation and backup choice in all controlled MCP write tools; execute an accepted SQL backup or bundle snapshot before the requested mutation, and stop if it is missing or fails.
+- Align workspace, lifecycle, APEX use-case and recovery guidance with the single global mutation confirmation, optional scoped backups, and the direct path for punctual DML; rename the application-generator's simulated recovery marker.
+- Apply the mutation decision gate to the controlled SQLcl MCP and PowerShell entry points; execute accepted SQL/bundle backups before changes and block the change if the backup is missing or fails.
+- Ignore local `.codex-tmp/` execution artifacts in Git and exclude them from secret scanning, which uses `--all-files` and otherwise scans those temporary files.
+- Persist correlated start and completion events with hashes, result, exit code, and timings from the controlled PowerShell SQL, APEX page, and change-bundle routes; block before execution if start logging fails and warn against automatic retry if completion logging fails.
+- Keep the local audit log in JSON Lines across the optional manual pre-commit script, and correct documentation that described the ignored mutable file as automatic or Git-backed.
+- Keep the full SQLcl runtime probe on the explicit `doctor()` diagnostic route; normal reads and executions attempt the requested operation directly and report runtime startup errors from that attempt.
+- Do not inspect Oracle/APEX grants before, during, or after requested operations; report the service response and inspect grants only when explicitly requested or diagnosing an observed access error.
+- Clarify that the SQLcl workspace inventory and TEST/Production context checks in the DBA request guide apply to initial provisioning, not routine reads or each later operation.
 
 - Added a live Oracle/APEX change protocol that retains a confirmed diagnostic
   context, validates a versioned `change.json` bundle, and records bounded

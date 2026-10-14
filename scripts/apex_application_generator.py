@@ -159,9 +159,9 @@ class ApplicationGenerationOrchestrator:
 
         target_env = config.get("target_env", "test")
 
-        # Create rollback point
-        self.generated_artifacts["rollback_point"] = f"rp_{int(time.time())}"
-        self._log_operation("ROLLBACK_POINT", self.generated_artifacts["rollback_point"])
+        # Preserve the prototype's simulated marker without implying a database restore.
+        self.generated_artifacts["simulated_rollback_marker"] = f"simulated_rp_{int(time.time())}"
+        self._log_operation("SIMULATED_RECOVERY_MARKER", self.generated_artifacts["simulated_rollback_marker"])
 
         # Deploy to target environment
         self._log_operation("DEPLOY_TO_ENV", target_env)

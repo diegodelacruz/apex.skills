@@ -36,9 +36,12 @@ Activate this workflow when the user requests to create, modify, or delete one o
 
 ## Modification Flow
 
-Follow the credential authorization principle from the APEX Coordinator
-(`skills/apex/SKILL.md`). A direct request is sufficient; do not ask for a
-separate mode choice or confirmation.
+Follow `skills/apex/SKILL.md`: before applying, ask once for confirmation of
+the environment, application/page/component, exact action, whether to proceed,
+and an explicit yes/no backup choice. Do not execute until both decisions are
+answered; if one is missing, ask only for it and wait. Do not create a backup
+or snapshot if declined; do not ask for another approval after the complete
+answer.
 
 - Execute requested changes in the requested sequence and environment.
 - Verify through the available channel and report the observed result.
@@ -50,7 +53,7 @@ separate mode choice or confirmation.
 Choose the smallest mode that fits the request:
 
 - **Assistant Mode**: User describes the page in natural language. Generate the
-  specification and show it, then proceed unless the user objects.
+  specification, then use the single global confirmation before execution.
 - **Expert Mode**: User provides a JSON specification or Python `ApexPageSpec`
   object with exact control.
 - **Hybrid Mode**: User sketches the design; generate a draft; user refines.
@@ -67,28 +70,28 @@ Infer these from the conversation and the database — do not interview the user
 
 ### Pre-flight validation
 
-1. Verify application exists and page number is available (not already in use).
-2. If modifying or deleting an existing page, capture current state for rollback.
+1. Read the requested application's/page's relevant state as needed to prepare the operation.
+2. Preserve a separate export/snapshot for rollback only when the user requested or accepted a backup.
 3. **For existing applications:** call `apex_open_app(app_id)` instead of `apex_create_app()`.
 
-For a confirmed correction to an existing page, LOV, region, process,
-validation or dynamic action, preserve the smallest native component export
-that contains the affected component. Build a live-change bundle with that
-export as rollback evidence; do not regenerate unrelated pages or the complete
-application. If component identity or export fingerprint changed after the
-diagnosis, return to inspection before importing.
+For a correction to an existing page, LOV, region, process, validation or
+dynamic action, use the smallest operational import payload that can apply the
+requested change; do not regenerate unrelated pages or the complete application.
+Retain a separate native component export as rollback evidence only when the
+user requested or accepted a backup. Use a live-change bundle only when a
+fingerprint check is needed to detect a changed component before import.
 
 ### Specification generation (Assistant Mode)
 
 1. Infer from context: regions, items, buttons, processes, validations, dynamic actions.
 2. Generate JSON specification using `ApexPageSpec` builder classes.
-3. Show specification to user and proceed unless the user objects.
+3. Use the single global confirmation before execution; show the JSON when requested or needed to resolve scope.
 
 ### Expert Mode
 
 1. User provides JSON spec (or Python dict matching `ApexPageSpec` schema).
 2. Validate schema: required fields, data types, cross-references.
-3. Show parsed specification to user and proceed.
+3. Use the single global confirmation before execution; show the parsed specification when requested or needed to resolve scope.
 
 ### Creation / Modification / Deletion
 
@@ -100,39 +103,39 @@ diagnosis, return to inspection before importing.
 3. Save as `f{app_id}_page_{page_number}.sql` in the project apex directory.
 4. Deploy via SQLcl:
    ```powershell
-   .\scripts\Deploy-ApexPage.ps1 -PageFile "apex\f109_page_291.sql" -ApplicationId 109 -Page 291
+   .\scripts\Deploy-ApexPage.ps1 -PageFile "apex\f109_page_291.sql" -ApplicationId 109 -Page 291 -Confirmed -BackupChoice no
    ```
    Or for inline SQL and DDL:
    ```powershell
-   .\scripts\Execute-OracleSql.ps1 -SqlFile "ddl\create_table.sql"
+   .\scripts\Execute-OracleSql.ps1 -SqlFile "ddl\create_table.sql" -Confirmed -BackupChoice no
    # For a reviewed live change, execute its bounded change.json bundle.
-   .\scripts\Invoke-OracleApexChange.ps1 -Bundle "control-proyecto\cambios\<id>\change.json" -Environment test
+   .\scripts\Invoke-OracleApexChange.ps1 -Bundle "control-proyecto\cambios\<id>\change.json" -Environment test -Confirmed -BackupChoice no
    ```
-5. Capture audit trail: timestamp, user, page ID, changes made.
+5. Confirm the execution event was written to `.bitacora.json`; it contains timestamp, environment, page identity, source hash, backup choice and result, not raw export SQL or credentials.
 6. Verify deployment: confirm exit code 0 and verify via database metadata query.
 
 ### Validation and rollback
 
 1. Post-creation: verify with available APEX metadata, App Builder, MCP, SQLcl,
    or browser evidence.
-2. If creation fails: provide error details, suggest fixes, offer rollback.
-3. If user requests rollback: restore from pre-operation snapshot (database-level or application export).
+2. If execution fails, report the actual APEX/Oracle error and observed result.
+3. Discuss rollback only when requested or when a concrete limitation makes it relevant.
 
 ## Operational guidance
 
 1. Use the environment named by the user or resolve it from context and the configured `DB_ENV` profile when omitted.
-2. Keep changes within the requested objects and operations. Perform requested deletions or replacements without adding approval requirements.
+2. Keep changes within the requested objects and operations. Use only the one global confirmation; do not add further approval requirements.
 3. Keep credentials out of specifications, logs, and scripts. Use configured profiles when available.
 4. Check cross-references when useful and report findings; Oracle/APEX remains the permission authority.
-5. Report rollback options and audit evidence as useful operational information, not as prerequisites to execute.
+5. Report the execution result and available audit evidence. Discuss rollback only on request or when a concrete limitation requires it.
 
 ## Output
 
 Return:
 - Confirmation of page created/modified/deleted with ID and name.
 - JSON specification (for audit and version control).
-- Audit trail entry (auto-captured by pre-commit hook).
-- Rollback instructions if creation failed.
+- Audit evidence from the execution route, when available.
+- Rollback instructions only when requested or materially needed.
 
 ## Specifications and examples
 
@@ -186,7 +189,7 @@ The agent validates the schema, applies the requested page in the selected envir
 - **No unauthorized data access.** Items inherit source table authorization from the application's parsing schema.
 - **No unauthorized SQL injection.** All process code and item defaults are subject to APEX's own validation (no additional escaping needed if using APEX API).
 - **Credentials never logged.** Database password, wallet password, and connection strings are never printed or logged.
-- **Audit trail immutable.** `.bitacora.json` is append-only and captured at commit time; cannot be edited after creation.
+- **Audit trail scope.** `.bitacora.json` is a local ignored JSON Lines file. Controlled adapters append events, but a user or process can edit or delete it; do not call it immutable or tamper-proof.
 
 ## Upstream references
 

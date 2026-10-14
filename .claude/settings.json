@@ -1,18 +1,4 @@
 {
-  "audit": {
-    "enabled": true,
-    "auto_capture": true,
-    "smart_analysis": true,
-    "storage_location": "control-proyecto/.bitacora.json",
-    "description": "Automatic decision and audit trail capture"
-  },
-  "hooks": {
-    "pre_commit": {
-      "enabled": true,
-      "script": ".hooks/pre-commit.sh",
-      "description": "Captures audit trail on each commit"
-    }
-  },
   "skills_organization": {
     "format": "apex_prefix",
     "use_emojis": false,

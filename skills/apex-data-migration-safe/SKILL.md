@@ -1,6 +1,6 @@
 ---
 name: apex-data-migration-safe
-description: Schema mapping, data validation, ETL pipeline, and rollback management framework
+description: Development prototype for migration design, schema mapping, validation, and in-memory markers; no live Oracle executor
 category: Apex Data Integration
 order: 25
 tags:
@@ -8,7 +8,7 @@ tags:
   - etl
   - schema-mapping
   - validation
-  - rollback
+  - prototype
   - data-sync
 access_level: read-write
 cost: high
@@ -18,15 +18,23 @@ status: active
 
 # apex-data-migration-safe
 
-Safe data migration framework for Oracle APEX: schema mapping, ETL pipelines, validation, and rollback management.
+Development prototype for planning and validating data-migration mappings. It does not execute ETL against Oracle or provide backup/restore.
+
+This skill's Python helpers are development prototypes, not an operational
+Oracle migration executor. Follow `skills/apex/SKILL.md` for live operations:
+simple reads are immediate; mutations require one confirmation including the
+backup choice; backups and preliminary row counts are not created/performed by
+default. Do not route an isolated transaction through a migration workflow.
+The Python helpers operate on supplied in-memory data and log simulated status;
+their rollback markers are not backups, savepoints, or database restoration.
 
 ## Overview
 
-Safely migrate APEX application data with intelligent validation and rollback capabilities:
+Design and validate a data migration using the available prototype helpers:
 - Schema mapping and transformation rules
 - Data validation and quality checks
-- ETL pipeline orchestration
-- Automatic rollback on failure
+- ETL-shaped in-memory helper flow; no live source/target connection or load
+- Optional in-memory status marker; it is not a backup or rollback
 - Change tracking and audit trail
 
 ## Capabilities
@@ -96,7 +104,7 @@ transformed = pipeline.transform(extracted_data, mapping_spec)
 # Validate
 validation_results = pipeline.validate(transformed)
 
-# Load with rollback point
+# This only logs a simulated marker; it does not load Oracle or create a backup.
 loaded = pipeline.load(transformed, target_table='USERS', create_rollback=True)
 
 # Verify
@@ -105,19 +113,19 @@ pipeline.verify(source_count, target_count)
 
 ### RollbackManager
 
-Manage rollback points and restoration:
+Manage in-memory status markers only; no restoration is performed:
 ```python
 from apex_data_migration import RollbackManager
 
 manager = RollbackManager()
 
-# Create rollback point before migration
+# This marker does not capture or restore database state.
 point = manager.create_rollback_point(
     schema='NEW_SCHEMA',
     affected_tables=['USERS', 'ACCOUNTS']
 )
 
-# On failure: rollback
+# This only changes the marker's status in memory.
 if error_occurred:
     manager.rollback_to_point(point)
 ```
@@ -177,17 +185,14 @@ Phases:
 1. Extract - Read from source (with batching)
 2. Transform - Apply mapping rules
 3. Validate - Check data quality
-4. Load - Write to target (with rollback point)
-5. Verify - Count/checksum validation
+4. Simulated load - Record a status marker; no target write is performed
+5. Verify - Prototype-level supplied-value comparison; no database query
 
 ### Rollback Management
 
-Rollback strategy:
-- Create savepoints before migration
-- Track affected tables
-- Restore on validation failure
-- Automatic vs manual rollback
-- Rollback audit trail
+Rollback markers are in-memory metadata only. They do not create savepoints,
+backups, or restore affected tables. A live migration requires a separately
+available and explicitly selected operational route.
 
 ## Security
 
@@ -195,13 +200,13 @@ Rollback strategy:
 - ✅ Sensitive data masking support
 - ✅ Encryption for data in transit
 - ✅ Audit trail of all changes
-- ✅ Rollback verification
+- ✅ In-memory marker inspection only; no database rollback verification
 
 ## Error Handling
 
-Automatic error recovery:
-- Data validation failures → rollback
-- Connection loss → retry with backoff
+Prototype behavior:
+- Data validation failures → return validation findings; no data rollback
+- No database connection or automatic retry is implemented
 - Transform errors → detailed logging
 - Partial load recovery
 
@@ -228,7 +233,7 @@ Typical operation times:
 
 ## Status
 
-🔨 **Active** - Data migration framework (10% complete)
+🔨 **Development prototype** - mapping and in-memory validation helpers; no live Oracle migration executor
 
 ---
 

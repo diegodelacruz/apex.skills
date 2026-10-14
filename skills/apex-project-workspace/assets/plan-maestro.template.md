@@ -22,6 +22,9 @@
 
 ## Cambios
 
+Registra aquí cambios formales o coordinados. Un DML puntual conserva su
+evento de auditoría normal y no requiere entrada, carpeta ni paquete.
+
 | ID | Descripción | Estado | Decisiones | Plan de implementación | Evidencia |
 | --- | --- | --- | --- | --- | --- |
 | <id-cambio> | <descripción> | pendiente | `cambios/<id>/change.json` o `decisions.md` | `implementation-plan.md` si aplica | |

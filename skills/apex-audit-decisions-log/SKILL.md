@@ -3,39 +3,36 @@ name: apex-audit-decisions-log
 category: "Apex Audit & Decisions"
 order: 0
 tags: ["audit", "documentation", "decisions", "governance", "read-only"]
-description: "Review and export project decisions and the Git-backed audit trail."
+description: "Review and export project decisions, controlled-operation events, and Git history."
 ---
 
 # Apex Audit & Decisions Log
 
-Read-only skill that visualizes and exports the automatic decision and audit trail captured by git and the audit hook.
+Read-only skill that visualizes and exports events available from controlled executors and the repository's Git history.
 
 ## Purpose
 
-Every change to your APEX project is automatically recorded:
-- Git commits (messages, author, timestamp, files changed)
-- Decisions made (extracted from commit context)
-- Skills invoked (tracked via hook)
-- Configuration changes
+Controlled Oracle/APEX write execution through the repository's MCP and PowerShell adapters appends correlated start/result events, hashes, environment, operation and backup choice to `.bitacora.json`. MCP and PowerShell read-only queries append one hashed result event after execution and are not blocked by a write-ahead audit step; an audit append failure does not suppress the query result. Git separately records committed files and their author/timestamp. External tools and manual database changes are not captured by these adapters.
 
 This skill lets you:
-- View the complete audit trail
+- View locally persisted events from supported controlled routes and Git history separately
 - Export as Markdown or PDF
-- Filter by date, skill, or type
+- Filter by date, environment, operation, or result when those fields are present
 - Generate compliance/audit reports
 
 ## How It Works
 
 **Automatic (zero tokens):**
 - Git records all commits naturally
-- Pre-commit hook captures changes to `.bitacora.json`
+- The optional `.hooks/pre-commit.sh` appends staged-file metadata to the same JSON Lines file when invoked.
+- `.bitacora.json` is ignored by Git and stays local unless a user explicitly changes that policy.
 - No AI processing required
 
 **On-demand (tokens only when you use it):**
 ```
 /apex-audit-decisions-log
   ↓
-Reads git history + .bitacora.json
+Reads Git history + JSON Lines from .bitacora.json
 AI analyzes context and relationships
 Presents decisions in readable format
   ↓
@@ -44,25 +41,14 @@ Offers options:
   - Export to Markdown
   - Export to PDF
   - Filter results
-  - Compliance report
+  - Report of available evidence and known capture gaps
 ```
 
 ## Configuration
 
-Enable/disable in `.claude/settings.json`:
-
-```json
-{
-  "apex": {
-    "audit": {
-      "enabled": true,
-      "auto_capture": true,
-      "smart_analysis": true,
-      "storage": "control-proyecto/.bitacora.json"
-    }
-  }
-}
-```
+The controlled adapters write the local log. `.claude/settings.json` does not
+enable or disable that logging. The optional `.hooks/pre-commit.sh` is a manual
+script and is not installed by `pre-commit install`.
 
 ## Usage Examples
 
@@ -94,7 +80,8 @@ Create an audit trail for TEST→Production release
 
 ✅ Read-only access only
 ✅ No modifications allowed
-✅ Complete audit trail
-✅ Tamper-proof (git-backed)
+✅ Structured evidence for supported controlled routes
+✅ Git commit history shown separately
+⚠️ The local `.bitacora.json` can be edited or deleted; it is not tamper-proof
 ✅ Exportable for compliance
 ✅ Timestamp every event

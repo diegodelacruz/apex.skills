@@ -1,4 +1,4 @@
 interface:
   display_name: Oracle APEX Project Workspace
   short_description: Organize decisions, plans, evidence, QA, and manuals.
-  default_prompt: Initialize the control-proyecto workspace for this Oracle APEX project.
+  default_prompt: Initialize the control-proyecto workspace when the user requests project bootstrap or formal lifecycle tracking. Do not create a plan or change folder for a punctual object request; direct DML uses the normal execution audit.

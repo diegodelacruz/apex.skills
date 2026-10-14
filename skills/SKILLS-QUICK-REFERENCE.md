@@ -8,7 +8,7 @@ One-line descriptions for rapid lookup.
 
 | Skill | Purpose |
 |-------|---------|
-| **apex-audit-decisions-log** | Review and export project decisions and the Git-backed audit trail. |
+| **apex-audit-decisions-log** | Review local controlled-operation events and Git history. |
 | **apex-database-diagnostics** | Diagnose Oracle and APEX requests in the user-selected environment through available authenticated routes. |
 | **apex-schema-automation-safe** | Create, modify, and drop Oracle database objects through available authenticated routes. |
 | **apex-delivery-lifecycle-complete** | Run the complete APEX lifecycle with environment and DATA governance. |
@@ -37,7 +37,7 @@ One-line descriptions for rapid lookup.
 | **apex-code-generation-safe** | Generate APEX components automatically from schema and metadata |
 | **apex-api-client-safe** | Retired simulated REST adapter; it must not be used for Oracle APEX deployment. |
 | **apex-automated-testing-safe** | Selenium test generation, performance testing, and regression validation framework |
-| **apex-data-migration-safe** | Schema mapping, data validation, ETL pipeline, and rollback management framework |
+| **apex-data-migration-safe** | Migration mapping and in-memory validation prototype; no live Oracle executor |
 | **oracle-data-change-governance-final** | Govern DATA changes with decisions, rollback, validation, and audit evidence. |
 
 ---
@@ -75,7 +75,7 @@ One-line descriptions for rapid lookup.
 | Generate APEX components from schema (forms, reports) | apex-code-generation-safe |
 | Deploy APEX pages using native export/import and configured tools | apex-page-automation-safe |
 | Run automated testing suite (Selenium, performance) | apex-automated-testing-safe |
-| Execute data migration and ETL pipelines | apex-data-migration-safe |
+| Design migration mappings and validate supplied data (prototype) | apex-data-migration-safe |
 | Run APEX delivery with Zaimella governance | apex-delivery-lifecycle-zaimella |
 
 ---
@@ -85,7 +85,7 @@ One-line descriptions for rapid lookup.
 | Cost | Skills |
 |------|--------|
 | **Free (Read-only)** | apex-export-qa-safe, apex-pattern-mining-safe, apex-rest-source-catalogs-safe, apex-ui-craft-safe |
-| **Free (On-demand)** | apex-audit-decisions-log (automatic capture, tokens only on view) |
+| **Free (On-demand)** | apex-audit-decisions-log (reads available local events and Git history on request) |
 | **Low (Typical)** | apex-solution-design, apex-page-range-governance, apex-environment-alignment-complete |
 | **Medium (Complex)** | apex-project-bootstrap-final, apex-project-workspace, apex-user-manual, apex-zaimella-gestion-proyectos |
 | **High (Full workflow)** | apex-delivery-lifecycle-safe, apex-delivery-lifecycle-complete, apex-delivery-lifecycle-zaimella, apex-page-automation-safe, apex-schema-automation-safe, apex-application-generator-complete, apex-data-orchestrator-safe, apex-qa-orchestrator-safe, apex-design-review-orchestrator, oracle-data-change-governance-final, apex-code-generation-safe, apex-automated-testing-safe, apex-data-migration-safe |

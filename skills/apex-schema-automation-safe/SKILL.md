@@ -30,33 +30,35 @@ sobre el archivo y reportar los hallazgos junto con el resultado de Oracle.
 
 ## Modification Flow
 
-Follow the credential authorization principle from the APEX Coordinator
-(`skills/apex/SKILL.md`). Execute requested SQL directly in the named
-environment. Do not add confirmation or permission gates. Verify through
-available data dictionary queries and report Oracle's result.
+Follow `skills/apex/SKILL.md`: ask once for confirmation of the environment,
+object, exact operation, whether to proceed, and an explicit yes/no backup
+choice. Do not execute until both decisions are answered; if one is missing,
+ask only for it and wait. Do not create a backup or snapshot if declined. For
+a confirmed one-object DDL request, execute
+the requested SQL directly and verify the resulting object. Do not add a
+separate approval or routine inventory/preflight workflow.
 
 ### Existing-object fast path
 
-When a user confirms a change immediately after a focused diagnosis, use the
-live-change protocol instead of rebuilding a full specification. Capture the
-current definition, express the preflight fingerprint, apply one reviewed
-artifact, verify the object and its relevant dependents, and preserve explicit
-rollback SQL. `scripts/Invoke-OracleApexChange.ps1` and
-`apex-controlled-mcp.execute_change_bundle` execute a prepared `change.json`.
-If the preflight no longer matches the diagnosed object, stop before `apply`
-and return to diagnosis.
+When an existing-object correction needs a fingerprint check to ensure the
+object has not changed since diagnosis, use the bundle path from the live-change
+protocol. For an ordinary one-object request, do not generate a bundle merely
+to repeat the focused inspection. If a backup was declined, do not create a
+snapshot or backup artifact; preserve only the operational SQL needed to make
+the requested change.
 
-For a compatible view replacement prefer `create or replace view` with a
-captured prior definition. Do not use `force` as a workaround for an invalid
-definition; validate the resulting view and dependencies. Use a full change
-record for multi-object DDL, table recreation, migrations, or material risk.
+For a compatible view replacement prefer `create or replace view`. Capture the
+prior definition as backup only when the user requests it. Do not use `force` as
+a workaround for an invalid definition; verify the resulting view. Use a full
+change record for multi-object DDL, table recreation, migrations, or material
+risk, and include a snapshot only when the user requested a backup.
 
 ## Modes
 
 Choose the smallest mode that fits the request:
 
 - **Assistant Mode**: User describes the schema in natural language. Generate the
-  DDL specification, show it, and proceed unless the user objects.
+  DDL specification, then use the one global confirmation before execution.
 - **Expert Mode**: User provides a JSON specification or Python `ApexSchemaSpec`
   object with exact control.
 - **Hybrid Mode**: User sketches the schema; generate a draft DDL; user refines.
@@ -73,20 +75,20 @@ Infer these from the conversation and the database — do not interview the user
 
 ### Pre-flight validation
 
-1. Check if target objects already exist (for CREATE, must not exist; for ALTER/DROP, must exist).
-2. List existing objects in schema to prevent naming collisions.
+1. Read the requested target's existence/definition as needed to prepare the operation.
+2. Do not inventory the schema or count affected rows unless requested or needed to resolve a concrete ambiguity.
 
 ### Specification generation (Assistant Mode)
 
 1. Infer from context: columns, data types, constraints, indexes, views, procedures.
 2. Generate DDL specification using `ApexSchemaSpec` builder classes.
-3. Show DDL to user and proceed unless the user objects.
+3. Use the single global confirmation before execution; provide full DDL when requested or needed to resolve scope.
 
 ### Expert Mode
 
 1. User provides JSON spec (or Python dict matching `ApexSchemaSpec` schema).
 2. Validate schema: required fields, data types, constraints, foreign key targets.
-3. Show parsed DDL to user and proceed.
+3. Use the single global confirmation before execution; provide parsed DDL when requested or needed to resolve scope.
 
 ### Creation / Modification / Deletion
 
@@ -96,21 +98,22 @@ Infer these from the conversation and the database — do not interview the user
    - **Create objects**: Tables → Indexes → Views → Sequences → Procedures → Functions → Packages.
    - **Modify objects**: ALTER TABLE (add/drop columns), ALTER CONSTRAINT, etc.; preserve existing data unless explicitly dropping.
    - **Drop objects**: Sequences → Packages → Functions → Procedures → Views → Indexes → Tables (reverse order, handle FK dependencies).
-4. Execute each SQL file via SQLcl, or one prepared change bundle when the
-   change is a confirmed existing-object correction:
+4. Execute each requested SQL file directly via SQLcl. Use a prepared bundle
+   only when the existing-object fingerprint must be checked or the change
+   spans coordinated objects:
    ```powershell
-   .\scripts\Execute-OracleSql.ps1 -SqlFile "ddl\001_create_table_employees.sql"
-   .\scripts\Execute-OracleSql.ps1 -SqlFile "ddl\002_create_pkg_body.sql" -ShowErrors
-    .\scripts\Invoke-OracleApexChange.ps1 -Bundle "control-proyecto\cambios\<id>\change.json" -Environment test
+   .\scripts\Execute-OracleSql.ps1 -SqlFile "ddl\001_create_table_employees.sql" -Confirmed -BackupChoice no
+   .\scripts\Execute-OracleSql.ps1 -SqlFile "ddl\002_create_pkg_body.sql" -ShowErrors -Confirmed -BackupChoice no
+   .\scripts\Invoke-OracleApexChange.ps1 -Bundle "control-proyecto\cambios\<id>\change.json" -Environment test -Confirmed -BackupChoice no
    ```
-5. Capture audit trail: timestamp, connected user, target owner, object names, DDL executed.
+5. Report the execution evidence returned by the selected route. Do not claim automatic capture or fields that the route did not return.
 6. Verify execution: query data dictionary via SQLcl to confirm objects exist under the requested owner and are VALID.
 
 ### Validation and rollback
 
 1. Post-execution: run data dictionary queries to confirm object existence and structure.
-2. If execution fails: provide error details (constraint violation, insufficient privileges, invalid SQL), suggest fixes, offer rollback to pre-operation snapshot.
-3. If user requests rollback: restore from database backup or provide step-by-step manual rollback instructions.
+2. If execution fails, report Oracle's error and the observed result.
+3. Discuss rollback only when the user asks or a concrete limitation makes it relevant.
 
 ## Non-negotiable safeguards
 
@@ -119,17 +122,17 @@ Infer these from the conversation and the database — do not interview the user
 3. **No hardcoded credentials.** All database connections read the selected profile from the ignored repository-root `.env` (via `run_apex_mcp_with_profile.py`). Never embed passwords in DDL, logs, or scripts.
 4. **Report permission results.** Oracle decides the grants for the connected account; report a returned denial and continue independent requested work.
 5. **Handle constraints and dependencies.** Tables with FK must create parent table first; dropping a table with FK requires CASCADE or explicit FK removal first. Procedures/functions must reference existing tables; views must reference existing tables/views.
-6. **Rollback information.** Explain rollback options when relevant. Oracle DDL may commit implicitly.
-7. **Audit trail.** Every DDL execution is recorded in `.bitacora.json` with timestamp, user, schema, object names, DDL statements, success/failure status, and user roles.
+6. **Rollback information.** Do not explain rollback routinely. Mention Oracle implicit DDL commits only when they materially affect the requested action.
+7. **Audit trail.** The controlled MCP and PowerShell write routes append correlated start/result events, source hashes, environment, operation and backup choice to the local `.bitacora.json`; they never store raw DDL, credentials or SQLcl output. MCP and PowerShell read-only routes append one hashed result event after execution; an audit failure does not block the query or suppress its result. External tools and manual changes are not covered.
 
 ## Output
 
 Return:
 - Confirmation of objects created/modified/dropped with names and types.
-- DDL statements executed (for audit and version control).
+- DDL statements executed when useful or requested, plus execution evidence actually available from the route.
 - Data dictionary verification (e.g., "Table EMPLOYEES created with 10 columns, 2 indexes, 1 FK constraint").
-- Audit trail entry (auto-captured by pre-commit hook).
-- Rollback instructions if execution failed.
+- Audit evidence when returned by the execution route.
+- Rollback instructions only when requested or materially needed to explain a failure.
 
 ## Specifications and examples
 
@@ -205,7 +208,7 @@ The agent validates the schema, applies the requested DDL in the named environme
 
 - **Oracle enforces privileges and statement semantics.** Submit the requested operation as written and report Oracle's response; do not impose an object, statement-category, or grant allowlist in the skill.
 - **Credentials never logged.** Database password and connection strings are never printed or logged.
-- **Audit trail immutable.** `.bitacora.json` is append-only and captured at commit time; cannot be edited after creation.
+- **Audit trail scope.** `.bitacora.json` is a local ignored JSON Lines file. Controlled adapters append events, but a user or process can edit or delete it; do not call it immutable or tamper-proof.
 - **Row limits on large operations.** Very large tables (>100M rows): warn about impact before TRUNCATE/DROP.
 
 ## Upstream references

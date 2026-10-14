@@ -26,11 +26,11 @@ evidence for the same live session; if it is not yet verified, make one minimal
 session check and then run the narrow query immediately. Do not delay a read
 with a broad environment inventory, privilege
 enumeration, or workspace diagnostic unless the target or route needs it. For
-writes, inspect effective Oracle privileges when the route exposes them (for example,
-`inspect_oracle_session` or `inspect_oracle_privileges`); the operation itself
-is still decided by Oracle/APEX. These checks report observed capabilities;
-they do not ask for a second approval. Never substitute another environment
-silently.
+writes, do not inspect privileges as a prerequisite or follow-up validation.
+Execute the confirmed operation with the configured credential and report the
+actual Oracle/APEX result, including any privilege error. Inspect grants only
+when the user requests that information or asks to diagnose an observed access
+error. Never substitute another environment silently.
 
 Past-session notes are context and search hints, not current access decisions.
 Connection, runtime, workspace, tool, and privilege failures can change: verify
@@ -46,16 +46,38 @@ version control.
 
 ## Fluency Policy
 
-- Act on requests immediately within the selected credential's effective
-  privileges. Do not ask for
-  permission to perform operations the user requested, or ask them to choose a
-  skill, workflow, or execution mode.
+- A request to review, inspect, query, or show Oracle/APEX object data or
+  specifications is implicitly read-only. Resolve its environment and target,
+  make one minimal identity/destination check only if it has not already been
+  verified on the live connection, then run the requested read immediately.
+  Do not insert a change workflow, broad validation, inventory, privilege scan,
+  workspace check, or approval step into a simple read.
+- Before any requested mutation, present one concise confirmation containing
+  the resolved environment, target, and exact action, and ask whether to
+  proceed and whether a backup is wanted. Do not execute until the user has
+  explicitly answered both decisions. If either answer is missing or ambiguous,
+  ask only for that missing decision and wait; never infer "no backup" from
+  silence. Treat the complete answer as the single confirmation; do not ask
+  again unless scope changes. If backup is declined, create no backup,
+  snapshot, or temporary backup artifact. Create a scoped backup only after an
+  explicit yes.
+- Do not make a preliminary row-count query a standard prerequisite for any
+  transaction, including INSERT, UPDATE, DELETE, and MERGE. Count only when
+  the user requests it or when a concrete ambiguity makes it necessary to
+  determine the requested scope; ask about that ambiguity instead of silently
+  expanding the operation.
+- Execute confirmed requests within the selected credential's effective
+  privileges; do not precheck or recheck grants before, during, or after the
+  operation. Report any authorization error returned by Oracle/APEX. Inspect
+  grants only when explicitly requested or when diagnosing an observed error.
+  Do not ask the user to choose a skill, workflow, or execution mode.
 - Infer application, page, schema, and environment when clear. Ask only for
   information that is genuinely ambiguous or necessary to identify the target.
 - Use database metadata, App Builder, MCP, SQLcl, exports, or the browser as
   available and applicable. Prefer direct evidence from the requested environment.
 - For a diagnostic request, inspect without making unrequested changes. For a
-  requested write, perform that write and report its result.
+  requested write, obtain the one confirmation above, then perform the write
+  and report its result.
 
 ## Live changes
 
@@ -64,8 +86,11 @@ change, follow [the live-change protocol](references/live-change-protocol.md).
 Keep the verified target, observed definition, impact explanation, proposed
 change, rollback and validation context alive for this request. Do not restart
 discovery, reload broad guidance, or create a formal project plan merely
-because the user confirmed a narrow change. Use the fast path only while the
-preflight proves the object remains the one diagnosed.
+because the user confirmed a narrow change. Use the direct path for a focused
+change; do not add a preflight when the target and intended operation are
+already clear. Use a change bundle and its fingerprint preflight only when the
+fingerprint materially protects an existing correction or multiple objects
+must be coordinated.
 
 ## Environment Policy
 
@@ -121,3 +146,8 @@ facts on the selected credential and current route; do not repeat failed
 historical steps without a changed condition. If current access fails, keep
 trying configured routes for that same environment and report the actual
 current error.
+
+Requests to show object data or specifications are simple reads: retrieve the
+requested information directly after the minimal destination check, without
+running a diagnostic-report workflow unless the user asks for analysis or the
+initial read reveals a specific issue to investigate.

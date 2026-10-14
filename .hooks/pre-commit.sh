@@ -1,75 +1,55 @@
 #!/bin/bash
-# Pre-commit hook for capturing audit trail
-# Automatically records git changes to .bitacora.json
+# Append staged Git metadata to the local JSON Lines audit log.
 
-set -e
+set -euo pipefail
 
-BITACORA_DIR="control-proyecto"
-BITACORA_FILE="$BITACORA_DIR/.bitacora.json"
-
-# Create control-proyecto if it doesn't exist
-mkdir -p "$BITACORA_DIR"
-
-# Initialize .bitacora.json if it doesn't exist
-if [ ! -f "$BITACORA_FILE" ]; then
-  echo "{}" > "$BITACORA_FILE"
-fi
-
-# Get current timestamp in ISO 8601 format
-TIMESTAMP=$(date -u +'%Y-%m-%dT%H:%M:%SZ')
-
-# Get git info
-BRANCH=$(git rev-parse --abbrev-ref HEAD)
-AUTHOR=$(git config user.name)
-EMAIL=$(git config user.email)
-
-# Get staged files
-STAGED_FILES=$(git diff --cached --name-only | tr '\n' ',' | sed 's/,$//g')
-STAGED_COUNT=$(git diff --cached --name-only | wc -l)
-
-# Get commit message if available (this runs before commit is created)
-COMMIT_MSG="$(git diff --cached --diff-filter=M --name-only | head -1 || echo 'staged changes')"
-
-# Create entry JSON (using Python for better JSON handling)
-python3 << PYTHON_EOF
+python_bin="${PYTHON_BIN:-python3}"
+"$python_bin" <<'PYTHON_EOF'
 import json
 import os
+import subprocess
+import uuid
 from datetime import datetime, timezone
 
-bitacora_file = "$BITACORA_FILE"
 
-# Read existing bitacora
-with open(bitacora_file, 'r') as f:
-    try:
-        bitacora = json.load(f)
-    except:
-        bitacora = {}
+def git(*args: str) -> str:
+    completed = subprocess.run(["git", *args], check=True, capture_output=True)
+    return completed.stdout.decode("utf-8", errors="replace").strip()
 
-# Create entry
-timestamp = "$TIMESTAMP"
+
+def git_config(name: str) -> str:
+    completed = subprocess.run(["git", "config", name], capture_output=True)
+    return completed.stdout.decode("utf-8", errors="replace").strip() if completed.returncode == 0 else ""
+
+
+branch_result = subprocess.run(["git", "symbolic-ref", "--short", "-q", "HEAD"], capture_output=True)
+branch = branch_result.stdout.decode("utf-8", errors="replace").strip() if branch_result.returncode == 0 else "detached"
+files = subprocess.run(
+    ["git", "diff", "--cached", "--name-only", "-z"], check=True, capture_output=True
+).stdout.split(b"\0")
+files_changed = [path.decode("utf-8", errors="replace") for path in files if path]
+timestamp = datetime.now(timezone.utc).isoformat()
 entry = {
-    "type": "git_staged_changes",
-    "branch": "$BRANCH",
-    "author": "$AUTHOR",
-    "email": "$EMAIL",
-    "files_count": $STAGED_COUNT,
-    "files_changed": "$STAGED_FILES".split(',') if "$STAGED_FILES" else [],
-    "status": "staged"
+    "timestamp_utc": timestamp,
+    "event_id": str(uuid.uuid4()),
+    "event_phase": "completed",
+    "operation": "git_staged_changes",
+    "source": "git_index",
+    "result": "STAGED",
+    "exit_code": 0,
+    "branch": branch,
+    "author": git_config("user.name"),
+    "email": git_config("user.email"),
+    "files_count": len(files_changed),
+    "files_changed": files_changed,
 }
 
-# Add to bitacora
-if timestamp not in bitacora:
-    bitacora[timestamp] = []
-if not isinstance(bitacora[timestamp], list):
-    bitacora[timestamp] = [bitacora[timestamp]]
+audit_path = os.path.join("control-proyecto", ".bitacora.json")
+os.makedirs(os.path.dirname(audit_path), exist_ok=True)
+with open(audit_path, "a", encoding="utf-8", newline="\n") as audit_file:
+    audit_file.write(json.dumps(entry, ensure_ascii=False, separators=(",", ":")) + "\n")
+    audit_file.flush()
+    os.fsync(audit_file.fileno())
 
-bitacora[timestamp].append(entry)
-
-# Write updated bitacora
-with open(bitacora_file, 'w') as f:
-    json.dump(bitacora, f, indent=2)
-
-print(f"✓ Audit logged: {$STAGED_COUNT} files staged at {timestamp}")
+print(f"Audit logged: {len(files_changed)} staged files at {timestamp}")
 PYTHON_EOF
-
-exit 0

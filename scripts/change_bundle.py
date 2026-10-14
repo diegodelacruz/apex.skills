@@ -17,7 +17,7 @@ from pathlib import Path
 from typing import Any
 
 SUPPORTED_KINDS = {"oracle_ddl", "oracle_data", "apex_page", "apex_component"}
-REQUIRED_PHASES = ("preflight", "apply", "verify", "rollback")
+REQUIRED_PHASES = ("preflight", "apply", "verify")
 FORBIDDEN_SQLCL_COMMAND = re.compile(r"(?im)^\s*(?:@@?|!|connect\b|exit\b|host\b|start\b|spool\b)")
 
 
@@ -70,6 +70,9 @@ def load_bundle(path: Path, root: Path) -> dict[str, Any]:
     if missing:
         raise ChangeBundleError(f"Faltan artefactos requeridos: {', '.join(missing)}.")
     resolved = {phase: _inside(root, str(artifacts[phase])) for phase in REQUIRED_PHASES}
+    rollback = artifacts.get("rollback")
+    if rollback is not None:
+        resolved["rollback"] = _inside(root, str(rollback))
     snapshot = artifacts.get("snapshot")
     if snapshot is not None:
         resolved["snapshot"] = _inside(root, str(snapshot))
@@ -92,8 +95,10 @@ def render_execution_sql(bundle: dict[str, Any], phases: tuple[str, ...] = ("pre
     """
     blocks: list[str] = []
     for phase in phases:
-        if phase not in {"preflight", "apply", "verify"}:
+        if phase not in {"preflight", "apply", "verify", "snapshot"}:
             raise ChangeBundleError(f"Fase ejecutable no admitida: {phase}.")
+        if phase == "snapshot" and phase not in bundle["_resolved_artifacts"]:
+            raise ChangeBundleError("snapshot.sql solo está disponible cuando el usuario aceptó un backup.")
         source = bundle["_resolved_artifacts"][phase]
         content = source.read_text(encoding="utf-8")
         if FORBIDDEN_SQLCL_COMMAND.search(content):
@@ -129,7 +134,7 @@ def main() -> int:
     parser.add_argument(
         "--phase",
         action="append",
-        choices=("preflight", "apply", "verify"),
+        choices=("preflight", "apply", "verify", "snapshot"),
         help="Renderiza solo esta fase; se puede repetir.",
     )
     args = parser.parse_args()
