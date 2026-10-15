@@ -603,16 +603,12 @@ def execute_readonly_batch(
                     "CONNECTION_FAILED"
                     if connection_failed
                     else (
-                        "OUTPUT_INCOMPLETE"
-                        if output is None
+                        process_result["code"]
+                        if not process_result["ok"]
                         else (
-                            "ORACLE_ERROR"
-                            if ora_codes
-                            else (
-                                "SQLCL_ERROR"
-                                if sqlcl_errors
-                                else "SUCCESS" if process_result["ok"] else process_result["code"]
-                            )
+                            "OUTPUT_INCOMPLETE"
+                            if output is None
+                            else ("ORACLE_ERROR" if ora_codes else "SQLCL_ERROR" if sqlcl_errors else "SUCCESS")
                         )
                     )
                 ),
@@ -648,14 +644,24 @@ def execute_readonly_batch(
     )
     return {
         "ok": top_ok,
-        "code": "CONNECTION_FAILED" if connection_failed else "SUCCESS" if top_ok else "BATCH_PARTIAL_FAILURE",
+        "code": (
+            "CONNECTION_FAILED"
+            if connection_failed
+            else (
+                "SUCCESS" if top_ok else process_result["code"] if not process_result["ok"] else "BATCH_PARTIAL_FAILURE"
+            )
+        ),
         "message": (
             "Todas las consultas terminaron correctamente."
             if top_ok
             else (
                 "No se pudo establecer la conexión Oracle para el lote."
                 if connection_failed
-                else "Una o más consultas o la identidad fallaron."
+                else (
+                    f"El proceso SQLcl falló con {process_result['code']}: {process_result['message']}"
+                    if not process_result["ok"]
+                    else "Una o más consultas o la identidad fallaron."
+                )
             )
         ),
         "environment": environment,

@@ -151,6 +151,27 @@ def test_readonly_batch_login_denied_before_markers_fails_every_query(monkeypatc
     assert result["results"][0]["code"] == "CONNECTION_FAILED"
 
 
+@pytest.mark.parametrize(
+    ("stderr", "expected_code"),
+    [
+        ("RUNTIME_NOT_INSTALLED", "RUNTIME_NOT_INSTALLED"),
+        ("SQLCL_RUNTIME_ERROR: timed out", "RUNTIME_INTEGRITY_FAILED"),
+        ("RUNTIME_INTEGRITY_FAILED", "RUNTIME_INTEGRITY_FAILED"),
+    ],
+)
+def test_readonly_batch_process_failure_preserves_classified_code(monkeypatch, tmp_path, stderr, expected_code):
+    def fake_sqlcl(profile, statements, **kwargs):
+        return mcp.CommandResult(1, "", stderr)
+
+    _configure_batch(monkeypatch, tmp_path, fake_sqlcl)
+    result = mcp.execute_readonly_batch(["select 1 from dual", "select 2 from dual"], "test", include_identity=False)
+
+    assert result["ok"] is False
+    assert result["code"] == expected_code
+    assert expected_code in result["message"]
+    assert all(item["code"] == expected_code for item in result["results"])
+
+
 @pytest.mark.parametrize("missing", ["start", "end"])
 def test_readonly_batch_missing_marker_is_output_incomplete(monkeypatch, tmp_path, missing):
     def fake_sqlcl(profile, statements, **kwargs):

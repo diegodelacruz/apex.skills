@@ -35,6 +35,7 @@
 ## Manejo de fallos y límites conocidos
 
 - Cada consulta requiere sus dos marcadores exactos. Si falta el inicio o el fin, devuelve `OUTPUT_INCOMPLETE`; una salida vacía entre ambos marcadores sí es una salida completa.
+- Un dato cuyo texto contenga `ORA-xxxxx:` o `SP2-xxxx` marca la consulta como error, por falla del lado seguro.
 - Los ORA dentro de una consulta producen `ORACLE_ERROR` y los mensajes SQL*Plus/SQLcl `SP2-xxxx` producen `SQLCL_ERROR`. Estos fallos no cancelan las consultas restantes.
 - Cualquier ORA emitido antes del primer marcador produce `CONNECTION_FAILED` en el lote y en todas sus consultas, también cuando `include_identity=False`: todavía no comenzó la salida de una consulta. Esto incluye los errores de autenticación `ORA-01017`, `ORA-28000` y `ORA-28001`; se valida con salidas simuladas y no se prueban credenciales inválidas contra Oracle.
 - El lote solo declara `ok=true` cuando todas las consultas terminan en `SUCCESS` y, si se solicitó, se obtuvo identidad. Un fallo de escritura de bitácora conserva los resultados y añade `audit_persisted=false` y un aviso; no cambia el estado SQL de las consultas.
