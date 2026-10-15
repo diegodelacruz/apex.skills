@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 ## [Unreleased]
 
 ### Changed
+- Make `execute_readonly_batch` fail closed on missing output markers, SQL*Plus/SQLcl errors, and pre-marker Oracle connection/authentication failures; preserve query results and report an audit warning if batch audit persistence fails.
 - Make `rollback.sql` optional in coordinated change bundles and clarify that a declared rollback script is not executed automatically.
 - Reject a bundle that declares `snapshot` when the user declines a backup.
 - Update `Deploy-ApexPage.ps1` help examples to include the required action confirmation and backup choice.

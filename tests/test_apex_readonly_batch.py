@@ -107,6 +107,94 @@ def test_batch_sql_error_continuation_is_opt_in_and_mutation_default_stays_fail_
     assert "whenever sqlerror continue" in captured[1]
 
 
+@pytest.mark.parametrize("include_identity", [True, False])
+@pytest.mark.parametrize(
+    "oracle_error",
+    [
+        "ORA-12541: TNS:no listener",
+        "ORA-12505: listener does not currently know of SID",
+        "ORA-12521: TNS listener does not currently know of instance",
+        "ORA-12545: Connect failed because target host or object does not exist",
+    ],
+)
+def test_readonly_batch_connection_failure_fails_every_query(monkeypatch, tmp_path, include_identity, oracle_error):
+    def fake_sqlcl(profile, statements, **kwargs):
+        return mcp.CommandResult(1, oracle_error, "")
+
+    _configure_batch(monkeypatch, tmp_path, fake_sqlcl)
+    result = mcp.execute_readonly_batch(
+        ["select 1 from dual", "select 2 from dual"], "test", include_identity=include_identity
+    )
+
+    assert result["ok"] is False
+    assert result["code"] == "CONNECTION_FAILED"
+    assert all(item["code"] == "CONNECTION_FAILED" for item in result["results"])
+
+
+@pytest.mark.parametrize(
+    "oracle_error",
+    [
+        "ORA-01017: invalid username/password; logon denied",
+        "ORA-28000: the account is locked",
+        "ORA-28001: the password has expired",
+    ],
+)
+def test_readonly_batch_login_denied_before_markers_fails_every_query(monkeypatch, tmp_path, oracle_error):
+    def fake_sqlcl(profile, statements, **kwargs):
+        return mcp.CommandResult(1, oracle_error, "")
+
+    _configure_batch(monkeypatch, tmp_path, fake_sqlcl)
+    result = mcp.execute_readonly_batch(["select 1 from dual"], "test", include_identity=False)
+
+    assert result["ok"] is False
+    assert result["code"] == "CONNECTION_FAILED"
+    assert result["results"][0]["code"] == "CONNECTION_FAILED"
+
+
+@pytest.mark.parametrize("missing", ["start", "end"])
+def test_readonly_batch_missing_marker_is_output_incomplete(monkeypatch, tmp_path, missing):
+    def fake_sqlcl(profile, statements, **kwargs):
+        marker = next(line.removeprefix("prompt ") for line in statements.splitlines() if line.startswith("prompt "))
+        end = marker.replace("BEGIN", "END")
+        output = f"row\n{end}\n" if missing == "start" else f"{marker}\nrow\n"
+        return mcp.CommandResult(0, output, "")
+
+    _configure_batch(monkeypatch, tmp_path, fake_sqlcl)
+    result = mcp.execute_readonly_batch(["select 1 from dual"], "test", include_identity=False)
+
+    assert result["ok"] is False
+    assert result["results"][0]["code"] == "OUTPUT_INCOMPLETE"
+
+
+def test_readonly_batch_sqlplus_error_inside_markers_is_failure(monkeypatch, tmp_path):
+    def fake_sqlcl(profile, statements, **kwargs):
+        markers = [line.removeprefix("prompt ") for line in statements.splitlines() if line.startswith("prompt ")]
+        return mcp.CommandResult(0, f"{markers[0]}\nSP2-0640: Not connected\n{markers[1]}\n", "")
+
+    _configure_batch(monkeypatch, tmp_path, fake_sqlcl)
+    result = mcp.execute_readonly_batch(["select 1 from dual"], "test", include_identity=False)
+
+    assert result["ok"] is False
+    assert result["results"][0]["code"] == "SQLCL_ERROR"
+
+
+def test_readonly_batch_audit_failure_preserves_results(monkeypatch, tmp_path):
+    def fake_sqlcl(profile, statements, **kwargs):
+        marker = next(line.removeprefix("prompt ") for line in statements.splitlines() if line.startswith("prompt "))
+        end = marker.replace("BEGIN", "END")
+        return mcp.CommandResult(0, f"{marker}\nrow\n{end}\n", "")
+
+    _configure_batch(monkeypatch, tmp_path, fake_sqlcl)
+    monkeypatch.setattr(mcp, "_readonly_batch_audit", lambda *args: (_ for _ in ()).throw(OSError("disk full")))
+
+    result = mcp.execute_readonly_batch(["select 1 from dual"], "test", include_identity=False)
+
+    assert result["ok"] is True
+    assert result["results"] == [{"index": 0, "code": "SUCCESS", "output": "row", "ora_codes": []}]
+    assert result["audit_persisted"] is False
+    assert result["warning"]
+
+
 def test_controlled_mutation_execution_keeps_fail_closed_sqlcl_default(monkeypatch):
     captured = {}
 

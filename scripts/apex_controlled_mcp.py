@@ -584,16 +584,37 @@ def execute_readonly_batch(
     )
     sqlcl_process_ms = round((time.perf_counter() - sqlcl_started) * 1000)
     process_result = classify_result(CommandResult(command.exit_code, command.stderr, ""))
+    first_marker = identity_start if include_identity else markers[0][0]
+    marker_position = command.stdout.find(first_marker)
+    pre_marker_output = command.stdout if marker_position < 0 else command.stdout[:marker_position]
+    pre_marker_output = "\n".join((pre_marker_output, command.stderr))
+    pre_marker_ora = {code for code, _ in ORA_PATTERN.findall(pre_marker_output)}
+    connection_failed = bool(pre_marker_ora)
     results: list[dict[str, Any]] = []
     for index, (start_marker, end_marker) in enumerate(markers):
         output = _batch_output(command.stdout, start_marker, end_marker)
         text = output or ""
         ora_codes = sorted({f"ORA-{code}" for code, _ in ORA_PATTERN.findall(text)})
+        sqlcl_errors = re.findall(r"\bSP2-\d{4}\b", text, re.IGNORECASE)
         results.append(
             {
                 "index": index,
                 "code": (
-                    "ORACLE_ERROR" if ora_codes else ("SUCCESS" if process_result["ok"] else process_result["code"])
+                    "CONNECTION_FAILED"
+                    if connection_failed
+                    else (
+                        "OUTPUT_INCOMPLETE"
+                        if output is None
+                        else (
+                            "ORACLE_ERROR"
+                            if ora_codes
+                            else (
+                                "SQLCL_ERROR"
+                                if sqlcl_errors
+                                else "SUCCESS" if process_result["ok"] else process_result["code"]
+                            )
+                        )
+                    )
                 ),
                 "output": text,
                 "ora_codes": ora_codes,
@@ -613,22 +634,37 @@ def execute_readonly_batch(
         "route_total": round((time.perf_counter() - route_started) * 1000),
         "query_count": len(normalized_queries),
     }
-    _readonly_batch_audit(environment, normalized_queries, bind_variables, results, timings_ms)
+    audit_persisted = True
+    try:
+        _readonly_batch_audit(environment, normalized_queries, bind_variables, results, timings_ms)
+    except OSError:
+        audit_persisted = False
     has_query_error = any(result["code"] != "SUCCESS" for result in results)
-    top_ok = process_result["ok"] and not has_query_error and (not include_identity or identity is not None)
+    top_ok = (
+        not connection_failed
+        and process_result["ok"]
+        and not has_query_error
+        and (not include_identity or identity is not None)
+    )
     return {
         "ok": top_ok,
-        "code": "SUCCESS" if top_ok else "BATCH_PARTIAL_FAILURE",
+        "code": "CONNECTION_FAILED" if connection_failed else "SUCCESS" if top_ok else "BATCH_PARTIAL_FAILURE",
         "message": (
             "Todas las consultas terminaron correctamente."
             if top_ok
-            else "Una o más consultas o la identidad fallaron."
+            else (
+                "No se pudo establecer la conexión Oracle para el lote."
+                if connection_failed
+                else "Una o más consultas o la identidad fallaron."
+            )
         ),
         "environment": environment,
         "source": "inline_readonly_batch",
         "identity": identity,
         "results": results,
         "timings_ms": timings_ms,
+        "audit_persisted": audit_persisted,
+        **({"warning": "No se pudo persistir la bitácora del lote."} if not audit_persisted else {}),
     }
 
 

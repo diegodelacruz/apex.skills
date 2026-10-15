@@ -87,6 +87,14 @@ su propio delimitador y ORA. Abre una única sesión y transacción de solo lect
 un error Oracle en una consulta no detiene las restantes. Su continuación de
 errores solo aplica a esta ruta; las demás llamadas a `sqlcl_result`, incluidas
 las de mutación, conservan el default `whenever sqlerror exit ... rollback`.
+Cada resultado requiere ambos marcadores; si falta uno devuelve
+`OUTPUT_INCOMPLETE`. Los ORA dentro del bloque devuelven `ORACLE_ERROR` y los
+errores `SP2-xxxx`, `SQLCL_ERROR`. Un ORA de conexión/autenticación antes del
+primer marcador hace fallar el lote y todas sus consultas con
+`CONNECTION_FAILED`, incluso sin identidad. El lote solo devuelve `ok=true`
+cuando todas las consultas son `SUCCESS` y la identidad solicitada está
+presente. Si falla la bitácora, conserva los resultados y devuelve
+`audit_persisted=false` junto con un aviso.
 La bitácora registra un digest por consulta, el código/ORA de cada resultado y
 tiempos, sin SQL, binds ni datos devueltos. Usa las consultas comprobadas de
 `skills/apex-database-diagnostics/references/page-snapshot-queries.md` para una
