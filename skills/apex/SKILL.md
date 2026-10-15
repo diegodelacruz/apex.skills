@@ -147,6 +147,11 @@ historical steps without a changed condition. If current access fails, keep
 trying configured routes for that same environment and report the actual
 current error.
 
+For a complete page review, use `execute_readonly_batch` with the verified
+snapshot queries so page identity and metadata share one SQLcl connection. Keep
+`execute_readonly_query` for one targeted SELECT; a separate identity call is
+not needed when the batch includes identity.
+
 Requests to show object data or specifications are simple reads: retrieve the
 requested information directly after the minimal destination check, without
 running a diagnostic-report workflow unless the user asks for analysis or the

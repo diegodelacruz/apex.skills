@@ -48,6 +48,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ### Added
 
+- Added `execute_readonly_batch` for up to 25 validated SELECT statements in one read-only SQLcl session, with per-query Oracle errors, same-session identity, timings, and digest-only audit; documented and verified APEX page snapshot queries for TEST.
 - Added a whole-repository Markdown coverage and link auditor with fragment checks, explicit exclusions, external URL status reporting, regression tests, and shared CI/pre-commit invocation.
 - Added a bound, single-SELECT SQLcl route in an Oracle read-only transaction, with hash-only audit logging, so metadata reads do not depend on a repository SQL artifact.
 - Added regressions for inline read-only query validation, ORA-20987-independent metadata routing, and the default DATA schema owner.

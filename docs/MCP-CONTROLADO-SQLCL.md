@@ -37,7 +37,7 @@ usuario lo pide o para diagnosticar un error de acceso ya observado.
 
 | Operación | Herramientas/ruta | Fuente de identidad y permiso |
 | --- | --- | --- |
-| Oracle lectura/diagnóstico | `inspect_oracle_session`, `inspect_environment`, `inspect_oracle_privileges`, `execute_readonly_query` (SELECT inline con binds enteros), `Execute-OracleSql.ps1 -ReadOnly` | Perfil Oracle del ambiente elegido en `.env`; grants y roles observados/efectivos en Oracle |
+| Oracle lectura/diagnóstico | `inspect_oracle_session`, `inspect_environment`, `inspect_oracle_privileges`, `execute_readonly_query` (un SELECT inline con binds enteros), `execute_readonly_batch` (hasta 25 SELECT y 100000 caracteres en una sesión), `Execute-OracleSql.ps1 -ReadOnly` | Perfil Oracle del ambiente elegido en `.env`; grants y roles observados/efectivos en Oracle |
 | Oracle DML puntual | `execute_sql_file` o `Execute-OracleSql.ps1` | Ambas rutas controladas exigen confirmación explícita y `backup_choice=yes/no`; con sí requieren SQL de backup dedicado y lo ejecutan antes. Sin backup aceptado: sin conteo previo ni bundle de rutina |
 | Oracle DDL/PLSQL o cambio coordinado | `execute_sql_file`, `execute_change_bundle`, `Execute-OracleSql.ps1` o `Invoke-OracleApexChange.ps1` | Bundle solo cuando aporta fingerprint/preflight o coordina objetos; con backup=yes, `snapshot.sql` se ejecuta tras preflight y antes de apply |
 | APEX lectura/contexto | `inspect_apex_context`, `inspect_environment`, `apex_get_page_details`; si el adaptador falla, `apex_run_sql` con binds sobre `APEX_APPLICATION_*` | Credencial del canal elegido; verificar el destino real y el contexto/app/workspace |
@@ -72,20 +72,29 @@ cuenta. La falta de un perfil no invalida otro canal autenticado.
 ## Ejecución
 
 `execute_readonly_query` acepta una sola sentencia SELECT en una línea física,
-con binds enteros,
-directamente por SQLcl y la envía dentro de una transacción Oracle de solo
+con binds enteros, directamente por SQLcl y la envía dentro de una transacción Oracle de solo
 lectura. El control limita escrituras directas en esa transacción, pero Oracle
 permite que ciertas funciones llamadas desde SELECT tengan efectos laterales;
 por eso esta herramienta se usa para consultas de metadata conocidas, no como
 sandbox para SQL arbitrario o funciones de usuario. La bitácora registra una
 huella conjunta de la consulta y los binds, sin guardar sus textos/valores. Así las lecturas de
 metadata no dependen de que la carpeta del proyecto sea un repositorio Git ni
-de un archivo bajo el checkout del MCP. `execute_sql_file` ejecuta artefactos
-DDL/DML/PLSQL desde el checkout. Si el proyecto del usuario no pertenece a ese
+de un archivo bajo el checkout del MCP. Para una revisión completa de página,
+`execute_readonly_batch` acepta entre 1 y 25 SELECT de una línea con hasta
+100000 caracteres totales y binds enteros compartidos. Valida todo el lote antes
+de conectar, devuelve sesión/esquema/servicio por defecto y cada resultado con
+su propio delimitador y ORA. Abre una única sesión y transacción de solo lectura;
+un error Oracle en una consulta no detiene las restantes. Su continuación de
+errores solo aplica a esta ruta; las demás llamadas a `sqlcl_result`, incluidas
+las de mutación, conservan el default `whenever sqlerror exit ... rollback`.
+La bitácora registra un digest por consulta, el código/ORA de cada resultado y
+tiempos, sin SQL, binds ni datos devueltos. Usa las consultas comprobadas de
+`skills/apex-database-diagnostics/references/page-snapshot-queries.md` para una
+página. `execute_sql_file` ejecuta artefactos DDL/DML/PLSQL desde el checkout. Si el proyecto del usuario no pertenece a ese
 checkout, crea el `.sql` temporal dentro del checkout del conector (por ejemplo,
 `.codex-tmp/<nombre>.sql`) y pasa una ruta relativa a ese checkout. El servidor
 rechaza archivos fuera de su raíz, incluidos archivos del proyecto y rutas
-absolutas. Para una lectura, usa `execute_readonly_query`; si se usa el helper
+absolutas. Para una consulta puntual, usa `execute_readonly_query`; si se usa el helper
 PowerShell, añade `-ReadOnly`, que acepta solo un SELECT y configura la
 transacción como read-only. Para una mutación por PowerShell, proporciona la
 confirmación y elección de backup requeridas; con backup=yes incluye un archivo
