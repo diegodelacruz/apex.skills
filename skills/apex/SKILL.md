@@ -57,8 +57,11 @@ version control.
   proceed and whether a backup is wanted. Do not execute until the user has
   explicitly answered both decisions. If either answer is missing or ambiguous,
   ask only for that missing decision and wait; never infer "no backup" from
-  silence. Treat the complete answer as the single confirmation; do not ask
-  again unless scope changes. If backup is declined, create no backup,
+  silence. Treat the complete answer as the single confirmation (una sola confirmación); do not ask
+  again unless scope changes. In **paso a paso**, the initial choice can
+  authorize bounded steps and the `¿continúo?` checkpoint is not another
+  confirmation; follow [the step-mode protocol](references/step-mode.md).
+  If backup is declined, create no backup,
   snapshot, or temporary backup artifact. Create a scoped backup only after an
   explicit yes.
 - Do not make a preliminary row-count query a standard prerequisite for any
@@ -91,6 +94,15 @@ change; do not add a preflight when the target and intended operation are
 already clear. Use a change bundle and its fingerprint preflight only when the
 fingerprint materially protects an existing correction or multiple objects
 must be coordinated.
+
+## Modo paso a paso / todos los pasos
+
+For an Oracle/APEX change or development, ask the one initial decision for
+environment, object, action, explicit backup choice, and mode. Default to
+**paso a paso** when the user has not chosen; **todos los pasos** produces one
+consolidated validation at the end. Reads and diagnostics remain immediate and
+do not request this decision. Read [the step-mode protocol](references/step-mode.md)
+before performing either mode.
 
 ## Environment Policy
 

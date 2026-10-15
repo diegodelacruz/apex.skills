@@ -47,10 +47,10 @@ and do NOT require the user to invoke a skill or say "usa apex".
 
 ### Modifications
 
-- Before the first write in a session, ask: "paso a paso o todos los pasos?"
-  Default to step-by-step. Do not ask again after that.
-- In step-by-step: instruct one change, wait for confirmation, verify via
-  database query, then advance. See `skills/apex/SKILL.md` for full details.
+- Before the first write, ask once for environment, object, action, explicit
+  backup yes/no, and "paso a paso o todos los pasos". Default to step-by-step;
+  see `skills/apex/references/step-mode.md` for the bounded checkpoints and
+  validation rules.
 
 ### Skills (invocable via `/skill-name`)
 

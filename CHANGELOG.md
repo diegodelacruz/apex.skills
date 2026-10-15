@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 ## [Unreleased]
 
 ### Changed
+- Define the default Oracle/APEX step-by-step and all-steps modes, including one initial decision, baseline comparison, bounded checkpoints, consolidated validation, and no automatic correction on failure.
 - Preserve the classified SQLcl process-failure code for every read-only batch query and its global result.
 - Make `execute_readonly_batch` fail closed on missing output markers, SQL*Plus/SQLcl errors, and pre-marker Oracle connection/authentication failures; preserve query results and report an audit warning if batch audit persistence fails.
 - Make `rollback.sql` optional in coordinated change bundles and clarify that a declared rollback script is not executed automatically.
