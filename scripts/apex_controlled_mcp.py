@@ -82,7 +82,8 @@ def runtime_state() -> dict[str, Any] | None:
     if not path.is_file():
         return None
     try:
-        value = json.loads(path.read_text(encoding="utf-8"))
+        # utf-8-sig accepts the UTF-8 BOM written by Windows PowerShell 5.1.
+        value = json.loads(path.read_text(encoding="utf-8-sig"))
     except (OSError, json.JSONDecodeError):
         return None
     return value if isinstance(value, dict) else None

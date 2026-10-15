@@ -73,6 +73,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ### Fixed
 
+- Read `runtime-state.json` with UTF-8 BOM tolerance so Windows PowerShell 5.1 runtime state is recognized by the local doctor.
 - Closed a routing gap that allowed omitted Oracle object owners to inherit the connected user's schema despite the existing DATA governance default; added a regression for coordinator and workflow instructions.
 - Fixed SQLcl read-only query execution by terminating `SET TRANSACTION READ ONLY` before the SELECT statement.
 - Clarified that new Oracle objects default to the DATA schema, and that repository-backed SQL tools require temporary artifacts inside the MCP checkout with a same-environment APEX SQL fallback after artifact or context-helper failures.
