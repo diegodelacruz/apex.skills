@@ -1,6 +1,7 @@
 # Reglas obligatorias para agentes
 
 Antes de modificar este repositorio, leer `docs/POLITICA-EVOLUCION-ECOSISTEMA.md`.
+Para cambios Oracle/APEX, aplica la pregunta única y los modos definidos en `skills/apex/references/step-mode.md`.
 
 Estas reglas aplican a toda sesión y a cualquier agente que trabaje sobre
 `apex.skills`. Ningún archivo puede obligar técnicamente a un agente externo
