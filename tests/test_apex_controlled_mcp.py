@@ -229,6 +229,31 @@ def test_sqlcl_read_only_transaction_starts_after_connect(monkeypatch):
     assert script.index("set transaction read only") < script.index("select 1 from dual")
 
 
+def test_sqlcl_result_uses_tolerant_utf8_for_accented_input_and_output(monkeypatch):
+    captured = {}
+    monkeypatch.setattr(mcp, "runtime_state", lambda: {"java_home": "java", "sqlcl_path": "sql"})
+
+    def fake_run(args, **kwargs):
+        captured.update(kwargs)
+        return type(
+            "Process", (), {"returncode": 0, "stdout": b"\xc3\xb3\xc3\x81\xc3\x91\xc3\xbc\x81", "stderr": b""}
+        )()
+
+    monkeypatch.setattr(mcp.subprocess, "run", fake_run)
+
+    result = mcp.sqlcl_result(
+        {"user": "u", "password": "p", "host": "db", "port": "1521", "service": "test"},
+        "select 'Histórico → ñ' from dual;",
+        read_only_transaction=True,
+    )
+
+    assert result.stdout == "óÁÑü�"
+    assert "Histórico ? ñ" in captured["input"]
+    assert captured["input"].splitlines()[0] == "set encoding utf8"
+    assert captured["encoding"] == "cp1252"
+    assert captured["errors"] == "surrogateescape"
+
+
 def test_sqlcl_runtime_failure_is_reported_without_preflight(monkeypatch):
     monkeypatch.setattr(mcp, "runtime_state", lambda: None)
 

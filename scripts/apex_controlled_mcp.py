@@ -65,6 +65,11 @@ class CommandResult:
     stderr: str
 
 
+def encode_sqlcl_input(script: str) -> str:
+    """Normalize stdin for the Windows SQLcl code page without raising on Unicode."""
+    return script.encode("cp1252", errors="replace").decode("cp1252")
+
+
 def runtime_root() -> Path:
     """Return the per-user runtime root without creating it."""
     configured = os.environ.get(RUNTIME_ENV)
@@ -181,6 +186,13 @@ def load_profile(environment: str | None) -> tuple[dict[str, str] | None, dict[s
     }, None
 
 
+def decode_sqlcl_stream(stream: str | bytes) -> str:
+    """Decode SQLcl output without letting malformed bytes hide the process result."""
+    if isinstance(stream, bytes):
+        return stream.decode("utf-8", errors="replace")
+    return stream.encode("cp1252", errors="surrogateescape").decode("utf-8", errors="replace")
+
+
 def sqlcl_result(
     profile: dict[str, str],
     statements: str,
@@ -215,6 +227,7 @@ def sqlcl_result(
         )
     script = "\n".join(
         (
+            "set encoding utf8",
             "set echo off feedback off heading off pagesize 0 verify off",
             "set define off",
             "whenever sqlerror continue" if continue_on_sql_error else "whenever sqlerror exit sql.sqlcode rollback",
@@ -231,14 +244,20 @@ def sqlcl_result(
             capture_output=True,
             check=False,
             env=environment,
-            input=script,
+            input=encode_sqlcl_input(script),
             text=True,
+            encoding="cp1252",
+            errors="surrogateescape",
             timeout=120,
             cwd=working_directory,
         )
     except (OSError, subprocess.TimeoutExpired) as exc:
         return CommandResult(1, "", f"SQLCL_RUNTIME_ERROR: {exc}")
-    return CommandResult(process.returncode, process.stdout, process.stderr)
+    return CommandResult(
+        process.returncode,
+        decode_sqlcl_stream(process.stdout),
+        decode_sqlcl_stream(process.stderr),
+    )
 
 
 def classify_result(result: CommandResult) -> dict[str, Any]:

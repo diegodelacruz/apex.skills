@@ -2,6 +2,11 @@
 
 Cada línea siguiente es un SELECT read-only independiente y de ejemplo. Cambia los literales en mayúsculas por el objetivo real; duplica comillas simples dentro de valores de texto. Ejecuta las líneas de una validación juntas con `execute_readonly_batch`. Los SELECT de DML se observan desde otra sesión tras el commit y por eso prueban persistencia, no solo el resultado del cliente.
 
+Los literales con acentos CP1252, por ejemplo `Descripción` o `Histórico`, son
+compatibles con la ruta controlada de SQLcl en Windows. Conserva el literal
+real y valida su lectura exacta; evita usar caracteres fuera de CP1252 (como
+`→`) como predicados hasta contar con una ruta Unicode específica validada.
+
 ## Diccionario Oracle
 
 ```sql
