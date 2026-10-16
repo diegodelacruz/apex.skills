@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 ## [Unreleased]
 
 ### Changed
+- Document the proposed read-only `inspect_apex_page` tool (not implemented), with measured evidence, design, acceptance criteria, and the related pending backlog.
 - Remove the fixed five-step cap from Oracle/APEX step-by-step mode; plans now announce `M` total steps, and all-steps execution stops at its first execution error while reporting unexecuted steps explicitly.
 - Validate separate column and table comment steps through `ALL_COL_COMMENTS` and `ALL_TAB_COMMENTS` templates.
 - Define the default Oracle/APEX step-by-step and all-steps modes, including one initial decision, baseline comparison, bounded checkpoints, consolidated validation, and no automatic correction on failure.
