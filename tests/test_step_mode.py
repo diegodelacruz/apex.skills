@@ -37,9 +37,11 @@ def test_step_mode_defines_all_user_decisions_and_boundaries():
         "una vez por objeto",
         "no verificable",
         "sin rollback ni corrección automática",
-        "máximo 5 iteraciones",
     ):
         assert phrase in protocol.lower()
+
+    assert "máximo 5 iteraciones" not in protocol.lower()
+    assert "Paso N/M" in protocol
 
 
 def test_step_mode_explicitly_reconciles_single_confirmation():
@@ -71,6 +73,16 @@ def test_validation_templates_are_single_read_only_selects():
         assert "{{" not in query
         assert ";" not in query
         assert re.search(r"'[^']+'", query)
+
+    assert "select comments from all_tab_comments where owner = 'DATA' and table_name = 'T_APEX_LOG'" in queries
+
+
+def test_all_steps_stops_after_the_first_execution_error():
+    protocol = _read(STEP_MODE).lower()
+
+    assert "primer error de ejecución" in protocol
+    assert "no ejecutado" in protocol
+    assert "no corrige ni revierte de forma automática" in protocol
 
 
 def test_repository_change_instructions_have_no_unreconciled_step_mode_contradiction():

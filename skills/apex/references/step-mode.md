@@ -23,12 +23,12 @@ PROPONER UN PASO → USUARIO EJECUTA → CONFIRMADO → VALIDAR → PASS → ¿c
                                                     └ FAIL → DETENER
 ```
 
-Si el usuario dice “hazlo tú”, el agente ejecuta solo ese paso con los gates vigentes (`confirmed=true` y `backup_choice=yes/no`), resume el resultado y pregunta si continúa. La pregunta **¿continúo?** entre pasos no viola la regla de una sola confirmación: cada paso es una unidad de alcance dentro de la decisión inicial. No solicita una nueva elección de backup salvo cambio de objeto o alcance. Máximo 5 iteraciones por cambio; al llegar al límite, detente y entrega estado y siguiente decisión necesaria.
+Si el usuario dice “hazlo tú”, el agente ejecuta solo ese paso con los gates vigentes (`confirmed=true` y `backup_choice=yes/no`), resume el resultado y pregunta si continúa. La pregunta **¿continúo?** entre pasos no viola la regla de una sola confirmación: cada paso es una unidad de alcance dentro de la decisión inicial. No solicita una nueva elección de backup salvo cambio de objeto o alcance. Al inicio anuncia el total `M` de pasos del plan; si el plan cambia, lo anuncia como cambio de alcance antes de continuar.
 
 Después de cada PASS muestra:
 
 ```
-Paso N/5 — PASS
+Paso N/M — PASS
 Ejecutor: usuario | agente
 Cambio observado: <antes → después>
 Validación: <SELECT de una línea>
@@ -42,7 +42,7 @@ Un paso sin persistencia visible en metadatos (por ejemplo, una edición aún no
 
 ## Todos los pasos
 
-El agente entrega o ejecuta todos los pasos bajo la misma decisión inicial. Al final, hace una única llamada de validación consolidada con `execute_readonly_batch` y muestra PASS/FAIL por paso, comparación antes/después/esperado y resumen. Si algo falla, no corrige ni revierte de forma automática.
+El agente entrega o ejecuta todos los pasos bajo la misma decisión inicial. Si el agente ejecuta, se detiene en el primer error de ejecución (error Oracle o fallo de herramienta) y no ejecuta los pasos siguientes. Al final, hace una única llamada de validación consolidada con `execute_readonly_batch` y muestra PASS/FAIL por paso, comparación antes/después/esperado y resumen. La validación cubre solo lo ejecutado y marca el resto como **no ejecutado**. Si algo falla, no corrige ni revierte de forma automática.
 
 ```
 DECISIÓN INICIAL → LÍNEA BASE → PASOS 1..N → VALIDACIÓN CONSOLIDADA → RESUMEN

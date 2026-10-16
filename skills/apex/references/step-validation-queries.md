@@ -6,6 +6,7 @@ Cada línea siguiente es un SELECT read-only independiente y de ejemplo. Cambia 
 
 ```sql
 select comments from all_col_comments where owner = 'DATA' and table_name = 'T_APEX_LOG' and column_name = 'DESCRIPCION'
+select comments from all_tab_comments where owner = 'DATA' and table_name = 'T_APEX_LOG'
 select data_type || '|' || nullable || '|' || data_length from all_tab_columns where owner = 'DATA' and table_name = 'T_APEX_LOG' and column_name = 'DESCRIPCION'
 select table_name from all_tables where owner = 'DATA' and table_name = 'T_APEX_LOG'
 select index_name || '|' || status from all_indexes where owner = 'DATA' and table_name = 'T_APEX_LOG' and index_name = 'T_APEX_LOG_PK'
