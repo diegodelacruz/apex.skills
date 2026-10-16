@@ -79,6 +79,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ### Fixed
 
+- Fail closed before SQLcl starts when a write artifact contains characters not representable in CP1252; read-only queries and batches report explicit input substitutions when they opt into replacement.
+- Preserve Spanish SQL literals sent through the Windows SQLcl standard-input code page, while decoding SQLcl output as tolerant UTF-8 so malformed bytes cannot abort controlled results.
 - Read `runtime-state.json` with UTF-8 BOM tolerance so Windows PowerShell 5.1 runtime state is recognized by the local doctor.
 - Closed a routing gap that allowed omitted Oracle object owners to inherit the connected user's schema despite the existing DATA governance default; added a regression for coordinator and workflow instructions.
 - Fixed SQLcl read-only query execution by terminating `SET TRANSACTION READ ONLY` before the SELECT statement.

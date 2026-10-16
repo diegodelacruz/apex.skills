@@ -1,6 +1,8 @@
 """Tests for the controlled local SQLcl MCP without Oracle connectivity."""
 
 import json
+import subprocess
+import sys
 from pathlib import Path
 
 import scripts.apex_controlled_mcp as mcp
@@ -227,6 +229,125 @@ def test_sqlcl_read_only_transaction_starts_after_connect(monkeypatch):
     assert script.index("connect user/") < script.index("set transaction read only")
     assert "set transaction read only;\n" in script
     assert script.index("set transaction read only") < script.index("select 1 from dual")
+
+
+def test_sqlcl_result_uses_tolerant_utf8_for_accented_input_and_output(monkeypatch):
+    captured = {}
+    monkeypatch.setattr(mcp, "runtime_state", lambda: {"java_home": "java", "sqlcl_path": "sql"})
+
+    def fake_run(args, **kwargs):
+        captured.update(kwargs)
+        return type(
+            "Process", (), {"returncode": 0, "stdout": b"\xc3\xb3\xc3\x81\xc3\x91\xc3\xbc\x81", "stderr": b""}
+        )()
+
+    monkeypatch.setattr(mcp.subprocess, "run", fake_run)
+
+    result = mcp.sqlcl_result(
+        {"user": "u", "password": "p", "host": "db", "port": "1521", "service": "test"},
+        "select 'Histórico → ñ' from dual;",
+        read_only_transaction=True,
+        strict_input=False,
+    )
+
+    assert result.stdout == "óÁÑü�"
+    assert "Histórico ? ñ" in captured["input"]
+    assert captured["input"].splitlines()[0] == "set encoding utf8"
+    assert captured["encoding"] == "cp1252"
+    assert captured["errors"] == "surrogateescape"
+
+
+def test_decode_sqlcl_stream_decodes_real_cp1252_surrogateescaped_utf8_output():
+    process = subprocess.run(
+        [sys.executable, "-c", "import sys; sys.stdout.buffer.write(b'\\xc3\\xb3\\xc3\\xb1')"],
+        capture_output=True,
+        check=True,
+        text=True,
+        encoding="cp1252",
+        errors="surrogateescape",
+    )
+
+    assert mcp.decode_sqlcl_stream(process.stdout) == "óñ"
+
+
+def test_cp1252_input_reaches_a_real_child_as_its_original_bytes():
+    process = subprocess.run(
+        [sys.executable, "-c", "import sys; sys.stdout.buffer.write(sys.stdin.buffer.read())"],
+        capture_output=True,
+        check=True,
+        input=mcp.encode_sqlcl_input("óñ"),
+        text=True,
+        encoding="cp1252",
+        errors="surrogateescape",
+    )
+
+    assert process.stdout.encode("cp1252") == b"\xf3\xf1"
+
+
+def test_sqlcl_result_fails_closed_before_starting_process_for_unrepresentable_input(monkeypatch):
+    monkeypatch.setattr(mcp, "runtime_state", lambda: {"java_home": "java", "sqlcl_path": "sql"})
+    monkeypatch.setattr(
+        mcp.subprocess,
+        "run",
+        lambda *args, **kwargs: (_ for _ in ()).throw(AssertionError("SQLcl must not start")),
+    )
+
+    result = mcp.classify_result(
+        mcp.sqlcl_result(
+            {"user": "u", "password": "p", "host": "db", "port": "1521", "service": "test"},
+            "comment on table data.t is 'a→b';",
+        )
+    )
+
+    assert result["code"] == "UNREPRESENTABLE_CHARACTERS"
+    assert "CP1252" in result["message"]
+
+
+def test_write_routes_reject_unrepresentable_artifacts_before_starting_sqlcl(monkeypatch, tmp_path):
+    change = tmp_path / "change.sql"
+    change.write_text("comment on table data.t is 'a→b';", encoding="utf-8")
+    preflight = tmp_path / "preflight.sql"
+    preflight.write_text("select 'a→b' from dual;", encoding="utf-8")
+    apply = tmp_path / "apply.sql"
+    apply.write_text("comment on table data.t is 'safe';", encoding="utf-8")
+    verify = tmp_path / "verify.sql"
+    verify.write_text("select 1 from dual;", encoding="utf-8")
+    (tmp_path / "change.json").write_text(
+        json.dumps(
+            {
+                "version": 1,
+                "id": "cp1252-closed",
+                "kind": "oracle_data",
+                "target": {"type": "table", "name": "DATA.T"},
+                "baseline": {"fingerprint": "sha256:observed"},
+                "artifacts": {"preflight": "preflight.sql", "apply": "apply.sql", "verify": "verify.sql"},
+            }
+        ),
+        encoding="utf-8",
+    )
+    page = tmp_path / "f109_p131.sql"
+    page.write_text("begin\nwwv_flow_imp.import_begin;\n-- a→b\nwwv_flow_imp.import_end;\nend;\n/", encoding="utf-8")
+    monkeypatch.setattr(mcp, "ROOT", tmp_path)
+    monkeypatch.setattr(mcp, "AUDIT_PATH", tmp_path / "audit.jsonl")
+    monkeypatch.setattr(
+        mcp,
+        "load_profile",
+        lambda environment: ({"user": "u", "password": "p", "host": "db", "port": "1521", "service": "test"}, None),
+    )
+    monkeypatch.setattr(mcp, "runtime_state", lambda: {"java_home": "java", "sqlcl_path": "sql"})
+    monkeypatch.setattr(
+        mcp.subprocess,
+        "run",
+        lambda *args, **kwargs: (_ for _ in ()).throw(AssertionError("SQLcl must not start")),
+    )
+
+    sql_file = mcp.execute_sql_file("change.sql", confirmed=True, backup_choice="no", environment="test")
+    bundle = mcp.execute_change_bundle("change.json", confirmed=True, backup_choice="no", environment="test")
+    deployment = mcp.deploy_apex_page("f109_p131.sql", confirmed=True, backup_choice="no", environment="test")
+
+    assert sql_file["code"] == "UNREPRESENTABLE_CHARACTERS"
+    assert bundle["code"] == "UNREPRESENTABLE_CHARACTERS"
+    assert deployment["code"] == "UNREPRESENTABLE_CHARACTERS"
 
 
 def test_sqlcl_runtime_failure_is_reported_without_preflight(monkeypatch):

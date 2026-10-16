@@ -20,6 +20,20 @@ Mantén los secretos fuera de archivos versionados.
 bootstrap verifica el runtime y reporta los estados Oracle/APEX; sus sondeos
 iniciales no limitan operaciones posteriores.
 
+### Codificación en Windows
+
+El SQLcl administrado en Windows recibe su entrada estándar como CP1252. Antes
+de conectar, `sqlcl_result` envía el comando ASCII `set encoding utf8` para que
+SQLcl emita resultados en UTF-8; además normaliza el script para esa entrada
+con reemplazo explícito de caracteres no representables y reconstruye la salida
+como UTF-8 con reemplazo tolerante. Así los literales
+españoles CP1252, como `Descripción` e `Histórico`, llegan sin mojibake y un
+byte malformado no interrumpe la clasificación de ORA/SP2. No se usa
+`JAVA_TOOL_OPTIONS`: SQLcl 26.2.2 lo anuncia por `stderr` y no corrigió la
+entrada en la validación. Los caracteres fuera de CP1252 no lanzan
+`UnicodeEncodeError`, pero se sustituyen y no deben usarse para comparaciones
+semánticas sin una ruta Unicode específica validada.
+
 ## Herramientas
 
 El servidor incluye `doctor`, inspección de entorno, sesión Oracle, contexto

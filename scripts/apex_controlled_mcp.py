@@ -63,6 +63,40 @@ class CommandResult:
     exit_code: int
     stdout: str
     stderr: str
+    input_substitutions: int = 0
+
+
+def encode_sqlcl_input(script: str) -> str:
+    """Normalize stdin for the Windows SQLcl code page without raising on Unicode."""
+    return script.encode("cp1252", errors="replace").decode("cp1252")
+
+
+def input_substitution_count(script: str) -> int:
+    """Count input characters that CP1252 would replace before SQLcl receives them."""
+    return sum(1 for character in script if not _is_cp1252_character(character))
+
+
+def _is_cp1252_character(character: str) -> bool:
+    try:
+        character.encode("cp1252")
+    except UnicodeEncodeError:
+        return False
+    return True
+
+
+def unrepresentable_input_result(script: str) -> dict[str, Any] | None:
+    """Return the classified local failure used to stop a write before SQLcl starts."""
+    substitutions = input_substitution_count(script)
+    if not substitutions:
+        return None
+    return classify_result(
+        CommandResult(
+            1,
+            "",
+            f"UNREPRESENTABLE_CHARACTERS: {substitutions} character(s) cannot be represented in CP1252.",
+            substitutions,
+        )
+    )
 
 
 def runtime_root() -> Path:
@@ -181,6 +215,13 @@ def load_profile(environment: str | None) -> tuple[dict[str, str] | None, dict[s
     }, None
 
 
+def decode_sqlcl_stream(stream: str | bytes) -> str:
+    """Decode SQLcl output without letting malformed bytes hide the process result."""
+    if isinstance(stream, bytes):
+        return stream.decode("utf-8", errors="replace")
+    return stream.encode("cp1252", errors="surrogateescape").decode("utf-8", errors="replace")
+
+
 def sqlcl_result(
     profile: dict[str, str],
     statements: str,
@@ -188,6 +229,7 @@ def sqlcl_result(
     bind_variables: dict[str, int] | None = None,
     read_only_transaction: bool = False,
     continue_on_sql_error: bool = False,
+    strict_input: bool = True,
 ) -> CommandResult:
     """Run SQLcl with credentials over stdin, never command-line arguments."""
     state = runtime_state()
@@ -215,6 +257,7 @@ def sqlcl_result(
         )
     script = "\n".join(
         (
+            "set encoding utf8",
             "set echo off feedback off heading off pagesize 0 verify off",
             "set define off",
             "whenever sqlerror continue" if continue_on_sql_error else "whenever sqlerror exit sql.sqlcode rollback",
@@ -225,20 +268,35 @@ def sqlcl_result(
             "exit",
         )
     )
+    substitutions = input_substitution_count(script)
+    if substitutions and strict_input:
+        return CommandResult(
+            1,
+            "",
+            f"UNREPRESENTABLE_CHARACTERS: {substitutions} character(s) cannot be represented in CP1252.",
+            substitutions,
+        )
     try:
         process = subprocess.run(
             [str(sqlcl_path), "-S", "/nolog"],
             capture_output=True,
             check=False,
             env=environment,
-            input=script,
+            input=encode_sqlcl_input(script),
             text=True,
+            encoding="cp1252",
+            errors="surrogateescape",
             timeout=120,
             cwd=working_directory,
         )
     except (OSError, subprocess.TimeoutExpired) as exc:
         return CommandResult(1, "", f"SQLCL_RUNTIME_ERROR: {exc}")
-    return CommandResult(process.returncode, process.stdout, process.stderr)
+    return CommandResult(
+        process.returncode,
+        decode_sqlcl_stream(process.stdout),
+        decode_sqlcl_stream(process.stderr),
+        substitutions,
+    )
 
 
 def classify_result(result: CommandResult) -> dict[str, Any]:
@@ -262,6 +320,11 @@ def classify_result(result: CommandResult) -> dict[str, Any]:
     elif "RUNTIME_INTEGRITY_FAILED" in technical or "SQLCL_RUNTIME_ERROR" in technical:
         code = "RUNTIME_INTEGRITY_FAILED"
         clear = "SQLcl no pudo arrancar con el runtime configurado; solicite doctor() para revisar el runtime."
+    elif "UNREPRESENTABLE_CHARACTERS" in technical:
+        code = "UNREPRESENTABLE_CHARACTERS"
+        clear = (
+            "El script contiene caracteres no representables en CP1252; SQLcl no se inició ni se abrió una conexión."
+        )
     elif match and match.group(1) == "01031":
         code = "AUTHORIZATION_DENIED"
         clear = "La cuenta conectada no tiene el privilegio requerido para esta operación."
@@ -581,6 +644,7 @@ def execute_readonly_batch(
         bind_variables=bind_variables,
         read_only_transaction=True,
         continue_on_sql_error=True,
+        strict_input=False,
     )
     sqlcl_process_ms = round((time.perf_counter() - sqlcl_started) * 1000)
     process_result = classify_result(CommandResult(command.exit_code, command.stderr, ""))
@@ -669,6 +733,7 @@ def execute_readonly_batch(
         "identity": identity,
         "results": results,
         "timings_ms": timings_ms,
+        "input_substitutions": command.input_substitutions,
         "audit_persisted": audit_persisted,
         **({"warning": "No se pudo persistir la bitácora del lote."} if not audit_persisted else {}),
     }
@@ -704,6 +769,9 @@ def execute_artifact(
         source = workspace_sql_file(relative_path)
     except ValueError as exc:
         return {"ok": False, "code": "INVALID_ARTIFACT", "message": str(exc)}
+    input_error = unrepresentable_input_result(source.read_text(encoding="utf-8"))
+    if input_error is not None:
+        return {**input_error, "environment": environment, "source": str(source.relative_to(ROOT))}
     profile_started = time.perf_counter()
     profile, error = load_profile(environment)
     profile_load_ms = round((time.perf_counter() - profile_started) * 1000)
@@ -768,6 +836,18 @@ def execute_change_bundle_artifact(
         apply_verify_statements = render_execution_sql(bundle, ("apply", "verify"))
     except (ValueError, ChangeBundleError) as exc:
         return {"ok": False, "code": "INVALID_CHANGE_BUNDLE", "message": str(exc)}
+    input_error = unrepresentable_input_result(
+        "\n".join(
+            statement for statement in (preflight_statements, snapshot_statements, apply_verify_statements) if statement
+        )
+    )
+    if input_error is not None:
+        return {
+            **input_error,
+            "environment": environment,
+            "source": str(manifest.relative_to(ROOT)),
+            "bundle_id": bundle["id"],
+        }
     profile, error = load_profile(environment)
     if error is not None:
         return {"ok": False, **error}
@@ -1287,6 +1367,7 @@ def execute_readonly_query(
         normalized_query,
         bind_variables=bind_variables,
         read_only_transaction=True,
+        strict_input=False,
     )
     sqlcl_process_ms = round((time.perf_counter() - sqlcl_started) * 1000)
     result = classify_result(command)
@@ -1301,6 +1382,7 @@ def execute_readonly_query(
         "environment": environment,
         "source": "inline_readonly_query",
         "timings_ms": timings_ms,
+        "input_substitutions": command.input_substitutions,
     }
 
 
