@@ -10,6 +10,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 ## [Unreleased]
 
 ### Changed
+- Preserve the classified SQLcl process-failure code for every read-only batch query and its global result.
+- Make `execute_readonly_batch` fail closed on missing output markers, SQL*Plus/SQLcl errors, and pre-marker Oracle connection/authentication failures; preserve query results and report an audit warning if batch audit persistence fails.
 - Make `rollback.sql` optional in coordinated change bundles and clarify that a declared rollback script is not executed automatically.
 - Reject a bundle that declares `snapshot` when the user declines a backup.
 - Update `Deploy-ApexPage.ps1` help examples to include the required action confirmation and backup choice.
@@ -48,6 +50,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ### Added
 
+- Added `execute_readonly_batch` for up to 25 validated SELECT statements in one read-only SQLcl session, with per-query Oracle errors, same-session identity, timings, and digest-only audit; documented and verified APEX page snapshot queries for TEST.
 - Added a whole-repository Markdown coverage and link auditor with fragment checks, explicit exclusions, external URL status reporting, regression tests, and shared CI/pre-commit invocation.
 - Added a bound, single-SELECT SQLcl route in an Oracle read-only transaction, with hash-only audit logging, so metadata reads do not depend on a repository SQL artifact.
 - Added regressions for inline read-only query validation, ORA-20987-independent metadata routing, and the default DATA schema owner.
@@ -73,6 +76,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ### Fixed
 
+- Read `runtime-state.json` with UTF-8 BOM tolerance so Windows PowerShell 5.1 runtime state is recognized by the local doctor.
 - Closed a routing gap that allowed omitted Oracle object owners to inherit the connected user's schema despite the existing DATA governance default; added a regression for coordinator and workflow instructions.
 - Fixed SQLcl read-only query execution by terminating `SET TRANSACTION READ ONLY` before the SELECT statement.
 - Clarified that new Oracle objects default to the DATA schema, and that repository-backed SQL tools require temporary artifacts inside the MCP checkout with a same-environment APEX SQL fallback after artifact or context-helper failures.

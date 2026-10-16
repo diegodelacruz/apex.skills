@@ -41,7 +41,7 @@ ruta y el resultado con las credenciales configuradas para esta solicitud.
 
 | Operación | Ruta preferida | Credencial y alcance |
 | --- | --- | --- |
-| Oracle: inspeccionar objetos, columnas, errores y datos | `apex-controlled-mcp.execute_readonly_query` (SELECT de metadata con binds enteros); `inspect_oracle_session`, `inspect_oracle_privileges`, `inspect_environment`; MCP Oracle de lectura; `scripts/Execute-OracleSql.ps1 -ReadOnly` | Perfil Oracle seleccionado para el ambiente. La transacción de solo lectura bloquea DML directo; la ruta se reserva a consultas conocidas porque un SELECT puede invocar funciones con efectos laterales. |
+| Oracle: inspeccionar objetos, columnas, errores y datos | `apex-controlled-mcp.execute_readonly_query` (un SELECT de metadata con binds enteros); `apex-controlled-mcp.execute_readonly_batch` (hasta 25 SELECT de una línea/100000 caracteres, una sesión); `inspect_oracle_session`, `inspect_oracle_privileges`, `inspect_environment`; MCP Oracle de lectura; `scripts/Execute-OracleSql.ps1 -ReadOnly` | Perfil Oracle seleccionado para el ambiente. Ambas rutas SQLcl usan transacción de solo lectura y se reservan a consultas conocidas porque un SELECT puede invocar funciones con efectos laterales. |
 | Oracle: ejecutar un DML puntual confirmado | `apex-controlled-mcp.execute_sql_file` o `Execute-OracleSql.ps1` | Las rutas controladas exigen `confirmed=true` y `backup_choice=yes/no`. Con sí, requieren y ejecutan un SQL de backup dedicado antes; si falta o falla, bloquean el DML. Registran inicio/resultado y hashes en `.bitacora.json`, sin SQL ni credenciales. No requiere conteo previo, bundle ni plan por defecto. |
 | Oracle: ejecutar DDL/PLSQL o cambio coordinado | `execute_sql_file`, SQLcl; `execute_change_bundle` cuando se necesita comprobar una fingerprint o coordinar objetos | Usar la credencial seleccionada. Bundle/preflight es condicional al alcance. Con backup afirmativo, `execute_change_bundle` requiere `snapshot.sql` y lo ejecuta tras preflight y antes de apply; ante falla detiene apply. |
 | APEX: listar aplicaciones, inspeccionar páginas/componentes y comparar metadata | Herramientas de lectura del MCP APEX configurado; `inspect_apex_context` / `inspect_environment`; export nativo o App Builder si la cuenta lo permite | Perfil APEX/App Builder configurado para el ambiente, o la sesión Oracle elegida cuando se leen vistas de metadata. Confirmar identidad y destino observados; el rótulo del MCP no basta. |
@@ -58,6 +58,13 @@ elegir TEST o Producción a ciegas.
 SQL y no depende de que el proyecto sea un checkout Git. No usarla como sandbox
 para SQL arbitrario: Oracle permite ciertos efectos laterales de funciones
 llamadas desde SELECT aunque la transacción sea de solo lectura.
+Para una revisión de página completa, `execute_readonly_batch` valida todas las
+consultas antes de conectar, incluye la identidad de sesión por defecto y
+ejecuta hasta 25 SELECT de una línea (100000 caracteres totales) en una sola
+sesión y transacción read-only. Devuelve resultado y ORA por consulta, continúa
+después de errores Oracle y audita solo digests, códigos y tiempos. Usa
+`skills/apex-database-diagnostics/references/page-snapshot-queries.md`; la ruta
+unitaria `execute_readonly_query` sigue disponible para un SELECT específico.
 `execute_sql_file` requiere un
 archivo `.sql` dentro del checkout que sirve al MCP; úsalo para DDL/DML/PLSQL.
 Las herramientas mutativas bloquean la llamada si falta la confirmación o la
@@ -94,7 +101,9 @@ de metadata con la credencial elegida. Si el helper de página del MCP falla por
 incompatibilidad de columnas o el helper de contexto devuelve ORA-20987, usar
 consultas enlazadas mediante `execute_readonly_query` o `apex_run_sql` contra
 `APEX_APPLICATION_PAGE_REGIONS`, items, procesos, botones, acciones y
-validaciones. No acceder a `WWV_FLOW_*` internos.
+validaciones. Para una página completa, usa el lote probado documentado en
+`skills/apex-database-diagnostics/references/page-snapshot-queries.md`; no se
+requiere una llamada de identidad separada. No acceder a `WWV_FLOW_*` internos.
 
 ## Separación entre herramientas y privilegios
 

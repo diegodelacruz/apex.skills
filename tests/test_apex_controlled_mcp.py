@@ -15,6 +15,41 @@ def test_doctor_reports_missing_runtime(monkeypatch, tmp_path):
     assert result["code"] == "RUNTIME_NOT_INSTALLED"
 
 
+def test_runtime_state_reads_utf8_bom(monkeypatch, tmp_path):
+    state = {"java_home": "java", "sqlcl_path": "sqlcl"}
+    (tmp_path / "runtime-state.json").write_bytes(b"\xef\xbb\xbf" + json.dumps(state).encode("utf-8"))
+    monkeypatch.setenv(mcp.RUNTIME_ENV, str(tmp_path))
+
+    assert mcp.runtime_state() == state
+
+
+def test_runtime_state_reads_utf8_without_bom(monkeypatch, tmp_path):
+    state = {"java_home": "java", "sqlcl_path": "sqlcl"}
+    (tmp_path / "runtime-state.json").write_bytes(json.dumps(state).encode("utf-8"))
+    monkeypatch.setenv(mcp.RUNTIME_ENV, str(tmp_path))
+
+    assert mcp.runtime_state() == state
+
+
+def test_doctor_does_not_report_missing_runtime_for_utf8_bom(monkeypatch, tmp_path):
+    java_home = tmp_path / "java"
+    java_exe = java_home / "bin" / "java.exe"
+    sqlcl_path = tmp_path / "sqlcl.exe"
+    java_exe.parent.mkdir(parents=True)
+    java_exe.write_text("", encoding="utf-8")
+    sqlcl_path.write_text("", encoding="utf-8")
+    state = {"java_home": str(java_home), "sqlcl_path": str(sqlcl_path)}
+    (tmp_path / "runtime-state.json").write_bytes(b"\xef\xbb\xbf" + json.dumps(state).encode("utf-8"))
+    monkeypatch.setenv(mcp.RUNTIME_ENV, str(tmp_path))
+    monkeypatch.setattr(
+        mcp.subprocess,
+        "run",
+        lambda *args, **kwargs: type("Process", (), {"returncode": 0, "stdout": "SQLcl", "stderr": ""})(),
+    )
+
+    assert mcp.doctor_report()["code"] != "RUNTIME_NOT_INSTALLED"
+
+
 def test_doctor_reports_registered_missing_binary(monkeypatch, tmp_path):
     state = {"java_home": str(tmp_path / "java"), "sqlcl_path": str(tmp_path / "sql.exe")}
     (tmp_path / "runtime-state.json").write_text(json.dumps(state), encoding="utf-8")
