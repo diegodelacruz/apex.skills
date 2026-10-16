@@ -107,6 +107,28 @@ def test_batch_sql_error_continuation_is_opt_in_and_mutation_default_stays_fail_
     assert "whenever sqlerror continue" in captured[1]
 
 
+def test_readonly_batch_substitutes_unrepresentable_input_and_reports_count(monkeypatch, tmp_path):
+    monkeypatch.setattr(mcp, "ROOT", Path(tmp_path))
+    monkeypatch.setattr(mcp, "AUDIT_PATH", Path(tmp_path) / "audit.jsonl")
+    monkeypatch.setattr(
+        mcp,
+        "load_profile",
+        lambda environment: ({"user": "u", "password": "p", "host": "db", "port": "1521", "service": "test"}, None),
+    )
+    monkeypatch.setattr(mcp, "runtime_state", lambda: {"java_home": "java", "sqlcl_path": "sql"})
+
+    def fake_run(args, **kwargs):
+        assert "→" not in kwargs["input"]
+        markers = [line.removeprefix("prompt ") for line in kwargs["input"].splitlines() if line.startswith("prompt ")]
+        return type("Process", (), {"returncode": 0, "stdout": f"{markers[0]}\nrow\n{markers[1]}\n", "stderr": ""})()
+
+    monkeypatch.setattr(mcp.subprocess, "run", fake_run)
+    result = mcp.execute_readonly_batch(["select 'a→b' from dual"], "test", include_identity=False)
+
+    assert result["ok"] is True
+    assert result["input_substitutions"] > 0
+
+
 @pytest.mark.parametrize("include_identity", [True, False])
 @pytest.mark.parametrize(
     "oracle_error",

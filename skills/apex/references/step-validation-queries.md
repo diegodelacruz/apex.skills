@@ -6,6 +6,8 @@ Los literales con acentos CP1252, por ejemplo `Descripción` o `Histórico`, son
 compatibles con la ruta controlada de SQLcl en Windows. Conserva el literal
 real y valida su lectura exacta; evita usar caracteres fuera de CP1252 (como
 `→`) como predicados hasta contar con una ruta Unicode específica validada.
+En la página TEST `109.131`, `Histórico` es el valor de `label`; el identificador
+del botón es `button_name = 'HISTORICO'`, sin acento.
 
 ## Diccionario Oracle
 
