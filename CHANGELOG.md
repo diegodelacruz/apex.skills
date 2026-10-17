@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 ## [Unreleased]
 
 ### Changed
+- Define who executes an Oracle/APEX change and what counts as the single confirmation: a descriptive request is not a confirmation, `paso a paso` defaults to user execution, and `confirmed=true` requires an explicit agent-execution phrase or an affirmative reply; remove documentation that said a direct request needs no further approval.
 - Document the proposed read-only `inspect_apex_page` tool (not implemented), with measured evidence, design, acceptance criteria, and the related pending backlog.
 - Remove the fixed five-step cap from Oracle/APEX step-by-step mode; plans now announce `M` total steps, and all-steps execution stops at its first execution error while reporting unexecuted steps explicitly.
 - Validate separate column and table comment steps through `ALL_COL_COMMENTS` and `ALL_TAB_COMMENTS` templates.

@@ -6,7 +6,9 @@
 perfil Oracle del ambiente seleccionado. Puede coexistir con otros MCP Oracle/
 APEX, incluido el upstream `apex-mcp` completo.
 
-La solicitud directa define la operación, el alcance y el ambiente. El servidor
+La solicitud directa define la operación, el alcance y el ambiente. Ejecutar una mutación
+requiere la confirmación única definida en `skills/apex/references/step-mode.md`; una orden
+descriptiva no la sustituye. El servidor
 selecciona el perfil Oracle `DB_TESTING_*` o `DB_PRODUCTION_*` configurado en
 `.env`; Oracle y los grants efectivos de esa cuenta deciden si la operación
 procede. Las rutas APEX usan la credencial que corresponda al conector

@@ -8,4 +8,4 @@ El inicializador no altera los registros MCP existentes. Las skills no bloquean 
 
 ## Operación
 
-Indique la operación y el ambiente. La solicitud directa autoriza ese alcance; no se requiere aprobación adicional de la skill. Si una operación falla, informe el error real y continúe con trabajo independiente.
+Indique la operación y el ambiente. La solicitud directa define ese alcance. Antes de ejecutar un cambio se pide una confirmación única (ambiente, objeto, acción y backup sí/no), salvo que el mensaje ya incluya una frase explícita de ejecución como «hazlo tú» con esos datos; no se pide otra aprobación. Si una operación falla, informe el error real y continúe con trabajo independiente.

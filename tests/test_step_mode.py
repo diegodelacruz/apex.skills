@@ -100,3 +100,33 @@ def test_repository_change_instructions_have_no_unreconciled_step_mode_contradic
 
     assert hits
     assert all("step-mode.md" in _read(path) or path == STEP_MODE for path, _ in hits)
+
+
+def test_step_mode_defines_executor_and_confirmation_rule():
+    protocol = _read(STEP_MODE)
+
+    assert "Quién ejecuta y qué cuenta como confirmación" in protocol
+    assert "no equivale a “hazlo tú”" in protocol
+    assert "nunca por inferencia de una orden descriptiva" in protocol
+    assert "prevalece sobre notas de memoria" in protocol
+
+
+def test_no_document_says_direct_request_removes_confirmation():
+    forbidden = (
+        "Treat the complete answer as the single confirmation",
+        "no se requiere aprobación adicional de la skill",
+        "sin añadir un gate de aprobación para una solicitud directa",
+    )
+    for path in (ROOT / "skills", ROOT / "docs", ROOT / "CLAUDE.md", ROOT / "AGENTS.md"):
+        files = [path] if path.is_file() else [p for p in path.rglob("*.md") if "decisiones" not in p.parts]
+        for file in files:
+            text = _read(file)
+            for phrase in forbidden:
+                assert phrase not in text, f"{file}: {phrase}"
+
+
+def test_scenario_a_documents_user_executor_regression():
+    pruebas = _read(ROOT / "docs/PRUEBAS-COMPORTAMIENTO-PASO-A-PASO.md")
+
+    assert "regresión de ejecutor" in pruebas
+    assert "Registro de ejecuciones" in pruebas
