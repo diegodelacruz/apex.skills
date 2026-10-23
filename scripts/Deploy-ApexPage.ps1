@@ -46,6 +46,7 @@ param(
 
 $ErrorActionPreference = "Stop"
 . (Join-Path $PSScriptRoot "Write-ApexAuditEvent.ps1")
+. (Join-Path $PSScriptRoot "Invoke-SqlclScript.ps1")
 
 # Resolve SQLcl
 if (-not $SqlclPath) { $SqlclPath = $env:APEX_SQLCL_PATH }
@@ -229,15 +230,10 @@ try {
         $tempScript = [System.IO.Path]::GetTempFileName() + ".sql"
         $wrapperScript | Out-File -FilePath $tempScript -Encoding UTF8
         $sqlclWatch = [System.Diagnostics.Stopwatch]::StartNew()
-        $process = Start-Process -FilePath $SqlclPath `
-            -ArgumentList @("-S", $env:APEX_SQLCL_CONN, "@$tempScript") `
-            -NoNewWindow -Wait -PassThru `
-            -RedirectStandardOutput "$tempScript.out" `
-            -RedirectStandardError "$tempScript.err"
-
-        $stdout = if (Test-Path "$tempScript.out") { Get-Content "$tempScript.out" -Raw } else { "" }
-        $stderr = if (Test-Path "$tempScript.err") { Get-Content "$tempScript.err" -Raw } else { "" }
-        $exitCode = $process.ExitCode
+        $sqlcl = Invoke-SqlclScript -SqlclPath $SqlclPath -Connection $env:APEX_SQLCL_CONN -ScriptPath $tempScript
+        $stdout = $sqlcl.StdOut
+        $stderr = $sqlcl.StdErr
+        $exitCode = $sqlcl.ExitCode
     } catch {
         $executionError = $_
     } finally {
@@ -285,7 +281,5 @@ try {
     $routeWatch.Stop()
     if ($tempScript) {
         Remove-Item $tempScript -ErrorAction SilentlyContinue
-        Remove-Item "$tempScript.out" -ErrorAction SilentlyContinue
-        Remove-Item "$tempScript.err" -ErrorAction SilentlyContinue
     }
 }

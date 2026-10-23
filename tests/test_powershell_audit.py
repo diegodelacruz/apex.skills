@@ -73,8 +73,8 @@ exit 0
 @pytest.mark.parametrize(
     ("script_name", "operation_marker", "execution_marker"),
     [
-        ("Execute-OracleSql.ps1", "oracle_sql_file", "Start-Process"),
-        ("Deploy-ApexPage.ps1", "apex_native_import", "Start-Process"),
+        ("Execute-OracleSql.ps1", "oracle_sql_file", "Invoke-SqlclScript -SqlclPath"),
+        ("Deploy-ApexPage.ps1", "apex_native_import", "Invoke-SqlclScript -SqlclPath"),
         ("Invoke-OracleApexChange.ps1", "oracle_apex_change_bundle", "Invoke-BundleSqlclPhase -SqlFile $preflightSql"),
     ],
 )
@@ -102,7 +102,7 @@ def test_powershell_readonly_route_does_not_gate_query_on_start_audit():
     script = (ROOT / "scripts" / "Execute-OracleSql.ps1").read_text(encoding="utf-8")
     start_event = script.index("$auditStart = New-ApexAuditEntry")
     start_write = script.index("Write-ApexAuditEvent -AuditPath $auditPath -Entry $auditStart")
-    sql_execution = script.index("Start-Process -FilePath $SqlclPath")
+    sql_execution = script.index("Invoke-SqlclScript -SqlclPath $SqlclPath")
     completion_write = script.index("Write-ApexAuditEvent -AuditPath $auditPath -Entry $auditComplete")
 
     assert "if (-not $ReadOnly) {" in script[start_write - 100 : start_write]

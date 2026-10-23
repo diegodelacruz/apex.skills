@@ -21,6 +21,7 @@ param(
 
 $ErrorActionPreference = "Stop"
 . (Join-Path $PSScriptRoot "Write-ApexAuditEvent.ps1")
+. (Join-Path $PSScriptRoot "Invoke-SqlclScript.ps1")
 if (-not $DryRun) {
 	if (-not $Confirmed) { throw "A live bundle requires -Confirmed after the user's explicit action confirmation." }
 	if ($BackupChoice -notin @("yes", "no")) { throw "A live bundle requires -BackupChoice yes or no." }
@@ -59,8 +60,8 @@ function Invoke-BundleSqlclPhase {
             (Get-Content -LiteralPath $SqlFile -Raw -Encoding UTF8),
             "EXIT"
         ) | Set-Content -LiteralPath $script -Encoding UTF8
-        $output = & $env:APEX_SQLCL_PATH "-S" $env:APEX_SQLCL_CONN "@$script" 2>&1 | Out-String
-        return [PSCustomObject]@{ ExitCode = $LASTEXITCODE; Output = $output }
+        $sqlcl = Invoke-SqlclScript -SqlclPath $env:APEX_SQLCL_PATH -Connection $env:APEX_SQLCL_CONN -ScriptPath $script
+        return [PSCustomObject]@{ ExitCode = $sqlcl.ExitCode; Output = $sqlcl.StdOut + $sqlcl.StdErr }
     } finally {
         Remove-Item -LiteralPath $script -ErrorAction SilentlyContinue
     }
