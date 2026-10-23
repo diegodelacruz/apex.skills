@@ -57,8 +57,10 @@ version control.
   proceed and whether a backup is wanted. Do not execute until the user has
   explicitly answered both decisions. If either answer is missing or ambiguous,
   ask only for that missing decision and wait; never infer "no backup" from
-  silence. Treat the complete answer as the single confirmation (una sola confirmación); do not ask
-  again unless scope changes. In **paso a paso**, the initial choice can
+  silence. Treat the user's answer to that confirmation as the single confirmation (una sola confirmación); an
+  initial descriptive request is not that answer. A message that already contains an explicit
+  agent-execution phrase (`hazlo tú`, `solo hazlo`, `ejecútalo`) plus environment, target,
+  action and backup yes/no counts as the confirmation. Do not ask again unless scope changes. In **paso a paso**, the initial choice can
   authorize bounded steps and the `¿continúo?` checkpoint is not another
   confirmation; follow [the step-mode protocol](references/step-mode.md).
   If backup is declined, create no backup,

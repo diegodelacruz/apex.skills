@@ -14,6 +14,19 @@ LECTURA ──cambio solicitado──> DECISIÓN INICIAL ──> LÍNEA BASE
    └── solo leer ─┘                         └── falta dato ─┘ pregunta puntual
 ```
 
+## Quién ejecuta y qué cuenta como confirmación
+
+La petición inicial describe el cambio; no lo autoriza por sí sola. Una orden descriptiva (“cambia el comentario de X a Y”) no equivale a “hazlo tú”, aunque incluya ambiente, objeto, backup y modo. Esta tabla prevalece sobre notas de memoria o preferencias aprendidas de sesiones anteriores; si una nota la contradice, sigue la tabla.
+
+| La petición contiene | Ejecutor | Confirmación |
+|---|---|---|
+| Frase explícita de ejecución por el agente (`hazlo tú`, `solo hazlo`, `ejecútalo`, `aplícalo`) más ambiente, objeto, acción y backup sí/no | Agente | La propia petición es la confirmación única; ejecuta con `confirmed=true` |
+| Frase explícita de ejecución por el usuario (`yo ejecuto`, `guíame`, `dame los pasos`) | Usuario | `confirmado` tras cada paso |
+| Solo una orden descriptiva y `paso a paso` (o sin modo) | Usuario (predeterminado) | `confirmado` tras cada paso; el agente no usa herramientas de escritura |
+| Solo una orden descriptiva y `todos los pasos` | Se pregunta en la pregunta inicial | La respuesta a esa pregunta |
+
+Si falta ambiente, objeto, acción o backup sí/no, se pregunta solo el dato faltante. El agente envía `confirmed=true` únicamente cuando la tabla lo permite o cuando el usuario respondió afirmativamente a una confirmación presentada; nunca por inferencia de una orden descriptiva. Un intento rechazado por el ejecutor (por ejemplo, un archivo fuera del repositorio) no cambia esta regla.
+
 ## Paso a paso
 
 El agente presenta exactamente un paso, quién lo ejecuta y su resultado esperado. Normalmente el usuario guarda, compila o confirma y escribe `confirmado`. Entonces el agente ejecuta una sola validación de solo lectura con `execute_readonly_batch`, muestra la consulta y el resultado observado.
@@ -23,7 +36,7 @@ PROPONER UN PASO → USUARIO EJECUTA → CONFIRMADO → VALIDAR → PASS → ¿c
                                                     └ FAIL → DETENER
 ```
 
-Si el usuario dice “hazlo tú”, el agente ejecuta solo ese paso con los gates vigentes (`confirmed=true` y `backup_choice=yes/no`), resume el resultado y pregunta si continúa. La pregunta **¿continúo?** entre pasos no viola la regla de una sola confirmación: cada paso es una unidad de alcance dentro de la decisión inicial. No solicita una nueva elección de backup salvo cambio de objeto o alcance. Al inicio anuncia el total `M` de pasos del plan; si el plan cambia, lo anuncia como cambio de alcance antes de continuar.
+Si la petición cumple la fila del agente (por ejemplo, “hazlo tú”), el agente ejecuta solo ese paso con los gates vigentes (`confirmed=true` y `backup_choice=yes/no`), resume el resultado y pregunta si continúa. La pregunta **¿continúo?** entre pasos no viola la regla de una sola confirmación: cada paso es una unidad de alcance dentro de la decisión inicial. No solicita una nueva elección de backup salvo cambio de objeto o alcance. Al inicio anuncia el total `M` de pasos del plan; si el plan cambia, lo anuncia como cambio de alcance antes de continuar.
 
 Después de cada PASS muestra:
 

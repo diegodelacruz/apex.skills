@@ -112,7 +112,7 @@ credencial. La superficie de herramientas solo determina qué se puede intentar;
 no concede permisos Oracle/APEX. A su vez, las credenciales con privilegios
 amplios no autorizan cambios fuera de la solicitud del usuario. Usar la ruta
 especializada cuando mejore la evidencia o el formato (por ejemplo, import
-nativo APEX), sin añadir un gate de aprobación para una solicitud directa.
+nativo APEX), sin añadir un gate de aprobación distinto de la confirmación única.
 
 Por decisión del usuario, se consideran capacidades intencionales la ejecución
 de DDL/DML/PLSQL Oracle solicitado y las operaciones APEX disponibles para la

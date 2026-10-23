@@ -5,7 +5,9 @@ una sola confirmación que identifique ambiente, objeto y acción, y una respues
 explícita de sí/no a si desea backup. No ejecutes si falta una de las dos
 decisiones. Si el usuario omite o deja ambigua la decisión de backup, pregunta
 solo eso y espera. La decisión completa es la única confirmación; no solicites
-otra aprobación salvo que cambie el alcance. La excepción es el checkpoint
+otra aprobación salvo que cambie el alcance. Una orden descriptiva inicial no es esa
+confirmación; consulta «Quién ejecuta y qué cuenta como confirmación» en
+[step-mode](step-mode.md). La excepción es el checkpoint
 `¿continúo?` de cada unidad de alcance en modo paso a paso: no es una nueva
 confirmación ni una nueva elección de backup. Sigue [modo paso a paso / todos
 los pasos](step-mode.md) para ambos modos, línea base y validación.
