@@ -25,7 +25,7 @@ This table is derived from every `skills/*/SKILL.md` frontmatter. The source fil
 | apex-code-generation-safe | apex-code-generation-safe | Apex Engineering & Design | 24 | development | code-generation, apex, forms, reports, automation, read-only | Generate APEX components automatically from schema and metadata |
 | apex-data-migration-safe | apex-data-migration-safe | Apex Data Integration | 25 | development | data-migration, prototype, schema-mapping, validation, data-sync | Development prototype for migration mapping and in-memory validation; no live Oracle executor |
 | apex-data-orchestrator-safe | apex-data-orchestrator-safe | Apex Data Integration | 13.5 | development | orchestration, data-integration, schema, etl, migration, automation | Development outline for schema and data migration workflows; APEX artifact import is separate |
-| apex-database-diagnostics | apex-database-diagnostics | Apex Database & Diagnostics | 1 | active | diagnostics, inspection, oracle | Diagnose Oracle and APEX requests in the user-selected environment through available authenticated routes. |
+| apex-database-diagnostics | apex-database-diagnostics | Apex Database & Diagnostics | 1 | active | diagnostics, inspection, oracle | Diagnose Oracle and APEX requests, including data present at a source but missing or wrong downstream, in the user-selected environment through available authenticated routes. |
 | apex-delivery-lifecycle-complete | apex-delivery-lifecycle-complete | Apex Delivery & Lifecycle | 2 | active | lifecycle, workflow, release, governance | Run the complete APEX lifecycle with environment and DATA governance. |
 | apex-delivery-lifecycle-safe | apex-delivery-lifecycle-safe | Apex Delivery & Lifecycle | 3 | active | lifecycle, workflow, qa, governance | Coordinate a safe APEX workflow from design through QA and documentation. |
 | apex-delivery-lifecycle-zaimella | apex-delivery-lifecycle-zaimella | Apex Delivery & Lifecycle | 3.5 | development | orchestration, delivery-lifecycle, methodology, gpz, zaimella, governance, project-management | Integrate GPZ (Zaimella) methodology with APEX delivery lifecycle for comprehensive project governance |
@@ -55,7 +55,7 @@ This table is derived from every `skills/*/SKILL.md` frontmatter. The source fil
   - *Tags: audit, documentation, decisions, governance, read-only*
 
 ### Apex Database & Diagnostics
-- **[apex-database-diagnostics](./apex-database-diagnostics)** - Diagnose Oracle and APEX requests in the user-selected environment through available authenticated routes.
+- **[apex-database-diagnostics](./apex-database-diagnostics)** - Diagnose Oracle and APEX requests, including data present at a source but missing or wrong downstream, in the user-selected environment through available authenticated routes.
   - *Tags: diagnostics, inspection, oracle*
 
 ### Apex Database & Schema

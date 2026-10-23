@@ -2,6 +2,7 @@
 
 Antes de modificar este repositorio, leer `docs/POLITICA-EVOLUCION-ECOSISTEMA.md`.
 Para cambios Oracle/APEX, aplica la pregunta única y los modos definidos en `skills/apex/references/step-mode.md`.
+Para diagnosticar un dato presente en origen y ausente o incorrecto en destino, aplica `skills/apex-database-diagnostics/references/trazabilidad-end-to-end.md`: registro testigo y de control, primera divergencia con evidencia antes de nombrar una causa, y solo lectura.
 
 Estas reglas aplican a toda sesión y a cualquier agente que trabaje sobre
 `apex.skills`. Ningún archivo puede obligar técnicamente a un agente externo

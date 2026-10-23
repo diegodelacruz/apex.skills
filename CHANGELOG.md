@@ -53,6 +53,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ### Added
 
+- Added the domain-agnostic Trazabilidad End-to-End (TE2E) diagnostic method for data present at a source but missing or wrong downstream: witness and mandatory control records, a bidirectional Markdown trace map, per-stage evidence, D0–D7/DX divergence taxonomy, root-cause/probable/evidence-limitation criteria, an anti-"configuration" rule, cost bounds, and read-only operation. It includes an Oracle/APEX probe adapter verified in TEST, a trace-map template, routing and adapter links, manual behavior scenarios, a decision record, and regressions.
 - Added `execute_readonly_batch` for up to 25 validated SELECT statements in one read-only SQLcl session, with per-query Oracle errors, same-session identity, timings, and digest-only audit; documented and verified APEX page snapshot queries for TEST.
 - Added a whole-repository Markdown coverage and link auditor with fragment checks, explicit exclusions, external URL status reporting, regression tests, and shared CI/pre-commit invocation.
 - Added a bound, single-SELECT SQLcl route in an Oracle read-only transaction, with hash-only audit logging, so metadata reads do not depend on a repository SQL artifact.

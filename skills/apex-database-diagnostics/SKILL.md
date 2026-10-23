@@ -3,7 +3,7 @@ name: apex-database-diagnostics
 category: "Apex Database & Diagnostics"
 order: 1
 tags: ["diagnostics", "inspection", "oracle"]
-description: "Diagnose Oracle and APEX requests in the user-selected environment through available authenticated routes."
+description: "Diagnose Oracle and APEX requests, including data present at a source but missing or wrong downstream, in the user-selected environment through available authenticated routes."
 ---
 
 # APEX Database Diagnostics
@@ -21,6 +21,24 @@ description: "Diagnose Oracle and APEX requests in the user-selected environment
 7. Use local files as supplementary evidence, or when the `.env`-backed requested connection is unavailable. Bootstrap status is informational and does not change the credential source.
 8. For an existing-page error or edit, use `apex-environment-alignment-complete` for comparison evidence when useful; a missing comparison does not block the requested work.
 9. For a simple read or object/specification display, return the requested information, observed destination, and any actual access limitation; do not generate a correction plan, rollback discussion, or change artifacts. For an error/performance diagnosis or a requested correction, return evidence and analysis relevant to that task. When a correction is plausible, retain compact live-change context so it can be reused if the user confirms the change. Do not create files or modify the target during diagnosis.
+
+## Data discrepancies: Trazabilidad End-to-End
+
+When a record exists at a source but is missing, duplicated, or wrong at a
+screen, report, process, interface, file, or target table ("no aparece", "no
+cuadra", "en A sí y en B no"), follow [the domain-agnostic TE2E method](references/trazabilidad-end-to-end.md).
+Use [the Oracle/APEX adapter](references/trazabilidad-adaptador-oracle-apex.md)
+for the read-only probes and [the trace-map template](assets/mapa-trazabilidad.template.md)
+for the deliverable. Fix a witness record and a control record, verify both
+ends, discover the real flow from both directions, and locate the first stage
+where the witness diverges before naming a cause. Classify the result with
+codes D0–D7 or DX. Do not declare configuration, filters, or permissions the
+cause until that mechanism has been evaluated against the witness record.
+Flows with at most two stages use the lightweight mode. The method is a
+diagnosis: it runs immediately, stays read-only, never re-runs processes, and
+hands any confirmed correction to the live-change protocol with its trace
+context intact. It does not apply to simple reads, execution errors without a
+data discrepancy, or performance work.
 
 ## Historical memory and current blockers
 

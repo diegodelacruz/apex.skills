@@ -63,6 +63,9 @@ than converted into an approval requirement.
    then perform those requested operations through the appropriate specialist.
 7. Report each check as passed, failed, unavailable, or not requested, with evidence and impact.
    A finding does not silently expand or cancel the user's requested implementation scope.
+8. When a QA finding is data present at a source but missing or wrong in the application, hand it
+   to `apex-database-diagnostics` with its [Trazabilidad End-to-End](../apex-database-diagnostics/references/trazabilidad-end-to-end.md)
+   method and report its classification and certainty; QA does not name a cause without that trace.
 
 ## Output
 
