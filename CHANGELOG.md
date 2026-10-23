@@ -10,7 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 ## [Unreleased]
 
 ### Security
-- Stop exposing the Oracle password in the process list from `Deploy-ApexPage.ps1`, `Execute-OracleSql.ps1`, and `Invoke-OracleApexChange.ps1`: SQLcl now starts as `sql -S /nolog` and receives `connect` over a BOM-free stdin through the new `Invoke-SqlclScript.ps1` helper, and a failed connect exits non-zero before the script runs. Exit codes, gates, and audit events are unchanged; regression tests assert the connection string never appears in SQLcl's arguments.
+- Stop exposing the Oracle password in the process list from `Deploy-ApexPage.ps1`, `Execute-OracleSql.ps1`, and `Invoke-OracleApexChange.ps1`: SQLcl now starts as `sql -S /nolog` and receives `SET DEFINE OFF` and `connect` over a BOM-free stdin through the new `Invoke-SqlclScript.ps1` helper, and a failed connect exits non-zero before the script runs. Exit codes, gates, and audit events are unchanged; regression tests assert the connection string never appears in SQLcl's arguments.
 
 ### Changed
 - Update development tooling consolidating the open Dependabot updates: Black 26.5.1, isort >=9.0.1, flake8 >=7.3.0, pylint >=4.0.7, python-docx >=1.2.0, and GitHub Actions `actions/checkout@v7`, `actions/setup-python@v7`, `codecov/codecov-action@v7`; align the pre-commit hook revisions and configuration guides, and apply Black 26 formatting to one docstring.

@@ -19,7 +19,9 @@ function Get-SqlclStdinInput {
         [Parameter(Mandatory = $true)][string]$Connection,
         [Parameter(Mandatory = $true)][string]$ScriptPath
     )
+    # DEFINE OFF before connect: an "&" in the password must not trigger substitution.
     return (@(
+        "SET DEFINE OFF",
         "WHENEVER SQLERROR EXIT FAILURE",
         "connect $Connection",
         "@`"$ScriptPath`"",

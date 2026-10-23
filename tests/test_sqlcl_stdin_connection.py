@@ -14,7 +14,7 @@ import pytest
 ROOT = Path(__file__).resolve().parent.parent
 # Windows PowerShell 5.1 and PowerShell 7 build the SQLcl stdin writer differently; test both.
 SHELLS = [shell for shell in (shutil.which("pwsh"), shutil.which("powershell")) if shell]
-CONNECTION = "apex_test_user/NotARealSecret#42@db.example.invalid:1521/TESTPDB"
+CONNECTION = "apex_test_user/NotARealSecret&pw42@db.example.invalid:1521/TESTPDB"
 SQLCL_ROUTES = ("Deploy-ApexPage.ps1", "Execute-OracleSql.ps1", "Invoke-OracleApexChange.ps1")
 FAKE_SQLCL = """
 import json
@@ -105,10 +105,11 @@ Write-Output "CONSOLE_RESTORED=$([Console]::InputEncoding.WebName -eq $consoleBe
     assert not any(CONNECTION in argument or "NotARealSecret" in argument for argument in recorded["argv"])
     lines = recorded["stdin"].splitlines()
     # A byte-order mark would make SQLcl reject the WHENEVER guard and ignore a failed connect.
-    assert lines[0] == "WHENEVER SQLERROR EXIT FAILURE"
-    assert lines[1] == f"connect {CONNECTION}"
-    assert lines[2] == f'@"{sql_script}"'
-    assert lines[3] == "EXIT"
+    assert lines[0] == "SET DEFINE OFF"
+    assert lines[1] == "WHENEVER SQLERROR EXIT FAILURE"
+    assert lines[2] == f"connect {CONNECTION}"
+    assert lines[3] == f'@"{sql_script}"'
+    assert lines[4] == "EXIT"
 
 
 @pytest.mark.skipif(not SHELLS, reason="PowerShell is not installed")
