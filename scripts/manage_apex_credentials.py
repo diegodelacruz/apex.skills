@@ -6,6 +6,7 @@ from __future__ import annotations
 import getpass
 import importlib
 import re
+import subprocess  # nosec B404: fixed SQLcl argv; credentials travel over stdin only
 import sys
 import time
 from pathlib import Path
@@ -283,12 +284,52 @@ def probe(environment: str) -> int:
 
 
 def sqlcl_conn(environment: str) -> int:
-    """Print an internal SQLcl connect string sourced from .env."""
+    """Report the SQLcl target from .env without ever printing the password."""
     profile = get_profile(environment)
     if not profile:
         print(f"SQLCL_CONN_FAIL environment={environment} reason=env_profile_incomplete")
         return 1
-    print(f"{profile['db_user']}/{profile['db_pass']}@{profile['dsn']}")
+    print(f"SQLCL_CONN_READY environment={environment} user={profile['db_user']} dsn={profile['dsn']} source=.env")
+    return 0
+
+
+def sqlcl_probe(environment: str, sqlcl_path: str, timeout: int = 120) -> int:
+    """Read the session user through SQLcl with credentials sent over stdin, never argv or stdout."""
+    profile = get_profile(environment)
+    if not profile:
+        print(f"SQLCL_CONN_SKIP environment={environment} reason=env_profile_incomplete")
+        return 1
+    script = "\n".join(
+        (
+            "set heading off feedback off pagesize 0",
+            "whenever sqlerror exit failure",
+            f"connect {profile['db_user']}/{profile['db_pass']}@{profile['dsn']}",
+            "select user from dual;",
+            "exit",
+            "",
+        )
+    )
+    try:
+        process = subprocess.run(  # nosec B603: fixed argv without shell; the secret is only in stdin
+            [sqlcl_path, "-S", "/nolog"],
+            input=script,
+            capture_output=True,
+            text=True,
+            errors="replace",
+            timeout=timeout,
+            check=False,
+        )
+    except (OSError, subprocess.TimeoutExpired) as error:
+        print(f"SQLCL_PROBE_FAIL environment={environment} error={type(error).__name__}")
+        return 1
+    combined = f"{process.stdout}\n{process.stderr}"
+    error_match = re.search(r"\b(ORA-\d{5}|SP2-\d{4})\b", combined)
+    user = next((line.strip() for line in process.stdout.splitlines() if re.fullmatch(r"\w+", line.strip())), "")
+    if process.returncode != 0 or error_match or not user:
+        suffix = f" error={error_match.group(1)}" if error_match else f" exit_code={process.returncode}"
+        print(f"SQLCL_PROBE_FAIL environment={environment}{suffix}")
+        return 1
+    print(f"SQLCL_PROBE_PASS environment={environment} user={user}")
     return 0
 
 
@@ -296,9 +337,20 @@ def main() -> int:
     parser = CLIParser("Manage Oracle and App Builder profiles stored in .env")
     parser.add_argument(
         "action",
-        choices=("set", "set-apex", "import-env", "status", "apex-status", "validate", "probe", "sqlcl-conn"),
+        choices=(
+            "set",
+            "set-apex",
+            "import-env",
+            "status",
+            "apex-status",
+            "validate",
+            "probe",
+            "sqlcl-conn",
+            "sqlcl-probe",
+        ),
         help="Manage, inspect, or validate the repository .env profile",
     )
+    parser.add_argument("--sqlcl-path", help="SQLcl executable used by the sqlcl-probe action")
     parser.add_environment_arg()
     args = parser.parse_args()
     if args.environment is None:
@@ -325,6 +377,10 @@ def main() -> int:
         return probe(args.environment)
     elif args.action == "sqlcl-conn":
         return sqlcl_conn(args.environment)
+    elif args.action == "sqlcl-probe":
+        if not args.sqlcl_path:
+            exit_with_error("sqlcl-probe requires --sqlcl-path.", "SQLCL_PATH_REQUIRED")
+        return sqlcl_probe(args.environment, args.sqlcl_path)
     return validate(args.environment)
 
 

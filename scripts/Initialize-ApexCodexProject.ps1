@@ -41,22 +41,12 @@ function Get-SqlclProbeState {
 	param([ValidateSet('test', 'production')][string]$Environment)
 	$sqlclPath = Find-Sqlcl
 	if (-not $sqlclPath) { return 'SQLCL_NOT_FOUND' }
-	$connStr = (& $python $credentials sqlcl-conn --environment $Environment 2>&1 | Out-String).Trim()
-	if ($LASTEXITCODE -ne 0 -or $connStr -match '^SQLCL_CONN_FAIL') { return "SQLCL_CONN_SKIP" }
-	$tempSql = [System.IO.Path]::GetTempFileName() + '.sql'
-	try {
-		Set-Content -Path $tempSql -Value "SET HEADING OFF`nSET FEEDBACK OFF`nSET PAGESIZE 0`nSELECT user FROM dual;`nEXIT;" -Encoding utf8
-		$output = & $sqlclPath -S $connStr "@$tempSql" 2>&1 | Out-String
-		if ($LASTEXITCODE -eq 0 -and $output -match '\S') {
-			$userLine = $output -split "`n" | Where-Object { $_.Trim() -match '^\w+$' } | Select-Object -First 1
-			$user = if ($userLine) { $userLine.Trim() } else { 'CONNECTED' }
-			return "SQLCL_PROBE_PASS user=$user"
-		} else {
-			return 'SQLCL_PROBE_FAIL'
-		}
-	} finally {
-		if (Test-Path -LiteralPath $tempSql) { Remove-Item -LiteralPath $tempSql -Force -Confirm:$false }
-	}
+	# The Python helper sends the .env credentials to SQLcl over stdin, so the
+	# password never reaches this script, the SQLcl command line or a temp file.
+	$output = (& $python $credentials sqlcl-probe --environment $Environment --sqlcl-path $sqlclPath 2>&1 | Out-String).Trim()
+	if ($output -match '^SQLCL_CONN_SKIP') { return 'SQLCL_CONN_SKIP' }
+	if ($LASTEXITCODE -eq 0 -and $output -match '^SQLCL_PROBE_PASS') { return $output }
+	return 'SQLCL_PROBE_FAIL'
 }
 
 function Get-OracleEnvironmentState {
