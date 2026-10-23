@@ -303,8 +303,10 @@ def sqlcl_probe(environment: str, sqlcl_path: str, timeout: int = 120) -> int:
         (
             "set heading off feedback off pagesize 0",
             "whenever sqlerror exit failure",
+            # Without this, an "&" in the password starts a substitution prompt that consumes the next input line.
+            "set define off",
             f"connect {profile['db_user']}/{profile['db_pass']}@{profile['dsn']}",
-            "select user from dual;",
+            "select 'SQLCL_PROBE_USER=' || user from dual;",
             "exit",
             "",
         )
@@ -324,7 +326,9 @@ def sqlcl_probe(environment: str, sqlcl_path: str, timeout: int = 120) -> int:
         return 1
     combined = f"{process.stdout}\n{process.stderr}"
     error_match = re.search(r"\b(ORA-\d{5}|SP2-\d{4})\b", combined)
-    user = next((line.strip() for line in process.stdout.splitlines() if re.fullmatch(r"\w+", line.strip())), "")
+    # Oracle user names may contain "$" and "#" (APP$USER, C##APP), so read the marked row instead of a word.
+    user_match = re.search(r"^\s*SQLCL_PROBE_USER=(\S+)\s*$", process.stdout, flags=re.MULTILINE)
+    user = user_match.group(1) if user_match else ""
     if process.returncode != 0 or error_match or not user:
         suffix = f" error={error_match.group(1)}" if error_match else f" exit_code={process.returncode}"
         print(f"SQLCL_PROBE_FAIL environment={environment}{suffix}")

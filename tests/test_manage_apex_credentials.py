@@ -290,7 +290,7 @@ def test_sqlcl_conn_reports_target_without_password(tmp_path, capsys):
 def test_sqlcl_probe_sends_credentials_over_stdin_only(tmp_path, capsys):
     env_file = tmp_path / ".env"
     env_file.write_text(DB_VALUES, encoding="utf-8")
-    completed = subprocess.CompletedProcess([], 0, stdout="APP_USER\n", stderr="")
+    completed = subprocess.CompletedProcess([], 0, stdout="SQLCL_PROBE_USER=APP_USER\n", stderr="")
 
     with (
         patch("manage_apex_credentials.get_profile", return_value=get_profile("test", env_file)),
@@ -305,6 +305,51 @@ def test_sqlcl_probe_sends_credentials_over_stdin_only(tmp_path, capsys):
     output = capsys.readouterr().out
     assert output.strip() == "SQLCL_PROBE_PASS environment=test user=APP_USER"
     assert "test-password" not in output
+
+
+def test_sqlcl_probe_disables_substitution_before_connect_for_ampersand_password(tmp_path):
+    env_file = tmp_path / ".env"
+    env_file.write_text(DB_VALUES.replace("test-password", "secret&suffix"), encoding="utf-8")
+    completed = subprocess.CompletedProcess([], 0, stdout="SQLCL_PROBE_USER=APP_USER\n", stderr="")
+
+    with (
+        patch("manage_apex_credentials.get_profile", return_value=get_profile("test", env_file)),
+        patch("manage_apex_credentials.subprocess.run", return_value=completed) as run,
+    ):
+        assert sqlcl_probe("test", "sql.exe") == 0
+
+    lines = run.call_args.kwargs["input"].splitlines()
+    connect_index = lines.index("connect app_user/secret&suffix@db.example:1521/service")
+    assert "set define off" in lines[:connect_index]
+
+
+@pytest.mark.parametrize("oracle_user", ["APP$USER", "C##APP", "APP_USER"])
+def test_sqlcl_probe_accepts_oracle_user_names_with_special_characters(tmp_path, capsys, oracle_user):
+    env_file = tmp_path / ".env"
+    env_file.write_text(DB_VALUES, encoding="utf-8")
+    completed = subprocess.CompletedProcess([], 0, stdout=f"\nSQLCL_PROBE_USER={oracle_user}\n\n", stderr="")
+
+    with (
+        patch("manage_apex_credentials.get_profile", return_value=get_profile("test", env_file)),
+        patch("manage_apex_credentials.subprocess.run", return_value=completed),
+    ):
+        assert sqlcl_probe("test", "sql.exe") == 0
+
+    assert capsys.readouterr().out.strip() == f"SQLCL_PROBE_PASS environment=test user={oracle_user}"
+
+
+def test_sqlcl_probe_fails_without_the_marked_user_row(tmp_path, capsys):
+    env_file = tmp_path / ".env"
+    env_file.write_text(DB_VALUES, encoding="utf-8")
+    completed = subprocess.CompletedProcess([], 0, stdout="Not connected\n", stderr="")
+
+    with (
+        patch("manage_apex_credentials.get_profile", return_value=get_profile("test", env_file)),
+        patch("manage_apex_credentials.subprocess.run", return_value=completed),
+    ):
+        assert sqlcl_probe("test", "sql.exe") == 1
+
+    assert capsys.readouterr().out.strip() == "SQLCL_PROBE_FAIL environment=test exit_code=0"
 
 
 def test_sqlcl_probe_reports_oracle_error_code_only(tmp_path, capsys):

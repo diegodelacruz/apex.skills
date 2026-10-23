@@ -65,7 +65,7 @@ function Get-OracleEnvironmentState {
 
 function Get-ShortStatus {
 	param([string]$Raw)
-	if ($Raw -match 'PASS.*user=(\w+)') { return $Matches[1] }
+	if ($Raw -match 'PASS.*user=(\S+)') { return $Matches[1] }
 	if ($Raw -match 'PASS.*schema=(\w+)') { return $Matches[1] }
 	if ($Raw -match '_READY\b') { return 'OK' }
 	if ($Raw -match '_MISSING\b') { return 'MISSING' }
