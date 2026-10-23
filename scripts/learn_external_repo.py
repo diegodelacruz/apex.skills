@@ -4,9 +4,9 @@ Learn External Repo: Main entry point for apex-external-context-learn skill.
 Analyzes external repositories without cloning and creates persistent references.
 
 Usage:
-	python learn_external_repo.py <url_or_path> <analysis_request> [--step-by-step]
-	python learn_external_repo.py list
-	python learn_external_repo.py delete <repo_id>
+        python learn_external_repo.py <url_or_path> <analysis_request> [--step-by-step]
+        python learn_external_repo.py list
+        python learn_external_repo.py delete <repo_id>
 """
 
 import json

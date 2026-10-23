@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 ## [Unreleased]
 
 ### Changed
+- Update development tooling consolidating the open Dependabot updates: Black 26.5.1, isort >=9.0.1, flake8 >=7.3.0, pylint >=4.0.7, python-docx >=1.2.0, and GitHub Actions `actions/checkout@v7`, `actions/setup-python@v7`, `codecov/codecov-action@v7`; align the pre-commit hook revisions and configuration guides, and apply Black 26 formatting to one docstring.
 - Define who executes an Oracle/APEX change and what counts as the single confirmation: a descriptive request is not a confirmation, `paso a paso` defaults to user execution, and `confirmed=true` requires an explicit agent-execution phrase or an affirmative reply; remove documentation that said a direct request needs no further approval.
 - Document the proposed read-only `inspect_apex_page` tool (not implemented), with measured evidence, design, acceptance criteria, and the related pending backlog.
 - Remove the fixed five-step cap from Oracle/APEX step-by-step mode; plans now announce `M` total steps, and all-steps execution stops at its first execution error while reporting unexecuted steps explicitly.

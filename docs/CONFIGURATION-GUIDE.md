@@ -269,11 +269,11 @@ pytest>=8.0.0
 pytest-cov>=5.0.0
 
 # Code quality
-black==24.10.0
-isort>=5.13.2
-flake8>=6.1.0
+black==26.5.1
+isort>=9.0.1
+flake8>=7.3.0
 bandit>=1.7.5
-pylint>=3.0.0
+pylint>=4.0.7
 ```
 
 **Why each package:**
