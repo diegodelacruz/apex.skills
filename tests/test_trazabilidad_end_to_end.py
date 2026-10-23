@@ -136,3 +136,12 @@ def test_adapters_and_routing_point_to_existing_method_files():
         assert core_path in _read(path), path
     assert "references/trazabilidad-end-to-end.md" in _read(SKILL_DIR / "agents/openai.yaml")
     assert "trazabilidad-end-to-end.md" in _read(ROOT / "skills/apex/references/routing.md")
+
+
+def test_coordinator_knows_the_method_and_links_routing():
+    coordinator = _read(ROOT / "skills/apex/SKILL.md")
+
+    assert "](references/routing.md)" in coordinator
+    assert "](../apex-database-diagnostics/references/trazabilidad-end-to-end.md)" in coordinator
+    for path in (ROOT / ".claude/commands/apex.md", ROOT / "skills/apex/agents/openai.yaml"):
+        assert "trazabilidad-end-to-end.md" in _read(path), path
