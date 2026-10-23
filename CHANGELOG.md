@@ -9,6 +9,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Added
+- Add `scripts/audit_semantic_checks.py`, a read-only diagnostic salvaged from PR #15 that reports tracked scripts and top-level docs no other tracked file mentions (SM08) and key docs whose labelled update date is older than 180 days (SM09); it never changes files, exits 1 on findings, and is not a CI gate until its current findings are reviewed with the user. The per-commit classification of PR #15 is in `docs/decisiones/20261023-rescate-pr15-auditoria-semantica.md`.
+
+### Fixed
+- Remove an unreachable legacy block from `Update-ApexSkillUpstreams-V2.ps1` that used the undefined `$repos` variable; a successful `-IncludeReferences` update no longer creates a second empty backup directory or prints `UPDATE_COMPLETE` twice.
+
 ### Changed
 - Update development tooling consolidating the open Dependabot updates: Black 26.5.1, isort >=9.0.1, flake8 >=7.3.0, pylint >=4.0.7, python-docx >=1.2.0, and GitHub Actions `actions/checkout@v7`, `actions/setup-python@v7`, `codecov/codecov-action@v7`; align the pre-commit hook revisions and configuration guides, and apply Black 26 formatting to one docstring.
 - Define who executes an Oracle/APEX change and what counts as the single confirmation: a descriptive request is not a confirmation, `paso a paso` defaults to user execution, and `confirmed=true` requires an explicit agent-execution phrase or an affirmative reply; remove documentation that said a direct request needs no further approval.
