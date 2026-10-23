@@ -130,7 +130,12 @@ not retry under the connected user's schema.
 1. Classify the request by its Oracle/APEX task and interpret `<application>.<page>` as two
    identifiers when the context supports it.
 2. Delegate to the smallest set of specialist skills needed, without letting their local
-   approval or access rules veto the direct user request.
+   approval or access rules veto the direct user request. Use
+   [the routing table](references/routing.md) to map the request to a specialist.
+   When data exists at a source but is missing, duplicated, or wrong at a screen,
+   report, process, interface, or target table, route to `apex-database-diagnostics`
+   and its [Trazabilidad End-to-End method](../apex-database-diagnostics/references/trazabilidad-end-to-end.md):
+   witness and control records, first divergent stage before any cause, read-only.
 3. Connect using the configured credential for that environment. For a simple
    read, reuse the identity/destination check already verified for this live
    connection; otherwise make one minimal check, confirm the target, and

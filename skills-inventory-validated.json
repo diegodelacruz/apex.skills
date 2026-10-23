@@ -38,7 +38,7 @@
         "category": "Apex Database & Diagnostics",
         "status": "active",
         "access": "read-only",
-        "description": "Diagnose Oracle and APEX requests in the user-selected environment through available authenticated routes",
+        "description": "Diagnose Oracle and APEX requests, including data present at a source but missing or wrong downstream, in the user-selected environment through available authenticated routes",
         "tags": ["diagnostics", "inspection", "oracle"]
       },
       {

@@ -67,6 +67,7 @@ backup objects in the connected user's schema.
 | TEST/production copy, release, or environment alignment | `apex-environment-alignment-complete` → `apex-delivery-lifecycle-complete`; use native import/App Builder instead of the retired simulated REST adapter | ⊳ Recommended |
 | Inspect/show Oracle/APEX object data or specifications | `apex-database-diagnostics` direct read | ◎ No routine inventory, QA, or environment-alignment workflow |
 | Diagnose an error or investigate slowness/performance | `apex-database-diagnostics`; use comparison/alignment only when it adds evidence | ◎ Optional |
+| Data present at a source but missing, duplicated, or wrong at a screen, report, process, interface, or target table | `apex-database-diagnostics` with [Trazabilidad End-to-End](../../apex-database-diagnostics/references/trazabilidad-end-to-end.md): witness and control records, first divergence before any cause, read-only | ◎ Diagnostic; no change workflow until a correction is confirmed |
 | Optimize an Oracle object, query, or PL/SQL execution | `apex-database-diagnostics`; add `oracle-data-change-governance-final` only when a change is requested | ⊳ Recommended |
 
 ### Integration & Documentation

@@ -9,7 +9,7 @@ One-line descriptions for rapid lookup.
 | Skill | Purpose |
 |-------|---------|
 | **apex-audit-decisions-log** | Review local controlled-operation events and Git history. |
-| **apex-database-diagnostics** | Diagnose Oracle and APEX requests in the user-selected environment through available authenticated routes. |
+| **apex-database-diagnostics** | Diagnose Oracle and APEX requests, including data present at a source but missing or wrong downstream, in the user-selected environment through available authenticated routes. |
 | **apex-schema-automation-safe** | Create, modify, and drop Oracle database objects through available authenticated routes. |
 | **apex-delivery-lifecycle-complete** | Run the complete APEX lifecycle with environment and DATA governance. |
 | **apex-delivery-lifecycle-safe** | Coordinate a safe APEX workflow from design through QA and documentation. |
@@ -61,6 +61,7 @@ One-line descriptions for rapid lookup.
 | Reserve pages for my project | apex-page-range-governance |
 | Run complete delivery workflow | apex-delivery-lifecycle-safe |
 | Fix DATABASE errors | apex-database-diagnostics |
+| Trace data that exists at a source but is missing or wrong downstream | apex-database-diagnostics (Trazabilidad End-to-End) |
 | Generate user documentation | apex-user-manual |
 | See all decisions and audit trail | apex-audit-decisions-log |
 | Start a new project | apex-project-bootstrap-final |

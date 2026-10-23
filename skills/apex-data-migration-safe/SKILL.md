@@ -157,6 +157,7 @@ Uses separate skills/routes for adjacent work:
 - `apex-code-generation-safe` (generated object migration)
 - `apex-schema-automation-safe` (schema creation)
 - `apex-delivery-lifecycle-safe` (migration in deployment)
+- `apex-database-diagnostics` ([Trazabilidad End-to-End](../apex-database-diagnostics/references/trazabilidad-end-to-end.md)) when a migrated record is missing or wrong in the target; trace one witness record instead of re-running the load
 
 ## Migration Strategy
 

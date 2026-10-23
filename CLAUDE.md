@@ -52,6 +52,15 @@ and do NOT require the user to invoke a skill or say "usa apex".
   see `skills/apex/references/step-mode.md` for the bounded checkpoints and
   validation rules.
 
+### Data discrepancies
+
+- When data exists at a source but is missing or wrong at a screen, report,
+  process, interface, or target table, follow
+  `skills/apex-database-diagnostics/references/trazabilidad-end-to-end.md`:
+  fix a witness and a control record, trace the real flow from both ends, and
+  locate the first divergent stage before naming any cause. Never close a
+  cause as "configuration" without that trace. The diagnosis stays read-only.
+
 ### Skills (invocable via `/skill-name`)
 
 Skills are in `.claude/commands/`. The coordinator `/apex` routes to specialists.
