@@ -20,11 +20,11 @@ identifica a una persona, usa solo su llave técnica.
 
 ## Etapas
 
-| Id | Tipo | Artefacto (versión desplegada) | Llave entrada → salida | Cardinalidad | Sincronía | Condiciones | Sonda | Estado |
-|---|---|---|---|---|---|---|---|---|
-| E0 | fuente | | | — | — | — | S0 | NO_VERIFICADO |
-| E1 | | | | | | | | NO_VERIFICADO |
-| En | presentacion | | | | | | | NO_VERIFICADO |
+| Id | Tipo | Artefacto (versión desplegada) | Llave entrada → salida | Cardinalidad | Sincronía | Condiciones | Representación esperada | Sonda | Estado | Conforme |
+|---|---|---|---|---|---|---|---|---|---|---|
+| E0 | fuente | | | — | — | — | fila | S0 | NO_VERIFICADO | — |
+| E1 | | | | | | | fila / contribución / compensación | | NO_VERIFICADO | — |
+| En | presentacion | | | | | | | | NO_VERIFICADO | — |
 
 ## Linaje de llaves
 
@@ -50,6 +50,7 @@ Resultado:      <hecho observado>
 Esperado aquí:  <valor o forma>
 Control:        <resultado del control>
 Estado:         PRESENTE | ALTERADO | AUSENTE | AGREGADO | NETEADO | PENDIENTE | NO_OBSERVABLE
+Conforme:       sí | no (testigo) · sí | no (control)
 Interpretación: <inferencia o "ninguna">
 Costo:          <filas / tiempo>
 ```

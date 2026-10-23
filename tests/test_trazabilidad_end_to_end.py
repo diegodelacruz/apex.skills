@@ -74,6 +74,16 @@ def test_core_defines_contract_states_taxonomy_and_closure_rules():
         assert phrase in lower, phrase
 
 
+def test_divergence_uses_conformity_not_mere_presence():
+    lower = _read(CORE).lower()
+
+    assert "la divergencia se mide contra la conformidad, no contra `presente`" in lower
+    assert "[última conforme, primera no conforme]" in lower
+    assert "una agregación o un neteo correctos y verificados" in lower
+    assert "un valor distinto o un duplicado en en" in lower
+    assert "conforme:" in _read(TEMPLATE).lower()
+
+
 def test_control_record_is_mandatory_for_confirmed_root_cause():
     lower = _read(CORE).lower()
 

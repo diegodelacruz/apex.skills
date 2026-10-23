@@ -61,6 +61,20 @@ Si un mismo artefacto realiza varios tipos, se separan como etapas distintas.
 | `PENDIENTE` | La etapa asíncrona que debía procesarlo aún no corrió o no terminó. |
 | `NO_OBSERVABLE` | No hay forma de observar la etapa: no persiste, no hay registro, falta privilegio o el dato fue sobrescrito. |
 
+**Conformidad.** Cada etapa declara su **representación esperada** del testigo:
+una fila con llave, valor y cardinalidad, una contribución a un grupo o una
+compensación con una contrapartida. Una etapa es **conforme** cuando lo
+observado coincide con esa representación:
+
+- `PRESENTE` es conforme si la llave, el valor y la cardinalidad son los
+  esperados.
+- `AGREGADO` o `NETEADO` es conforme en una etapa que agrega o compensa por
+  diseño, si la contribución del testigo al grupo esperado está verificada.
+- Cualquier otro estado, o un `AGREGADO`/`NETEADO` donde se esperaba una fila
+  individual, es **no conforme**.
+
+La divergencia se mide contra la conformidad, no contra `PRESENTE`.
+
 **Linaje de llaves:** cadena explícita `llave_origen → … → llave_visible`. Cada
 salto declara su correlación:
 
@@ -87,6 +101,7 @@ Resultado:      <hecho observado, resumido, sin datos sensibles>
 Esperado aquí:  <valor o forma esperada en esta etapa>
 Control:        <resultado del testigo de control en la misma sonda>
 Estado:         PRESENTE | ALTERADO | AUSENTE | AGREGADO | NETEADO | PENDIENTE | NO_OBSERVABLE
+Conforme:       sí | no (testigo) · sí | no (control)
 Interpretación: <inferencia separada del hecho; "ninguna" si no aplica>
 Costo:          <filas leídas aproximadas / tiempo>
 ```
@@ -117,8 +132,12 @@ Reglas de evidencia:
 2. **Verificar extremos** (barato y obligatorio). Comprobar que el testigo
    existe en la fuente (E0) y que el síntoma se reproduce en la presentación
    (En) con los mismos parámetros. Si E0 está `AUSENTE`, se cierra como
-   `D0 NO_EXISTE_EN_FUENTE`. Si En sí lo muestra, el síntoma no se reproduce:
-   revisar parámetros, usuario y momento antes de seguir.
+   `D0 NO_EXISTE_EN_FUENTE`. En En no basta con que el testigo aparezca: se
+   compara con el resultado esperado en valor, cardinalidad y forma. Solo si
+   En es conforme (el testigo aparece con el valor esperado, sin duplicados ni
+   faltantes) el síntoma no se reproduce, y hay que revisar parámetros,
+   usuario y momento antes de seguir. Un valor distinto o un duplicado en En
+   reproduce el síntoma y se traza.
 3. **Descubrir el flujo** (§6) desde ambos extremos hasta obtener una cadena
    continua E0…En. Los huecos quedan como `NO_VERIFICADO`.
 4. **Recorrer el flujo:**
@@ -128,11 +147,12 @@ Reglas de evidencia:
      … → punto visible;
    - con cuatro o más etapas, **bisección:** sondear primero la etapa
      intermedia observable más barata y reducir el intervalo
-     [última `PRESENTE`, primera distinta de `PRESENTE`].
-5. **Localizar la primera divergencia:** la etapa `k` donde E(k-1) está
-   `PRESENTE` con llave y valor correctos y E(k) tiene otro estado, ambas
-   observadas sobre el mismo testigo con la correlación declarada. El testigo
-   de control debe seguir `PRESENTE` en E(k); si también diverge, el problema
+     [última conforme, primera no conforme].
+5. **Localizar la primera divergencia:** la etapa `k` donde E(k-1) es
+   conforme y E(k) no lo es, ambas observadas sobre el mismo testigo con la
+   correlación declarada. Una agregación o un neteo correctos y verificados
+   forman parte del tramo conforme; no son la divergencia. El testigo de
+   control debe ser conforme en E(k); si también es no conforme, el problema
    no es específico del testigo y se replantea la expectativa o el control.
 6. **Explicar el mecanismo de `k`.** Identificar la regla, condición, cruce,
    mapeo o ventana concreta y **evaluarla contra los valores del testigo y del
@@ -218,7 +238,9 @@ lo que queda abierto es si es un **defecto**. No se elige `DX` en silencio.
   salvo que exista una tabla de mapeo persistida.
 - **Agregaciones.** El testigo pasa a ser una contribución. Verificar la llave
   de grupo calculada para el testigo, recomputar el agregado solo para ese
-  grupo y comparar el total con y sin el testigo.
+  grupo y comparar el total con y sin el testigo. Si la contribución es
+  correcta, la etapa es conforme y el recorrido sigue aguas abajo con la
+  llave de grupo como nueva llave del linaje.
 - **Neteos.** Buscar la contrapartida dentro del mismo grupo (signo opuesto,
   reverso, anulación). Un registro neteado no está `AUSENTE`: está `NETEADO`.
 - **Procesos asíncronos.** Identificar el disparador, la programación, la
