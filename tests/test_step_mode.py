@@ -116,6 +116,8 @@ def test_no_document_says_direct_request_removes_confirmation():
         "Treat the complete answer as the single confirmation",
         "no se requiere aprobación adicional de la skill",
         "sin añadir un gate de aprobación para una solicitud directa",
+        "no requiere aprobación adicional",
+        "no solicite aprobaciones adicionales",
     )
     for path in (ROOT / "skills", ROOT / "docs", ROOT / "CLAUDE.md", ROOT / "AGENTS.md"):
         files = [path] if path.is_file() else [p for p in path.rglob("*.md") if "decisiones" not in p.parts]
