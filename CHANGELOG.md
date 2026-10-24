@@ -9,6 +9,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Security
+- Stop printing the Oracle password from `manage_apex_credentials.py sqlcl-conn`, which now reports only user and DSN; the bootstrap SQLcl probe uses the new `sqlcl-probe` action, which sends credentials to SQLcl over stdin instead of PowerShell variables, command-line arguments, or temporary files. The probe disables SQLcl substitution before `connect`, so passwords containing `&` work, and accepts Oracle user names containing `$` or `#`.
+- Reject external-repository identifiers that would read, write, or delete files outside `control-proyecto/external-repos/` or overwrite its index.
+- Record the reconciliation of the 2026-10-01 audit branch against `main`, including which findings are fixed, ported, obsolete, or still open, in `docs/decisiones/20261023-reconciliacion-auditoria-seguridad.md`.
+
 ### Added
 - Add `scripts/audit_semantic_checks.py`, a read-only diagnostic salvaged from PR #15 that reports tracked scripts and top-level docs no other tracked file mentions (SM08) and key docs whose labelled update date is older than 180 days (SM09); it never changes files, exits 1 on findings, and is not a CI gate until its current findings are reviewed with the user. The per-commit classification of PR #15 is in `docs/decisiones/20261023-rescate-pr15-auditoria-semantica.md`.
 

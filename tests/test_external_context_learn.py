@@ -276,3 +276,30 @@ class TestIntegration:
             retrieved = indexer.get_learned_repo(repo_id)
             assert retrieved["source"] == str(repo_path)
             assert retrieved["repo_info"]["total_files"] >= 2
+
+
+class TestExternalRepoIndexerIdentifiers:
+    """Repository identifiers must stay inside the external-repos directory."""
+
+    @pytest.mark.parametrize(
+        "repo_id",
+        ["../outside", "..\\outside", "nested/repo", "C:outside", "", "   ", "bad\x00id", "external-repos-index"],
+    )
+    def test_rejects_identifiers_that_leave_repos_dir(self, tmp_path, repo_id):
+        indexer = ExternalRepoIndexer(tmp_path / "external-repos")
+        outside = tmp_path / "outside.json"
+        outside.write_text("{}", encoding="utf-8")
+
+        for operation in (indexer.get_learned_repo, indexer.repo_exists, indexer.delete_learned_repo):
+            with pytest.raises(ValueError, match="Invalid repository identifier"):
+                operation(repo_id)
+        with pytest.raises(ValueError, match="Invalid repository identifier"):
+            indexer.save_learned_repo({"identifier": repo_id}, {})
+
+        assert outside.exists()
+        assert indexer._read_index() == {}
+
+    def test_accepts_scanner_generated_identifiers(self, tmp_path):
+        indexer = ExternalRepoIndexer(tmp_path / "external-repos")
+        for repo_id in ("github-owner-repo.name", "github-owner-..", "local-my project"):
+            assert indexer.repo_exists(repo_id) is False

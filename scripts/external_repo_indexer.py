@@ -37,6 +37,20 @@ class ExternalRepoIndexer:
         if not self.index_file.exists():
             self._write_index({})
 
+    def _repo_file(self, repo_id: str) -> Path:
+        """Return the JSON path for an identifier, rejecting values that leave repos_dir."""
+        if (
+            not isinstance(repo_id, str)
+            or not repo_id.strip()
+            or any(char in repo_id for char in ("/", "\\", ":", "\x00"))
+        ):
+            raise ValueError(f"Invalid repository identifier: {repo_id!r}")
+        repo_file = self.repos_dir / f"{repo_id}.json"
+        resolved = repo_file.resolve()
+        if resolved.parent != self.repos_dir.resolve() or resolved == self.index_file.resolve():
+            raise ValueError(f"Invalid repository identifier: {repo_id!r}")
+        return repo_file
+
     def _read_index(self) -> Dict:
         """Read central index file."""
         if not self.index_file.exists():
@@ -71,7 +85,7 @@ class ExternalRepoIndexer:
                 Repository identifier (filename without .json)
         """
         repo_id = repo_metadata["identifier"]
-        repo_file = self.repos_dir / f"{repo_id}.json"
+        repo_file = self._repo_file(repo_id)
 
         # Combine metadata with analysis
         full_data = {
@@ -105,7 +119,7 @@ class ExternalRepoIndexer:
         Returns:
                 Repository data dict or None if not found
         """
-        repo_file = self.repos_dir / f"{repo_id}.json"
+        repo_file = self._repo_file(repo_id)
         if not repo_file.exists():
             return None
 
@@ -149,7 +163,7 @@ class ExternalRepoIndexer:
 
     def repo_exists(self, repo_id: str) -> bool:
         """Check if a learned repository exists."""
-        return (self.repos_dir / f"{repo_id}.json").exists()
+        return self._repo_file(repo_id).exists()
 
     def delete_learned_repo(self, repo_id: str) -> bool:
         """
@@ -161,7 +175,7 @@ class ExternalRepoIndexer:
         Returns:
                 True if deleted, False if not found
         """
-        repo_file = self.repos_dir / f"{repo_id}.json"
+        repo_file = self._repo_file(repo_id)
         if not repo_file.exists():
             return False
 
