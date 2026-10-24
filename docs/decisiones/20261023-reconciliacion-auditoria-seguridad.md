@@ -31,8 +31,9 @@
 
 Hallazgo relacionado, nuevo: `Deploy-ApexPage.ps1`, `Execute-OracleSql.ps1` e
 `Invoke-OracleApexChange.ps1` pasan `$env:APEX_SQLCL_CONN` (con contraseña) como
-argumento de SQLcl, visible en la lista de procesos. Queda abierto como
-seguimiento; requiere migrar esas rutas a credenciales por stdin.
+argumento de SQLcl, visible en la lista de procesos. Resuelto en
+`20261023-conexion-sqlcl-por-stdin-en-powershell.md`: las rutas envían la
+conexión por stdin.
 
 ## Decisión
 
