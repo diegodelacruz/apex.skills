@@ -17,6 +17,8 @@ La auditoría verifica recursos requeridos y enlaces Markdown locales. La revisi
 python -m py_compile .\scripts\nombre_del_script.py
 ```
 
+Como diagnóstico complementario, no bloqueante, `python .\scripts\audit_semantic_checks.py` informa scripts y documentos de primer nivel que ningún otro archivo versionado menciona (SM08) y documentos clave con fecha de actualización rotulada de más de 180 días (SM09). Es de sólo lectura: los hallazgos se revisan con la persona usuaria antes de corregir, retirar o enlazar algo. El motivo de que no sea un gate está en la [decisión de rescate del PR #15](decisiones/20261023-rescate-pr15-auditoria-semantica.md).
+
 Para PowerShell se valida el parser, y para cambios APEX/Oracle se ejecutan las pruebas de sólo lectura, QA y evidencias definidas por el plan de implementación.
 
 Todo `.sql` creado o modificado debe pasar además el validador de gobierno Oracle antes de entregarse:
