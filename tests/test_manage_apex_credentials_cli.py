@@ -70,3 +70,10 @@ def test_initializer_production_mcp_uses_same_labels_as_test():
 def test_initializer_does_not_reuse_profile_exit_code_for_skill_installer():
     initializer = (ROOT / "scripts" / "Initialize-ApexCodexProject.ps1").read_text(encoding="utf-8")
     assert "$skillInstallerSucceeded = $?" in initializer
+
+
+def test_initializer_sqlcl_probe_never_handles_the_password():
+    initializer = (ROOT / "scripts" / "Initialize-ApexCodexProject.ps1").read_text(encoding="utf-8")
+    assert "sqlcl-probe --environment $Environment --sqlcl-path $sqlclPath" in initializer
+    assert "sqlcl-conn" not in initializer
+    assert "$connStr" not in initializer
